@@ -1,0 +1,79 @@
+TARGET = Some("aarch64-apple-darwin")
+OPT_LEVEL = Some("0")
+HOST = Some("aarch64-apple-darwin")
+cargo:rerun-if-env-changed=CC_aarch64-apple-darwin
+CC_aarch64-apple-darwin = None
+cargo:rerun-if-env-changed=CC_aarch64_apple_darwin
+CC_aarch64_apple_darwin = None
+cargo:rerun-if-env-changed=HOST_CC
+HOST_CC = None
+cargo:rerun-if-env-changed=CC
+CC = None
+cargo:rerun-if-env-changed=CRATE_CC_NO_DEFAULTS
+CRATE_CC_NO_DEFAULTS = None
+DEBUG = Some("true")
+CARGO_CFG_TARGET_FEATURE = Some("aes,crc,dit,dotprod,dpb,dpb2,fcma,fhm,flagm,fp16,frintts,jsconv,lor,lse,neon,paca,pacg,pan,pmuv3,ras,rcpc,rcpc2,rdm,sb,sha2,sha3,ssbs,vh")
+cargo:rerun-if-env-changed=CFLAGS_aarch64-apple-darwin
+CFLAGS_aarch64-apple-darwin = None
+cargo:rerun-if-env-changed=CFLAGS_aarch64_apple_darwin
+CFLAGS_aarch64_apple_darwin = None
+cargo:rerun-if-env-changed=HOST_CFLAGS
+HOST_CFLAGS = None
+cargo:rerun-if-env-changed=CFLAGS
+CFLAGS = None
+running: env -u IPHONEOS_DEPLOYMENT_TARGET "cc" "-O0" "-ffunction-sections" "-fdata-sections" "-fPIC" "-gdwarf-2" "-fno-omit-frame-pointer" "-arch" "arm64" "-I" "/Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/dart-sys-4.1.5/dart-sdk/include" "-Wall" "-Wextra" "-o" "/Users/fred/git/open-tv-mobile/rust/target/debug/build/dart-sys-3b9f3e4770fe80a0/out/be2fb64aa36dcbcd-dart_api_dl.o" "-c" "/Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/dart-sys-4.1.5/dart-sdk/include/dart_api_dl.c"
+cargo:warning=/Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/dart-sys-4.1.5/dart-sdk/include/dart_api_dl.c:33:31: warning: unused parameter 'object' [-Wunused-parameter]
+
+cargo:warning=   33 |     Dart_WeakPersistentHandle object, intptr_t external_size) {
+
+cargo:warning=      |                               ^
+
+cargo:warning=/Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/dart-sys-4.1.5/dart-sdk/include/dart_api_dl.c:33:48: warning: unused parameter 'external_size' [-Wunused-parameter]
+
+cargo:warning=   33 |     Dart_WeakPersistentHandle object, intptr_t external_size) {
+
+cargo:warning=      |                                                ^
+
+cargo:warning=/Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/dart-sys-4.1.5/dart-sdk/include/dart_api_dl.c:38:28: warning: unused parameter 'object' [-Wunused-parameter]
+
+cargo:warning=   38 |     Dart_FinalizableHandle object,
+
+cargo:warning=      |                            ^
+
+cargo:warning=/Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/dart-sys-4.1.5/dart-sdk/include/dart_api_dl.c:39:17: warning: unused parameter 'strong_ref_to_object' [-Wunused-parameter]
+
+cargo:warning=   39 |     Dart_Handle strong_ref_to_object,
+
+cargo:warning=      |                 ^
+
+cargo:warning=/Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/dart-sys-4.1.5/dart-sdk/include/dart_api_dl.c:40:14: warning: unused parameter 'external_allocation_size' [-Wunused-parameter]
+
+cargo:warning=   40 |     intptr_t external_allocation_size) {
+
+cargo:warning=      |              ^
+
+cargo:warning=5 warnings generated.
+
+exit status: 0
+cargo:rerun-if-env-changed=AR_aarch64-apple-darwin
+AR_aarch64-apple-darwin = None
+cargo:rerun-if-env-changed=AR_aarch64_apple_darwin
+AR_aarch64_apple_darwin = None
+cargo:rerun-if-env-changed=HOST_AR
+HOST_AR = None
+cargo:rerun-if-env-changed=AR
+AR = None
+cargo:rerun-if-env-changed=ARFLAGS_aarch64-apple-darwin
+ARFLAGS_aarch64-apple-darwin = None
+cargo:rerun-if-env-changed=ARFLAGS_aarch64_apple_darwin
+ARFLAGS_aarch64_apple_darwin = None
+cargo:rerun-if-env-changed=HOST_ARFLAGS
+HOST_ARFLAGS = None
+cargo:rerun-if-env-changed=ARFLAGS
+ARFLAGS = None
+running: ZERO_AR_DATE="1" "ar" "cq" "/Users/fred/git/open-tv-mobile/rust/target/debug/build/dart-sys-3b9f3e4770fe80a0/out/libdart_api_dl.a" "/Users/fred/git/open-tv-mobile/rust/target/debug/build/dart-sys-3b9f3e4770fe80a0/out/be2fb64aa36dcbcd-dart_api_dl.o"
+exit status: 0
+running: "ar" "s" "/Users/fred/git/open-tv-mobile/rust/target/debug/build/dart-sys-3b9f3e4770fe80a0/out/libdart_api_dl.a"
+exit status: 0
+cargo:rustc-link-lib=static=dart_api_dl
+cargo:rustc-link-search=native=/Users/fred/git/open-tv-mobile/rust/target/debug/build/dart-sys-3b9f3e4770fe80a0/out

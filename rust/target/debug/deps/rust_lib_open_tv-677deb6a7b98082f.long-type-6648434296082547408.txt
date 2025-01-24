@@ -1,0 +1,1 @@
+MappedRows<'_, for<'a, 'b> fn(&'a Row<'b>) -> Result<{type error}, rusqlite::Error> {row_to_id_name}>
