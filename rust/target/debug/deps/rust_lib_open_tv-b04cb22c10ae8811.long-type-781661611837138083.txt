@@ -1,1 +1,0 @@
-std::iter::Map<std::slice::Iter<'_, XtreamEPGItem>, for<'a> fn(&'a XtreamEPGItem) -> Result<{type error}, {type error}> {xtream_epg_to_epg}>
