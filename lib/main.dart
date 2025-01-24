@@ -69,7 +69,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 final channel = channels[index];
                 return ChannelTile(
                   channel: channel,
-                  onSelect: () => print('Selected ${channel.name}'),
                 );
               },
             );
