@@ -1,0 +1,15 @@
+/Users/fred/git/open-tv-mobile/rust/target/debug/deps/libuuid-297fe87cd6225881.rmeta: /Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/uuid-1.12.0/src/lib.rs /Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/uuid-1.12.0/src/builder.rs /Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/uuid-1.12.0/src/error.rs /Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/uuid-1.12.0/src/non_nil.rs /Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/uuid-1.12.0/src/parser.rs /Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/uuid-1.12.0/src/fmt.rs /Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/uuid-1.12.0/src/timestamp.rs /Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/uuid-1.12.0/src/v4.rs /Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/uuid-1.12.0/src/rng.rs /Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/uuid-1.12.0/src/external.rs /Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/uuid-1.12.0/src/macros.rs
+
+/Users/fred/git/open-tv-mobile/rust/target/debug/deps/uuid-297fe87cd6225881.d: /Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/uuid-1.12.0/src/lib.rs /Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/uuid-1.12.0/src/builder.rs /Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/uuid-1.12.0/src/error.rs /Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/uuid-1.12.0/src/non_nil.rs /Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/uuid-1.12.0/src/parser.rs /Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/uuid-1.12.0/src/fmt.rs /Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/uuid-1.12.0/src/timestamp.rs /Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/uuid-1.12.0/src/v4.rs /Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/uuid-1.12.0/src/rng.rs /Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/uuid-1.12.0/src/external.rs /Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/uuid-1.12.0/src/macros.rs
+
+/Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/uuid-1.12.0/src/lib.rs:
+/Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/uuid-1.12.0/src/builder.rs:
+/Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/uuid-1.12.0/src/error.rs:
+/Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/uuid-1.12.0/src/non_nil.rs:
+/Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/uuid-1.12.0/src/parser.rs:
+/Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/uuid-1.12.0/src/fmt.rs:
+/Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/uuid-1.12.0/src/timestamp.rs:
+/Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/uuid-1.12.0/src/v4.rs:
+/Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/uuid-1.12.0/src/rng.rs:
+/Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/uuid-1.12.0/src/external.rs:
+/Users/fred/.cargo/registry/src/index.crates.io-6f17d22bba15001f/uuid-1.12.0/src/macros.rs:
