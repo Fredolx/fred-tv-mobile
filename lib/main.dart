@@ -3,6 +3,7 @@ import 'package:open_tv/bottom_nav.dart';
 import 'package:open_tv/channel_tile.dart';
 import 'package:open_tv/models/channel.dart';
 import 'package:open_tv/models/media_type.dart';
+import 'package:open_tv/setup.dart';
 
 void main() {
   runApp(const MyApp());
@@ -19,7 +20,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Open TV'),
+      home: Setup(),
     );
   }
 }
@@ -51,11 +52,11 @@ class _MyHomePageState extends State<MyHomePage> {
         padding: const EdgeInsets.all(40.0),
         child: LayoutBuilder(
           builder: (context, constraints) {
-            double cardWidth = 300;
+            double cardWidth = 400;
             double cardHeight = 90;
-            int crossAxisCount = (constraints.maxWidth / cardWidth)
+            int crossAxisCount = (constraints.maxWidth / cardWidth * 1.25)
                 .floor()
-                .clamp(1, double.infinity)
+                .clamp(1, 3)
                 .toInt();
             return GridView.builder(
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

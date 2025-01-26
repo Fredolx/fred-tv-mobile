@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:open_tv/models/channel.dart';
 
@@ -38,33 +39,27 @@ class _ChannelTileState extends State<ChannelTile> {
       ),
       color: _focusNode.hasFocus ? Colors.blue.shade100 : Colors.white,
       child: InkWell(
-        focusNode: _focusNode,
-        onTap: () => print("Selected ${widget.channel.name}"),
-        borderRadius: BorderRadius.circular(10),
-        child: Container(
-          alignment: Alignment.center,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+          focusNode: _focusNode,
+          onTap: () => print("Selected ${widget.channel.name}"),
+          borderRadius: BorderRadius.circular(10),
+          child: Row(
             children: [
-              Text(
-                widget.channel.name!,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: _focusNode.hasFocus ? Colors.blue : Colors.black,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'ID: ${widget.channel.id}',
-                style: TextStyle(
-                  color: _focusNode.hasFocus ? Colors.blue : Colors.black54,
-                ),
-              ),
+              Expanded(
+                  flex: 4,
+                  child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: widget.channel.image != null
+                          ? CachedNetworkImage(
+                              fit: BoxFit.contain,
+                              imageUrl: widget.channel.image!,
+                            )
+                          : Image.asset(
+                              "assets/icon.png",
+                              fit: BoxFit.contain,
+                            ))),
+              Expanded(flex: 8, child: Text(widget.channel.name!))
             ],
-          ),
-        ),
-      ),
+          )),
     );
   }
 }
