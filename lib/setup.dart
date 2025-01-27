@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:open_tv/models/source_type.dart';
 
 class Setup extends StatefulWidget {
   @override
@@ -54,47 +55,58 @@ class _SetupState extends State<Setup> {
                     border: OutlineInputBorder(),
                   )),
             ),
-            const SizedBox(height: 10),
-            Padding(
-                padding: EdgeInsets.symmetric(
-                    horizontal: MediaQuery.of(context).size.width * 0.1),
-                child: TextField(
-                  controller: _urlController,
-                  decoration: InputDecoration(
-                    labelText: 'URL', // Label inside the input
-                    prefixIcon:
-                        Icon(Icons.link), // Icon inside the input (left side)
-                    border: OutlineInputBorder(),
-                  ),
-                )),
-            const SizedBox(height: 10),
-            Padding(
-                padding: EdgeInsets.symmetric(
-                    horizontal: MediaQuery.of(context).size.width * 0.1),
-                child: TextField(
-                  controller: _usernameController,
-                  decoration: InputDecoration(
-                    labelText: 'Username', // Label inside the input
-                    prefixIcon: Icon(Icons
-                        .account_circle), // Icon inside the input (left side)
-                    border: OutlineInputBorder(),
-                  ),
-                )),
-            const SizedBox(height: 10),
-            Padding(
-                padding: EdgeInsets.symmetric(
-                    horizontal: MediaQuery.of(context).size.width * 0.1),
-                child: TextField(
-                  controller: _passwordController,
-                  decoration: InputDecoration(
-                    labelText: 'Password', // Label inside the input
-                    prefixIcon: Icon(
-                        Icons.password), // Icon inside the input (left side)
-                    border: OutlineInputBorder(),
-                  ),
-                )),
+            if (_selectedIndex == SourceType.xtream.index ||
+                _selectedIndex == SourceType.m3uUrl.index)
+              const SizedBox(height: 10),
+            if (_selectedIndex == SourceType.xtream.index ||
+                _selectedIndex == SourceType.m3uUrl.index)
+              Padding(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: MediaQuery.of(context).size.width * 0.1),
+                  child: TextField(
+                    controller: _urlController,
+                    decoration: InputDecoration(
+                      labelText: 'URL', // Label inside the input
+                      prefixIcon:
+                          Icon(Icons.link), // Icon inside the input (left side)
+                      border: OutlineInputBorder(),
+                    ),
+                  )),
+            if (_selectedIndex == SourceType.xtream.index)
+              const SizedBox(height: 10),
+            if (_selectedIndex == SourceType.xtream.index)
+              Padding(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: MediaQuery.of(context).size.width * 0.1),
+                  child: TextField(
+                    controller: _usernameController,
+                    decoration: InputDecoration(
+                      labelText: 'Username', // Label inside the input
+                      prefixIcon: Icon(Icons
+                          .account_circle), // Icon inside the input (left side)
+                      border: OutlineInputBorder(),
+                    ),
+                  )),
+            if (_selectedIndex == SourceType.xtream.index)
+              const SizedBox(height: 10),
+            if (_selectedIndex == SourceType.xtream.index)
+              Padding(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: MediaQuery.of(context).size.width * 0.1),
+                  child: TextField(
+                    controller: _passwordController,
+                    decoration: InputDecoration(
+                      labelText: 'Password', // Label inside the input
+                      prefixIcon: Icon(
+                          Icons.password), // Icon inside the input (left side)
+                      border: OutlineInputBorder(),
+                    ),
+                  )),
             const SizedBox(height: 20),
-            ElevatedButton(onPressed: () => (), child: Text("Submit"))
+            ElevatedButton(
+              onPressed: () => (),
+              child: Text("Submit"),
+            )
           ]),
     );
   }
