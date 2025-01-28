@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:open_tv/models/source_type.dart';
 
 class Setup extends StatefulWidget {
@@ -12,11 +14,21 @@ class _SetupState extends State<Setup> {
   final TextEditingController _urlController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
+  final _formKey = GlobalKey<FormBuilderState>();
+  bool formValid = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
+        body: FormBuilder(
+      onChanged: () {
+        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+          setState(() {
+            formValid = _formKey.currentState?.isValid == true;
+          });
+        });
+      },
+      key: _formKey,
+      child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -25,6 +37,11 @@ class _SetupState extends State<Setup> {
               onPressed: (index) {
                 setState(() {
                   _selectedIndex = index;
+                });
+                WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+                  setState(() {
+                    formValid = _formKey.currentState?.isValid == true;
+                  });
                 });
               },
               children: <Widget>[
@@ -46,14 +63,19 @@ class _SetupState extends State<Setup> {
             Padding(
               padding: EdgeInsets.symmetric(
                   horizontal: MediaQuery.of(context).size.width * 0.1),
-              child: TextField(
-                  controller: _nameController,
-                  decoration: InputDecoration(
-                    labelText: 'Name', // Label inside the input
-                    prefixIcon:
-                        Icon(Icons.edit), // Icon inside the input (left side)
-                    border: OutlineInputBorder(),
-                  )),
+              child: FormBuilderTextField(
+                controller: _nameController,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                validator: FormBuilderValidators.compose(
+                    [FormBuilderValidators.required()]),
+                decoration: InputDecoration(
+                  labelText: 'Name', // Label inside the input
+                  prefixIcon:
+                      Icon(Icons.edit), // Icon inside the input (left side)
+                  border: OutlineInputBorder(),
+                ),
+                name: 'name',
+              ),
             ),
             if (_selectedIndex == SourceType.xtream.index ||
                 _selectedIndex == SourceType.m3uUrl.index)
@@ -63,14 +85,18 @@ class _SetupState extends State<Setup> {
               Padding(
                   padding: EdgeInsets.symmetric(
                       horizontal: MediaQuery.of(context).size.width * 0.1),
-                  child: TextField(
+                  child: FormBuilderTextField(
                     controller: _urlController,
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    validator: FormBuilderValidators.compose(
+                        [FormBuilderValidators.required()]),
                     decoration: InputDecoration(
                       labelText: 'URL', // Label inside the input
                       prefixIcon:
                           Icon(Icons.link), // Icon inside the input (left side)
                       border: OutlineInputBorder(),
                     ),
+                    name: 'url',
                   )),
             if (_selectedIndex == SourceType.xtream.index)
               const SizedBox(height: 10),
@@ -78,14 +104,18 @@ class _SetupState extends State<Setup> {
               Padding(
                   padding: EdgeInsets.symmetric(
                       horizontal: MediaQuery.of(context).size.width * 0.1),
-                  child: TextField(
+                  child: FormBuilderTextField(
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
                     controller: _usernameController,
+                    validator: FormBuilderValidators.compose(
+                        [FormBuilderValidators.required()]),
                     decoration: InputDecoration(
                       labelText: 'Username', // Label inside the input
                       prefixIcon: Icon(Icons
                           .account_circle), // Icon inside the input (left side)
                       border: OutlineInputBorder(),
                     ),
+                    name: 'username',
                   )),
             if (_selectedIndex == SourceType.xtream.index)
               const SizedBox(height: 10),
@@ -93,21 +123,30 @@ class _SetupState extends State<Setup> {
               Padding(
                   padding: EdgeInsets.symmetric(
                       horizontal: MediaQuery.of(context).size.width * 0.1),
-                  child: TextField(
+                  child: FormBuilderTextField(
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
                     controller: _passwordController,
+                    validator: FormBuilderValidators.compose(
+                        [FormBuilderValidators.required()]),
                     decoration: InputDecoration(
                       labelText: 'Password', // Label inside the input
                       prefixIcon: Icon(
                           Icons.password), // Icon inside the input (left side)
                       border: OutlineInputBorder(),
                     ),
+                    name: 'password',
                   )),
             const SizedBox(height: 20),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor:
+                    formValid ? Colors.blue : Colors.grey, // Disabled color
+                foregroundColor: Colors.white, // Text color
+              ),
               onPressed: () => (),
               child: Text("Submit"),
             )
           ]),
-    );
+    ));
   }
 }
