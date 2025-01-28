@@ -4,6 +4,8 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:open_tv/models/source_type.dart';
 
 class Setup extends StatefulWidget {
+  const Setup({super.key});
+
   @override
   State<Setup> createState() => _SetupState();
 }
@@ -44,17 +46,17 @@ class _SetupState extends State<Setup> {
                   });
                 });
               },
-              children: <Widget>[
+              children: const <Widget>[
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  padding: EdgeInsets.symmetric(horizontal: 16.0),
                   child: Text('Xtream'),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  padding: EdgeInsets.symmetric(horizontal: 16.0),
                   child: Text('M3U URL'),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  padding: EdgeInsets.symmetric(horizontal: 16.0),
                   child: Text('M3U File'),
                 ),
               ],
@@ -68,7 +70,7 @@ class _SetupState extends State<Setup> {
                 autovalidateMode: AutovalidateMode.onUserInteraction,
                 validator: FormBuilderValidators.compose(
                     [FormBuilderValidators.required()]),
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Name', // Label inside the input
                   prefixIcon:
                       Icon(Icons.edit), // Icon inside the input (left side)
@@ -90,7 +92,7 @@ class _SetupState extends State<Setup> {
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     validator: FormBuilderValidators.compose(
                         [FormBuilderValidators.required()]),
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'URL', // Label inside the input
                       prefixIcon:
                           Icon(Icons.link), // Icon inside the input (left side)
@@ -109,7 +111,7 @@ class _SetupState extends State<Setup> {
                     controller: _usernameController,
                     validator: FormBuilderValidators.compose(
                         [FormBuilderValidators.required()]),
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Username', // Label inside the input
                       prefixIcon: Icon(Icons
                           .account_circle), // Icon inside the input (left side)
@@ -128,7 +130,7 @@ class _SetupState extends State<Setup> {
                     controller: _passwordController,
                     validator: FormBuilderValidators.compose(
                         [FormBuilderValidators.required()]),
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Password', // Label inside the input
                       prefixIcon: Icon(
                           Icons.password), // Icon inside the input (left side)
@@ -144,7 +146,7 @@ class _SetupState extends State<Setup> {
                 foregroundColor: Colors.white, // Text color
               ),
               onPressed: () => (),
-              child: Text("Submit"),
+              child: const Text("Submit"),
             )
           ]),
     ));
