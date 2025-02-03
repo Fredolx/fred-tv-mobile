@@ -10,6 +10,7 @@ class Channel {
   MediaType mediaType;
   int sourceId;
   bool favorite;
+  int? seriesId;
   int? streamId;
 
   Channel({
@@ -22,6 +23,7 @@ class Channel {
     required this.mediaType,
     required this.sourceId,
     required this.favorite,
+    this.seriesId,
     this.streamId,
   });
 }
