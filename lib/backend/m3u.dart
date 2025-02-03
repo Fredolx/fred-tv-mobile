@@ -28,21 +28,29 @@ Future<void> processM3U(Source source) async {
   String? lastLine;
   String? channelLine;
   ChannelHttpHeaders? headers;
-  var setHttpHeaders = false;
+  var httpHeadersSet = false;
   await for (var line in file) {
     var lineUpper = line.toUpperCase();
     if (lineUpper.startsWith("#EXTINF")) {
       if (channelLine != null) {
-        commitChannel(channelLine, lastLine!, headers, statements);
+        commitChannel(channelLine, lastLine!, httpHeadersSet ? headers : null,
+            statements);
       }
       channelLine = line;
       lastLine = null;
+      httpHeadersSet = false;
+      headers = null;
     } else if (lineUpper.startsWith("#EXTVLCOPT")) {
-      headers = ChannelHttpHeaders();
+      headers ??= ChannelHttpHeaders();
+      if (setChannelHeaders(line, headers)) {
+        httpHeadersSet = true;
+      }
     } else {
       lastLine = line;
     }
   }
+  commitChannel(channelLine!, lastLine!, headers, statements);
+  await Sql.commitWrite(statements);
 }
 
 void commitChannel(
@@ -86,8 +94,24 @@ String? getName(String l1) {
   return name;
 }
 
-void setChannelHeaders(
+bool setChannelHeaders(
+  String headerLine,
   ChannelHttpHeaders headers,
 ) {
-  headers.userAgent 
+  var userAgent = httpUserAgentRegex.firstMatch(headerLine)?[0];
+  if (userAgent != null) {
+    headers.userAgent = userAgent;
+    return true;
+  }
+  var referrer = httpReferrerRegex.firstMatch(headerLine)?[0];
+  if (referrer != null) {
+    headers.referrer = referrer;
+    return true;
+  }
+  var origin = httpOriginRegex.firstMatch(headerLine)?[0];
+  if (origin != null) {
+    headers.httpOrigin = origin;
+    return true;
+  }
+  return false;
 }
