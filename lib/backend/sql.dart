@@ -1,4 +1,5 @@
 import 'package:open_tv/models/channel.dart';
+import 'package:open_tv/models/channel_http_headers.dart';
 import 'package:open_tv/models/source.dart';
 import 'package:sqlite_async/sqlite_async.dart';
 
@@ -106,7 +107,7 @@ class Sql {
   static Future<void> Function(SqliteWriteContext, Map<String, String> memory)
       insertChannel(Channel channel) {
     return (SqliteWriteContext tx, Map<String, String> memory) async {
-      await tx.execute('''
+      memory['lastChannelId'] = (await tx.execute('''
         INSERT INTO channels (name, image, url, source_id, media_type, series_id, favorite, stream_id)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT (name, source_id)
@@ -117,19 +118,23 @@ class Sql {
           stream_id = excluded.stream_id,
           image = excluded.image,
           series_id = excluded.series_id;
+        SELECT last_insert_rowid();
       ''', [
         channel.name,
         channel.image,
         channel.url,
         int.parse(memory['sourceId']!)
-      ]);
+      ]))
+          .elementAt(0)
+          .columnAt(0);
     };
   }
 
   static Future<void> Function(SqliteWriteContext, Map<String, String>)
-      updateGroups(int sourceId) {
+      updateGroups() {
     return (SqliteWriteContext tx, Map<String, String> memory) async {
-      tx.execute('''
+      var sourceId = int.parse(memory['sourceId']!);
+      await tx.execute('''
       INSERT INTO groups (group_name, ?)
       SELECT DISTINCT group_name FROM channel WHERE source_id = ?
       ON CONFLICT(group_name) DO NOTHING;
@@ -137,6 +142,16 @@ class Sql {
       UPDATE channel
       SET group_id = (SELECT id FROM groups WHERE groups.group_name = channel.group_name);
     ''', [sourceId, sourceId]);
+    };
+  }
+
+  static Future<void> Function(SqliteWriteContext, Map<String, String>)
+      insertChannelHeaders(ChannelHttpHeaders headers) {
+    return (SqliteWriteContext tx, Map<String, String> memory) async {
+      await tx.execute('''
+          INSERT OR IGNORE INTO channel_http_headers (channel_id, referrer, user_agent, http_origin, ignore_ssl)
+          VALUES (?, ?, ?, ?, ?)
+        ''', [int.parse(memory['lastChannelId']!)]);
     };
   }
 
