@@ -15,11 +15,41 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   List<Channel> channels = [
-    Channel(id: 0, name: "Test 1", mediaType: MediaType.livestream),
-    Channel(id: 1, name: "Test 2", mediaType: MediaType.livestream),
-    Channel(id: 2, name: "Test 3", mediaType: MediaType.livestream),
-    Channel(id: 3, name: "Test 4", mediaType: MediaType.livestream),
-    Channel(id: 4, name: "Test 5", mediaType: MediaType.livestream),
+    Channel(
+        id: 0,
+        name: "Test 1",
+        mediaType: MediaType.livestream,
+        url: '',
+        sourceId: 1,
+        favorite: false),
+    Channel(
+        id: 1,
+        name: "Test 2",
+        mediaType: MediaType.livestream,
+        url: '',
+        sourceId: 1,
+        favorite: false),
+    Channel(
+        id: 2,
+        name: "Test 3",
+        mediaType: MediaType.livestream,
+        url: '',
+        sourceId: 1,
+        favorite: false),
+    Channel(
+        id: 3,
+        name: "Test 4",
+        mediaType: MediaType.livestream,
+        url: '',
+        sourceId: 1,
+        favorite: false),
+    Channel(
+        id: 4,
+        name: "Test 5",
+        mediaType: MediaType.livestream,
+        url: '',
+        sourceId: 1,
+        favorite: false),
   ];
 
   void search() {}
