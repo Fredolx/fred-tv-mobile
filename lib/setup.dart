@@ -81,7 +81,7 @@ class _SetupState extends State<Setup> {
             ),
             if (_selectedIndex == SourceType.xtream.index ||
                 _selectedIndex == SourceType.m3uUrl.index)
-              const SizedBox(height: 10),
+              const SizedBox(height: 15),
             if (_selectedIndex == SourceType.xtream.index ||
                 _selectedIndex == SourceType.m3uUrl.index)
               Padding(
@@ -101,7 +101,7 @@ class _SetupState extends State<Setup> {
                     name: 'url',
                   )),
             if (_selectedIndex == SourceType.xtream.index)
-              const SizedBox(height: 10),
+              const SizedBox(height: 15),
             if (_selectedIndex == SourceType.xtream.index)
               Padding(
                   padding: EdgeInsets.symmetric(
@@ -120,7 +120,7 @@ class _SetupState extends State<Setup> {
                     name: 'username',
                   )),
             if (_selectedIndex == SourceType.xtream.index)
-              const SizedBox(height: 10),
+              const SizedBox(height: 15),
             if (_selectedIndex == SourceType.xtream.index)
               Padding(
                   padding: EdgeInsets.symmetric(
@@ -145,7 +145,7 @@ class _SetupState extends State<Setup> {
                     formValid ? Colors.blue : Colors.grey, // Disabled color
                 foregroundColor: Colors.white, // Text color
               ),
-              onPressed: () => (),
+              onPressed: () => {},
               child: const Text("Submit"),
             )
           ]),

@@ -216,6 +216,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.0"
+  logging:
+    dependency: "direct main"
+    description:
+      name: logging
+      sha256: c8245ada5f1717ed44271ed1c26b8ce85ca3228fd2ffdb75468ab01979309d61
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.3.0"
   matcher:
     dependency: transitive
     description:
@@ -240,6 +248,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.15.0"
+  mutex:
+    dependency: transitive
+    description:
+      name: mutex
+      sha256: "8827da25de792088eb33e572115a5eb0d61d61a3c01acbc8bcbe76ed78f1a1f2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.0"
   octo_image:
     dependency: transitive
     description:
@@ -389,6 +405,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.4.0"
+  sqlite3:
+    dependency: transitive
+    description:
+      name: sqlite3
+      sha256: "35d3726fe18ab1463403a5cc8d97dbc81f2a0b08082e8173851363fcc97b6627"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.7.2"
+  sqlite3_web:
+    dependency: transitive
+    description:
+      name: sqlite3_web
+      sha256: "870f287c2375117af1f769893c5ea0941882ee820444af5c3dcceec3b217aab1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.0"
+  sqlite_async:
+    dependency: "direct main"
+    description:
+      name: sqlite_async
+      sha256: "70836e6a5dae2d14ce585934d1d6ce22433c1be825e78908a4b2a18333f7073c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.11.2"
   stack_trace:
     dependency: transitive
     description:
