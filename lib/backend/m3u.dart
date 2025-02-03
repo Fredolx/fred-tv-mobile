@@ -20,10 +20,10 @@ final httpUserAgentRegex = RegExp(r'http-user-agent=(.+)');
 Future<void> processM3U(Source source) async {
   var file = File(source.url!)
       .openRead()
-      .map(utf8.decode)
+      .transform(utf8.decoder)
       .transform(const LineSplitter());
   List<Future<void> Function(SqliteWriteContext, Map<String, String>)>
-      statements = List.empty();
+      statements = [];
   statements.add(Sql.getOrCreateSourceByName(source));
   String? lastLine;
   String? channelLine;
@@ -50,6 +50,7 @@ Future<void> processM3U(Source source) async {
     }
   }
   commitChannel(channelLine!, lastLine!, headers, statements);
+  statements.add(Sql.updateGroups());
   await Sql.commitWrite(statements);
 }
 
@@ -79,8 +80,8 @@ Channel? getChannelFromLines(String l1, String last) {
   if (name == null) return null;
   return Channel(
       name: name,
-      group: groupRegex.firstMatch(l1)?[0],
-      image: logoRegex.firstMatch(l1)?[0],
+      group: groupRegex.firstMatch(l1)?[1],
+      image: logoRegex.firstMatch(l1)?[1],
       favorite: false,
       mediaType: getMediaType(last),
       sourceId: -1,
@@ -88,9 +89,9 @@ Channel? getChannelFromLines(String l1, String last) {
 }
 
 String? getName(String l1) {
-  var name = nameRegex.firstMatch(l1)?[0];
-  name ??= nameRegexAlt.firstMatch(l1)?[0];
-  name ??= idRegex.firstMatch(l1)?[0];
+  var name = nameRegex.firstMatch(l1)?[1];
+  name ??= nameRegexAlt.firstMatch(l1)?[1];
+  name ??= idRegex.firstMatch(l1)?[1];
   return name;
 }
 
@@ -98,17 +99,17 @@ bool setChannelHeaders(
   String headerLine,
   ChannelHttpHeaders headers,
 ) {
-  var userAgent = httpUserAgentRegex.firstMatch(headerLine)?[0];
+  var userAgent = httpUserAgentRegex.firstMatch(headerLine)?[1];
   if (userAgent != null) {
     headers.userAgent = userAgent;
     return true;
   }
-  var referrer = httpReferrerRegex.firstMatch(headerLine)?[0];
+  var referrer = httpReferrerRegex.firstMatch(headerLine)?[1];
   if (referrer != null) {
     headers.referrer = referrer;
     return true;
   }
-  var origin = httpOriginRegex.firstMatch(headerLine)?[0];
+  var origin = httpOriginRegex.firstMatch(headerLine)?[1];
   if (origin != null) {
     headers.httpOrigin = origin;
     return true;

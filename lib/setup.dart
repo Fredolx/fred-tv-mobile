@@ -1,6 +1,9 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:open_tv/backend/m3u.dart';
+import 'package:open_tv/models/source.dart';
 import 'package:open_tv/models/source_type.dart';
 
 class Setup extends StatefulWidget {
@@ -145,7 +148,17 @@ class _SetupState extends State<Setup> {
                     formValid ? Colors.blue : Colors.grey, // Disabled color
                 foregroundColor: Colors.white, // Text color
               ),
-              onPressed: () => {},
+              onPressed: () async {
+                var filePath =
+                    (await FilePicker.platform.pickFiles())?.files.single.path;
+                if (filePath != null) {
+                  await processM3U(Source(
+                      name: 'test',
+                      sourceType: SourceType.m3u.index,
+                      enabled: true,
+                      url: filePath));
+                }
+              },
               child: const Text("Submit"),
             )
           ]),
