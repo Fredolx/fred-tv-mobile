@@ -1,9 +1,13 @@
 import 'package:open_tv/models/channel.dart';
 import 'package:open_tv/models/channel_http_headers.dart';
+import 'package:open_tv/models/filters.dart';
 import 'package:open_tv/models/source.dart';
+import 'package:open_tv/models/view_type.dart';
+import 'package:sqlite_async/sqlite3.dart';
 import 'package:sqlite_async/sqlite_async.dart';
 
 const String dbName = "/data/data/com.example.open_tv/db.sqlite";
+const int pageSize = 36;
 
 class Sql {
   static SqliteDatabase? _db;
@@ -206,5 +210,94 @@ class Sql {
       memory['sourceId'] =
           (await tx.get("SELECT last_insert_rowid();")).columnAt(0).toString();
     };
+  }
+
+  static Future<List<Channel>> search(Filters filters) async {
+    if (filters.viewType == ViewType.categories.index &&
+        filters.groupId == null &&
+        filters.seriesId == null) {
+      return searchGroup(filters);
+    }
+    var db = await Sql.db;
+    var offset = filters.page * pageSize - pageSize;
+    var mediaTypes = filters.seriesId != null ? filters.mediaTypes : [1];
+    var query = filters.query ?? "";
+    var keywords = filters.useKeywords
+        ? query.split(" ").map((f) => "%$f%").toList()
+        : ["%$query%"];
+    var sqlQuery = '''
+        SELECT * FROM channels 
+        WHERE (${getKeywordsSql(keywords.length)})
+        AND media_type IN (${generatePlaceholders(mediaTypes.length)})
+        AND source_id IN (${generatePlaceholders(filters.sourceIds.length)})
+        AND url IS NOT NULL
+    ''';
+    List<Object> params = [];
+    if (filters.viewType == ViewType.favorites.index &&
+        filters.seriesId == null) {
+      sqlQuery += "\nAND favorite = 1";
+    }
+    if (filters.seriesId != null) {
+      sqlQuery += "\nAND series_id = ?";
+    } else if (filters.groupId != null) {
+      sqlQuery += "\nAND group_id = ?";
+    }
+    sqlQuery += "\nLIMIT ?, ?";
+    params.addAll(keywords);
+    params.addAll(mediaTypes);
+    params.addAll(filters.sourceIds);
+    if (filters.seriesId != null) {
+      params.add(filters.seriesId!);
+    } else if (filters.groupId != null) {
+      params.add(filters.groupId!);
+    }
+    params.add(offset);
+    params.add(pageSize);
+    var results = await db.getAll(sqlQuery, params);
+    return results.map(rowToChannel).toList();
+  }
+
+  static Channel rowToChannel(Row row) {
+    return Channel(
+      id: row.columnAt(0),
+      name: row.columnAt(1),
+      image: row.columnAt(2),
+      url: row.columnAt(3),
+      mediaType: row.columnAt(4),
+      sourceId: row.columnAt(5),
+      favorite: row.columnAt(6),
+      seriesId: row.columnAt(7),
+      groupId: row.columnAt(8),
+    );
+  }
+
+  static String generatePlaceholders(int size) {
+    return List.filled(size, "?").join(",");
+  }
+
+  static getKeywordsSql(int size) {
+    return List.generate(size, (_) => "name LIKE ?").join(" AND ");
+  }
+
+  static Future<List<Channel>> searchGroup(Filters filters) async {
+    var db = await Sql.db;
+    var offset = filters.page * pageSize - pageSize;
+    var query = filters.query ?? "";
+    var keywords = filters.useKeywords
+        ? query.split(" ").map((f) => "%$f%").toList()
+        : ["%$query%"];
+    var sqlQuery = '''
+        SELECT * FROM groups 
+        WHERE (${getKeywordsSql(keywords.length)})
+        AND source_id IN (${generatePlaceholders(filters.sourceIds.length)})
+        LIMIT ?, ?
+    ''';
+    List<Object> params = [];
+    params.addAll(keywords);
+    params.addAll(filters.sourceIds);
+    params.add(offset);
+    params.add(pageSize);
+    var results = await db.getAll(sqlQuery, params);
+    return results.map(rowToChannel).toList();
   }
 }
