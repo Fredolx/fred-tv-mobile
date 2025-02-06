@@ -12,9 +12,6 @@ import 'types.dart';
 Future<void> deleteDatabase() =>
     RustLib.instance.api.crateApiSqlDeleteDatabase();
 
-Future<void> createOrInitializeDb() =>
-    RustLib.instance.api.crateApiSqlCreateOrInitializeDb();
-
 Future<void> insertChannelHeaders(
         {required Transaction tx, required ChannelHttpHeaders headers}) =>
     RustLib.instance.api

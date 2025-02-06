@@ -1,6 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:open_tv/models/channel.dart';
+import 'package:open_tv/src/rust/api/types.dart';
 
 class ChannelTile extends StatefulWidget {
   final Channel channel;
