@@ -85,7 +85,7 @@ class _HomeState extends State<Home> {
           },
         ),
       ),
-      bottomNavigationBar: BottomNav(),
+      bottomNavigationBar: const BottomNav(),
       floatingActionButton: FloatingActionButton(
         onPressed: search,
         tooltip: 'Search',
