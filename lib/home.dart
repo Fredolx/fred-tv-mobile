@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:open_tv/bottom_nav.dart';
 import 'package:open_tv/channel_tile.dart';
-import 'package:open_tv/models/channel.dart';
 import 'package:open_tv/models/media_type.dart';
+import 'package:open_tv/src/rust/api/types.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key, required this.title});
@@ -18,35 +18,35 @@ class _HomeState extends State<Home> {
     Channel(
         id: 0,
         name: "Test 1",
-        mediaType: MediaType.livestream,
+        mediaType: MediaType.livestream.index,
         url: '',
         sourceId: 1,
         favorite: false),
     Channel(
         id: 1,
         name: "Test 2",
-        mediaType: MediaType.livestream,
+        mediaType: MediaType.livestream.index,
         url: '',
         sourceId: 1,
         favorite: false),
     Channel(
         id: 2,
         name: "Test 3",
-        mediaType: MediaType.livestream,
+        mediaType: MediaType.livestream.index,
         url: '',
         sourceId: 1,
         favorite: false),
     Channel(
         id: 3,
         name: "Test 4",
-        mediaType: MediaType.livestream,
+        mediaType: MediaType.livestream.index,
         url: '',
         sourceId: 1,
         favorite: false),
     Channel(
         id: 4,
         name: "Test 5",
-        mediaType: MediaType.livestream,
+        mediaType: MediaType.livestream.index,
         url: '',
         sourceId: 1,
         favorite: false),
