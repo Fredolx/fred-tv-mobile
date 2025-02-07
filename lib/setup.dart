@@ -1,6 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:open_tv/backend/m3u.dart';
 import 'package:open_tv/models/source.dart';
@@ -149,14 +150,23 @@ class _SetupState extends State<Setup> {
                 foregroundColor: Colors.white, // Text color
               ),
               onPressed: () async {
+                _formKey.currentState?.saveAndValidate();
                 var filePath =
                     (await FilePicker.platform.pickFiles())?.files.single.path;
                 if (filePath != null) {
                   await processM3U(Source(
-                      name: 'test',
+                      name: _formKey.currentState?.value["name"],
                       sourceType: SourceType.m3u.index,
                       enabled: true,
                       url: filePath));
+                  Fluttertoast.showToast(
+                      msg: "Success",
+                      toastLength: Toast.LENGTH_SHORT,
+                      gravity: ToastGravity.CENTER,
+                      timeInSecForIosWeb: 1,
+                      backgroundColor: Colors.red,
+                      textColor: Colors.white,
+                      fontSize: 16.0);
                 }
               },
               child: const Text("Submit"),

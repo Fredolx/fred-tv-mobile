@@ -1,4 +1,4 @@
-package com.example.open_tv
+package dev.fredol.open_tv
 
 import io.flutter.embedding.android.FlutterActivity
 

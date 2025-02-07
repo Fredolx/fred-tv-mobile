@@ -6,7 +6,7 @@ import 'package:open_tv/models/view_type.dart';
 import 'package:sqlite_async/sqlite3.dart';
 import 'package:sqlite_async/sqlite_async.dart';
 
-const String dbName = "/data/data/com.example.open_tv/db.sqlite";
+const String dbName = "/data/data/dev.fredol.open_tv/databases/db.sqlite";
 const int pageSize = 36;
 
 class Sql {
@@ -195,7 +195,7 @@ class Sql {
               "SELECT id FROM sources WHERE name = ?", [source.name]))
           ?.columnAt(0);
       if (sourceId != null) {
-        memory['sourceId'] = sourceId;
+        memory['sourceId'] = sourceId.toString();
         return;
       }
       await tx.execute('''
