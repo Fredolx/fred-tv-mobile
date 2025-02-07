@@ -21,9 +21,7 @@ pub(crate) fn get_conn() -> Result<PooledConnection<SqliteConnectionManager>> {
 
 fn create_connection_pool() -> Pool<SqliteConnectionManager> {
     let manager = SqliteConnectionManager::file(get_and_create_sqlite_db_path());
-    let pool = r2d2::Pool::builder().max_size(20).build(manager).unwrap();
-    apply_migrations(pool.try_get().unwrap());
-    pool
+    r2d2::Pool::builder().max_size(20).build(manager).unwrap()
 }
 
 fn get_and_create_sqlite_db_path() -> String {
@@ -43,7 +41,13 @@ pub fn delete_database() -> Result<()> {
     std::process::exit(0);
 }
 
-fn apply_migrations(mut sql: PooledConnection<SqliteConnectionManager>) -> Result<()> {
+pub fn create_or_initialize_db() -> Result<()> {
+    apply_migrations()?;
+    Ok(())
+}
+
+fn apply_migrations() -> Result<()> {
+    let mut sql = get_conn()?;
     let migrations = Migrations::new(vec![M::up(
         r#"
             CREATE TABLE "sources" (

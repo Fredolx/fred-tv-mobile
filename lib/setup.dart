@@ -2,9 +2,9 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:open_tv/backend/m3u.dart';
+import 'package:open_tv/models/source.dart';
 import 'package:open_tv/models/source_type.dart';
-import 'package:open_tv/src/rust/api/types.dart';
-import 'package:open_tv/src/rust/api/m3u.dart';
 
 class Setup extends StatefulWidget {
   const Setup({super.key});
@@ -152,13 +152,11 @@ class _SetupState extends State<Setup> {
                 var filePath =
                     (await FilePicker.platform.pickFiles())?.files.single.path;
                 if (filePath != null) {
-                  await readM3U8(
-                      source: Source(
-                          name: 'test',
-                          sourceType: SourceType.m3u.index,
-                          enabled: true,
-                          url: filePath),
-                      wipe: false);
+                  await processM3U(Source(
+                      name: 'test',
+                      sourceType: SourceType.m3u.index,
+                      enabled: true,
+                      url: filePath));
                 }
               },
               child: const Text("Submit"),
