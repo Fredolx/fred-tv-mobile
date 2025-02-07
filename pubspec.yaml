@@ -42,6 +42,7 @@ dependencies:
   file_picker: ^8.3.1
   sqlite3_flutter_libs: ^0.5.29+1
   fluttertoast: ^8.2.11
+  url_launcher: ^6.3.1
 
 dev_dependencies:
   flutter_test:
