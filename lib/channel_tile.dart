@@ -57,7 +57,7 @@ class _ChannelTileState extends State<ChannelTile> {
                               "assets/icon.png",
                               fit: BoxFit.contain,
                             ))),
-              Expanded(flex: 8, child: Text(widget.channel.name!))
+              Expanded(flex: 8, child: Text(widget.channel.name))
             ],
           )),
     );

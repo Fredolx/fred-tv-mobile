@@ -6,6 +6,7 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:open_tv/backend/m3u.dart';
 import 'package:open_tv/models/source.dart';
 import 'package:open_tv/models/source_type.dart';
+import 'package:open_tv/error.dart';
 
 class Setup extends StatefulWidget {
   const Setup({super.key});
@@ -16,10 +17,6 @@ class Setup extends StatefulWidget {
 
 class _SetupState extends State<Setup> {
   int _selectedIndex = 0;
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _urlController = TextEditingController();
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormBuilderState>();
   bool formValid = false;
   @override
@@ -70,7 +67,6 @@ class _SetupState extends State<Setup> {
               padding: EdgeInsets.symmetric(
                   horizontal: MediaQuery.of(context).size.width * 0.1),
               child: FormBuilderTextField(
-                controller: _nameController,
                 autovalidateMode: AutovalidateMode.onUserInteraction,
                 validator: FormBuilderValidators.compose(
                     [FormBuilderValidators.required()]),
@@ -92,7 +88,6 @@ class _SetupState extends State<Setup> {
                   padding: EdgeInsets.symmetric(
                       horizontal: MediaQuery.of(context).size.width * 0.1),
                   child: FormBuilderTextField(
-                    controller: _urlController,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     validator: FormBuilderValidators.compose(
                         [FormBuilderValidators.required()]),
@@ -112,7 +107,6 @@ class _SetupState extends State<Setup> {
                       horizontal: MediaQuery.of(context).size.width * 0.1),
                   child: FormBuilderTextField(
                     autovalidateMode: AutovalidateMode.onUserInteraction,
-                    controller: _usernameController,
                     validator: FormBuilderValidators.compose(
                         [FormBuilderValidators.required()]),
                     decoration: const InputDecoration(
@@ -131,7 +125,6 @@ class _SetupState extends State<Setup> {
                       horizontal: MediaQuery.of(context).size.width * 0.1),
                   child: FormBuilderTextField(
                     autovalidateMode: AutovalidateMode.onUserInteraction,
-                    controller: _passwordController,
                     validator: FormBuilderValidators.compose(
                         [FormBuilderValidators.required()]),
                     decoration: const InputDecoration(
@@ -154,19 +147,26 @@ class _SetupState extends State<Setup> {
                 var filePath =
                     (await FilePicker.platform.pickFiles())?.files.single.path;
                 if (filePath != null) {
-                  await processM3U(Source(
-                      name: _formKey.currentState?.value["name"],
-                      sourceType: SourceType.m3u.index,
-                      enabled: true,
-                      url: filePath));
-                  Fluttertoast.showToast(
-                      msg: "Success",
-                      toastLength: Toast.LENGTH_SHORT,
-                      gravity: ToastGravity.CENTER,
-                      timeInSecForIosWeb: 1,
-                      backgroundColor: Colors.red,
-                      textColor: Colors.white,
-                      fontSize: 16.0);
+                  try {
+                    if (_selectedIndex == SourceType.xtream.index) {
+                      throw Exception("This is a temporary test");
+                    }
+                    await processM3U(Source(
+                        name: _formKey.currentState?.value["name"],
+                        sourceType: SourceType.m3u.index,
+                        enabled: true,
+                        url: filePath));
+                    Fluttertoast.showToast(
+                        msg: "Successfully added source",
+                        toastLength: Toast.LENGTH_LONG,
+                        gravity: ToastGravity.TOP_RIGHT,
+                        timeInSecForIosWeb: 5,
+                        backgroundColor: Colors.green,
+                        textColor: Colors.white,
+                        fontSize: 16.0);
+                  } catch (e) {
+                    Error.handleError(context, e);
+                  }
                 }
               },
               child: const Text("Submit"),
