@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.open_tv"
+    namespace = "dev.fredol.open_tv"
     compileSdk = 35
     ndkVersion = "25.1.8937393"
 
@@ -21,7 +21,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.open_tv"
+        applicationId = "dev.fredol.open_tv"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
