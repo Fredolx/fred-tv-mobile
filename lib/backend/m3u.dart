@@ -33,7 +33,7 @@ Future<void> processM3U(Source source, [String? path]) async {
   ChannelHttpHeaders? headers;
   var httpHeadersSet = false;
   await for (var line in file) {
-    var lineUpper = line.toUpperCase();
+    final lineUpper = line.toUpperCase();
     if (lineUpper.startsWith("#EXTINF")) {
       if (channelLine != null) {
         commitChannel(channelLine, lastLine!, httpHeadersSet ? headers : null,
@@ -102,17 +102,17 @@ bool setChannelHeaders(
   String headerLine,
   ChannelHttpHeaders headers,
 ) {
-  var userAgent = httpUserAgentRegex.firstMatch(headerLine)?[1];
+  final userAgent = httpUserAgentRegex.firstMatch(headerLine)?[1];
   if (userAgent != null) {
     headers.userAgent = userAgent;
     return true;
   }
-  var referrer = httpReferrerRegex.firstMatch(headerLine)?[1];
+  final referrer = httpReferrerRegex.firstMatch(headerLine)?[1];
   if (referrer != null) {
     headers.referrer = referrer;
     return true;
   }
-  var origin = httpOriginRegex.firstMatch(headerLine)?[1];
+  final origin = httpOriginRegex.firstMatch(headerLine)?[1];
   if (origin != null) {
     headers.httpOrigin = origin;
     return true;
