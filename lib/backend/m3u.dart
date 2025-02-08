@@ -2,11 +2,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:open_tv/backend/sql.dart';
+import 'package:open_tv/backend/utils.dart';
 import 'package:open_tv/models/channel.dart';
 import 'package:open_tv/models/channel_http_headers.dart';
 import 'package:open_tv/models/media_type.dart';
 import 'package:open_tv/models/source.dart';
 import 'package:sqlite_async/sqlite_async.dart';
+import 'package:http/http.dart' as http;
 
 final nameRegex = RegExp(r'tvg-name="([^"]*)"');
 final nameRegexAlt = RegExp(r',([^\n\r\t]*)');
@@ -17,8 +19,9 @@ final httpOriginRegex = RegExp(r'http-origin=(.+)');
 final httpReferrerRegex = RegExp(r'http-referrer=(.+)');
 final httpUserAgentRegex = RegExp(r'http-user-agent=(.+)');
 
-Future<void> processM3U(Source source) async {
-  var file = File(source.url!)
+Future<void> processM3U(Source source, [String? path]) async {
+  path ??= source.url;
+  var file = File(path!)
       .openRead()
       .transform(utf8.decoder)
       .transform(const LineSplitter());
@@ -115,4 +118,27 @@ bool setChannelHeaders(
     return true;
   }
   return false;
+}
+
+Future<void> processM3UUrl(Uri url, Source source) async {
+  var path = await downloadM3U(url);
+  await processM3U(source, path);
+}
+
+Future<String> downloadM3U(Uri url) async {
+  final client = http.Client();
+  final request = http.Request('GET', url);
+  final response = await client.send(request);
+  if (response.statusCode != 200) {
+    throw Exception('Failed to download file: ${response.statusCode}');
+  }
+  final path = await Utils.getTempPath("get.m3u");
+  final file = File(path);
+  final sink = file.openWrite();
+  await for (var chunk in response.stream) {
+    sink.add(chunk);
+  }
+  await sink.close();
+  client.close();
+  return path;
 }
