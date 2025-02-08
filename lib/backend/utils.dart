@@ -11,8 +11,8 @@ class Utils {
   }
 
   static Future<String> getTempPath(String fileName) async {
-    var path = await appDir;
-    var tempDir = join(path, "temp");
+    final path = await appDir;
+    final tempDir = join(path, "temp");
     Directory(tempDir).create(recursive: true);
     return join(tempDir, fileName);
   }
