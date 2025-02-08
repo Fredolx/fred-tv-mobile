@@ -148,22 +148,11 @@ class _SetupState extends State<Setup> {
                     (await FilePicker.platform.pickFiles())?.files.single.path;
                 if (filePath != null) {
                   try {
-                    if (_selectedIndex == SourceType.xtream.index) {
-                      throw Exception("This is a temporary test");
-                    }
                     await processM3U(Source(
                         name: _formKey.currentState?.value["name"],
                         sourceType: SourceType.m3u.index,
                         enabled: true,
                         url: filePath));
-                    Fluttertoast.showToast(
-                        msg: "Successfully added source",
-                        toastLength: Toast.LENGTH_LONG,
-                        gravity: ToastGravity.TOP_RIGHT,
-                        timeInSecForIosWeb: 5,
-                        backgroundColor: Colors.green,
-                        textColor: Colors.white,
-                        fontSize: 16.0);
                   } catch (e) {
                     Error.handleError(context, e);
                   }
