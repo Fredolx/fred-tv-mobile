@@ -1,9 +1,10 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
-import 'package:open_tv/backend/m3u.dart';
+import 'package:open_tv/backend/utils.dart';
+import 'package:open_tv/home.dart';
+import 'package:open_tv/loading.dart';
 import 'package:open_tv/models/source.dart';
 import 'package:open_tv/models/source_type.dart';
 import 'package:open_tv/error.dart';
@@ -22,7 +23,8 @@ class _SetupState extends State<Setup> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: FormBuilder(
+        body: Loading(
+            child: FormBuilder(
       onChanged: () {
         WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
           setState(() {
@@ -143,24 +145,39 @@ class _SetupState extends State<Setup> {
                 foregroundColor: Colors.white, // Text color
               ),
               onPressed: () async {
-                _formKey.currentState?.saveAndValidate();
-                var filePath =
-                    (await FilePicker.platform.pickFiles())?.files.single.path;
-                if (filePath != null) {
-                  try {
-                    await processM3U(Source(
-                        name: _formKey.currentState?.value["name"],
-                        sourceType: SourceType.m3u.index,
-                        enabled: true,
-                        url: filePath));
-                  } catch (e) {
-                    Error.handleError(context, e);
-                  }
+                if (_formKey.currentState?.saveAndValidate() == false) {
+                  return;
+                }
+                final sourceType = SourceType.values[_selectedIndex];
+                final url = sourceType == SourceType.m3u
+                    ? (await FilePicker.platform.pickFiles())?.files.single.path
+                    : (_formKey.currentState?.value["url"] as String);
+                final result = await Error.tryAsync(() async {
+                  await Utils.processSource(
+                    Source(
+                      name: (_formKey.currentState?.value["name"] as String)
+                          .trim(),
+                      sourceType: sourceType,
+                      url: url,
+                      username: sourceType == SourceType.xtream
+                          ? (_formKey.currentState?.value["username"] as String)
+                              .trim()
+                          : null,
+                      password: sourceType == SourceType.xtream
+                          ? (_formKey.currentState?.value["password"] as String)
+                              .trim()
+                          : null,
+                    ),
+                  );
+                }, context, "Successfully added source");
+                if (result.success) {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => const Home()));
                 }
               },
               child: const Text("Submit"),
             )
           ]),
-    ));
+    )));
   }
 }
