@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:loader_overlay/loader_overlay.dart';
-import 'package:open_tv/loading.dart';
 import 'package:open_tv/models/result.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -116,19 +115,20 @@ class Error {
   static Future<Result<T>> tryAsync<T>(
       Future<T?> Function() fn, BuildContext context,
       [String successMessage = "Action completed successfully"]) async {
+    var success = false;
     if (context.mounted) {
       context.loaderOverlay.show();
     }
     try {
       var result = await fn();
       showSuccess(context, successMessage);
-      return Result(success: true, data: result);
+      success = true;
     } catch (e) {
-      handleError(context, e);
+      await handleError(context, e);
     }
     if (context.loaderOverlay.visible) {
       context.loaderOverlay.hide();
     }
-    return Result(success: false);
+    return Result(success: success);
   }
 }

@@ -152,6 +152,7 @@ class _SetupState extends State<Setup> {
                 final url = sourceType == SourceType.m3u
                     ? (await FilePicker.platform.pickFiles())?.files.single.path
                     : (_formKey.currentState?.value["url"] as String);
+                if (sourceType == SourceType.m3u && url == null) return;
                 final result = await Error.tryAsync(() async {
                   await Utils.processSource(
                     Source(
