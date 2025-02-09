@@ -2,6 +2,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:open_tv/backend/sql.dart';
 import 'package:open_tv/backend/utils.dart';
 import 'package:open_tv/home.dart';
 import 'package:open_tv/loading.dart';
@@ -20,6 +21,7 @@ class _SetupState extends State<Setup> {
   int _selectedIndex = 0;
   final _formKey = GlobalKey<FormBuilderState>();
   bool formValid = false;
+  Set<String> existingSourceNames = {};
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -70,8 +72,19 @@ class _SetupState extends State<Setup> {
                   horizontal: MediaQuery.of(context).size.width * 0.1),
               child: FormBuilderTextField(
                 autovalidateMode: AutovalidateMode.onUserInteraction,
-                validator: FormBuilderValidators.compose(
-                    [FormBuilderValidators.required()]),
+                validator: FormBuilderValidators.compose([
+                  FormBuilderValidators.required(),
+                  (value) {
+                    var trimmed = value?.trim();
+                    if (trimmed == null || trimmed.isEmpty) {
+                      return null;
+                    }
+                    if (existingSourceNames.contains(trimmed)) {
+                      return "Name already exists";
+                    }
+                    return null;
+                  }
+                ]),
                 decoration: const InputDecoration(
                   labelText: 'Name', // Label inside the input
                   prefixIcon:
@@ -145,6 +158,12 @@ class _SetupState extends State<Setup> {
                 foregroundColor: Colors.white, // Text color
               ),
               onPressed: () async {
+                final sourceName =
+                    (_formKey.currentState?.instantValue["name"] as String)
+                        .trim();
+                if (await Sql.sourceNameExists(sourceName)) {
+                  existingSourceNames.add(sourceName);
+                }
                 if (_formKey.currentState?.saveAndValidate() == false) {
                   return;
                 }
@@ -156,8 +175,7 @@ class _SetupState extends State<Setup> {
                 final result = await Error.tryAsync(() async {
                   await Utils.processSource(
                     Source(
-                      name: (_formKey.currentState?.value["name"] as String)
-                          .trim(),
+                      name: sourceName,
                       sourceType: sourceType,
                       url: url,
                       username: sourceType == SourceType.xtream
