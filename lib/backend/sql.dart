@@ -6,7 +6,7 @@ import 'package:open_tv/models/view_type.dart';
 import 'package:sqlite_async/sqlite3.dart';
 import 'package:sqlite_async/sqlite_async.dart';
 
-const String dbName = "/data/data/dev.fredol.open_tv/databases/db.sqlite";
+const String dbName = "/data/data/dev.fredol.open_tv/db.sqlite";
 const int pageSize = 36;
 
 class Sql {
@@ -202,7 +202,7 @@ class Sql {
             INSERT INTO sources (name, source_type, url, username, password) VALUES (?, ?, ?, ?, ?);
           ''', [
         source.name,
-        source.sourceType,
+        source.sourceType.index,
         source.url,
         source.username,
         source.password,

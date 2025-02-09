@@ -1,13 +1,14 @@
+import 'package:open_tv/models/source_type.dart';
+
 class Source {
-  final int? id;
-  final String name;
-  final String? url;
-  final String? urlOrigin;
-  final String? username;
-  final String? password;
-  final int sourceType;
-  final bool? useTvgId;
-  final bool enabled;
+  int? id;
+  String name;
+  String? url;
+  String? urlOrigin;
+  String? username;
+  String? password;
+  SourceType sourceType;
+  bool enabled;
 
   Source({
     this.id,
@@ -17,7 +18,6 @@ class Source {
     this.username,
     this.password,
     required this.sourceType,
-    this.useTvgId,
-    required this.enabled,
+    this.enabled = true,
   });
 }

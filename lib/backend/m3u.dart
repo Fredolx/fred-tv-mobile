@@ -120,12 +120,13 @@ bool setChannelHeaders(
   return false;
 }
 
-Future<void> processM3UUrl(Uri url, Source source) async {
-  var path = await downloadM3U(url);
+Future<void> processM3UUrl(Source source) async {
+  var path = await downloadM3U(source.url!);
   await processM3U(source, path);
 }
 
-Future<String> downloadM3U(Uri url) async {
+Future<String> downloadM3U(String urlStr) async {
+  final url = Uri.parse(urlStr);
   final client = http.Client();
   final request = http.Request('GET', url);
   final response = await client.send(request);

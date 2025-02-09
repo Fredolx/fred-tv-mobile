@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:loader_overlay/loader_overlay.dart';
+import 'package:open_tv/loading.dart';
+import 'package:open_tv/models/result.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class Error {
-  static void handleError(BuildContext context, Object error) async {
+  static Future<void> handleError(BuildContext context, Object error) async {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -92,5 +95,40 @@ class Error {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(message)));
     }
+  }
+
+  static T? trySync<T>(T? Function() fn, BuildContext context,
+      [String successMessage = "Action completed successfully"]) {
+    context.loaderOverlay.show();
+    try {
+      var result = fn();
+      showSuccess(context, successMessage);
+      return result;
+    } catch (e) {
+      if (context.mounted) {
+        handleError(context, e);
+      }
+    }
+    context.loaderOverlay.hide();
+    return null;
+  }
+
+  static Future<Result<T>> tryAsync<T>(
+      Future<T?> Function() fn, BuildContext context,
+      [String successMessage = "Action completed successfully"]) async {
+    if (context.mounted) {
+      context.loaderOverlay.show();
+    }
+    try {
+      var result = await fn();
+      showSuccess(context, successMessage);
+      return Result(success: true, data: result);
+    } catch (e) {
+      handleError(context, e);
+    }
+    if (context.loaderOverlay.visible) {
+      context.loaderOverlay.hide();
+    }
+    return Result(success: false);
   }
 }
