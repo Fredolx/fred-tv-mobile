@@ -300,4 +300,14 @@ class Sql {
     var results = await db.getAll(sqlQuery, params);
     return results.map(rowToChannel).toList();
   }
+
+  static Future<bool> sourceNameExists(String? name) async {
+    var db = await Sql.db;
+    var result = await db.getOptional('''
+      SELECT 1
+      FROM sources
+      WHERE name = ?
+    ''', [name]);
+    return result?.columnAt(0) == 1;
+  }
 }
