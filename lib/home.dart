@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:open_tv/backend/sql.dart';
 import 'package:open_tv/bottom_nav.dart';
 import 'package:open_tv/channel_tile.dart';
 import 'package:open_tv/models/channel.dart';
+import 'package:open_tv/models/filters.dart';
 import 'package:open_tv/models/media_type.dart';
+import 'package:open_tv/models/view_type.dart';
+import 'package:open_tv/error.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -12,64 +16,68 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  List<Channel> channels = [
-    Channel(
-        id: 0,
-        name: "Test 1",
-        mediaType: MediaType.livestream,
-        url: '',
-        sourceId: 1,
-        favorite: false),
-    Channel(
-        id: 1,
-        name: "Test 2",
-        mediaType: MediaType.livestream,
-        url: '',
-        sourceId: 1,
-        favorite: false),
-    Channel(
-        id: 2,
-        name: "Test 3",
-        mediaType: MediaType.livestream,
-        url: '',
-        sourceId: 1,
-        favorite: false),
-    Channel(
-        id: 3,
-        name: "Test 4",
-        mediaType: MediaType.livestream,
-        url: '',
-        sourceId: 1,
-        favorite: false),
-    Channel(
-        id: 4,
-        name: "Test 5",
-        mediaType: MediaType.livestream,
-        url: '',
-        sourceId: 1,
-        favorite: false),
-  ];
+  Filters filters = Filters(
+      sourceIds: [],
+      mediaTypes: [MediaType.livestream, MediaType.movie, MediaType.serie],
+      viewType: ViewType.all,
+      page: 1,
+      useKeywords: false);
+  bool reachedMax = false;
+  final int pageSize = 36;
+  List<Channel> channels = [];
+  @override
+  void initState() {
+    super.initState();
+    initializeAsync();
+  }
 
-  void search() {}
+  Future<void> initializeAsync() async {
+    final sources = await Sql.getEnabledSourcesMinimal();
+    filters.sourceIds = sources.map((x) => x.id).toList();
+    await load();
+  }
+
+  Future<void> loadMore() async {
+    filters.page++;
+    load(true);
+  }
+
+  search() {}
+
+  Future<void> load([bool more = false]) async {
+    Error.tryAsyncNoLoading(() async {
+      List<Channel> channels = await Sql.search(filters);
+      if (!more) {
+        setState(() {
+          this.channels = channels;
+        });
+      } else {
+        setState(() {
+          this.channels.addAll(channels);
+        });
+      }
+      reachedMax = channels.length < pageSize;
+    }, context);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.all(40.0),
+        padding: const EdgeInsets.all(10.0),
         child: LayoutBuilder(
           builder: (context, constraints) {
-            double cardWidth = 400;
-            double cardHeight = 90;
-            int crossAxisCount = (constraints.maxWidth / cardWidth * 1.25)
+            double cardWidth = 150;
+            double cardHeight = 60;
+            int crossAxisCount = (constraints.maxWidth / cardWidth)
                 .floor()
-                .clamp(1, 3)
+                .clamp(1, 4)
                 .toInt();
             return GridView.builder(
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: crossAxisCount,
-                crossAxisSpacing: 8.0,
-                mainAxisSpacing: 8.0,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 12,
                 childAspectRatio: cardWidth / cardHeight,
               ),
               itemCount: channels.length,

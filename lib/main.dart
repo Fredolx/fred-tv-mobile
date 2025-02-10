@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:open_tv/loading.dart';
+import 'package:open_tv/backend/sql.dart';
+import 'package:open_tv/home.dart';
 import 'package:open_tv/setup.dart';
 
-void main() {
-  runApp(const MyApp());
+Future<void> main() async {
+  final hasSources = await Sql.hasSources();
+  runApp(MyApp(
+    skipSetup: hasSources,
+  ));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool skipSetup;
+  const MyApp({super.key, required this.skipSetup});
 
   @override
   Widget build(BuildContext context) {
@@ -17,6 +22,6 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
           useMaterial3: true,
         ),
-        home: Setup());
+        home: skipSetup ? const Home() : const Setup());
   }
 }

@@ -190,7 +190,7 @@ class _SetupState extends State<Setup> {
                   );
                 }, context, "Successfully added source");
                 if (result.success) {
-                  Navigator.push(context,
+                  Navigator.pushReplacement(context,
                       MaterialPageRoute(builder: (context) => const Home()));
                 }
               },

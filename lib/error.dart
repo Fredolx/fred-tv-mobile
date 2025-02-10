@@ -5,7 +5,7 @@ import 'package:open_tv/models/result.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class Error {
-  static Future<void> handleError(BuildContext context, Object error) async {
+  static Future<void> handleError(BuildContext context, String error) async {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -38,7 +38,7 @@ class Error {
                                                 maxHeight: 200),
                                             child: SingleChildScrollView(
                                                 child: Text(
-                                              error.toString(),
+                                              error,
                                               style: const TextStyle(
                                                   color: Colors.white),
                                             ))))
@@ -96,39 +96,31 @@ class Error {
     }
   }
 
-  static T? trySync<T>(T? Function() fn, BuildContext context,
-      [String successMessage = "Action completed successfully"]) {
-    context.loaderOverlay.show();
-    try {
-      var result = fn();
-      showSuccess(context, successMessage);
-      return result;
-    } catch (e) {
-      if (context.mounted) {
-        handleError(context, e);
-      }
-    }
-    context.loaderOverlay.hide();
-    return null;
-  }
-
   static Future<Result<T>> tryAsync<T>(
       Future<T?> Function() fn, BuildContext context,
-      [String successMessage = "Action completed successfully"]) async {
+      [String? successMessage = "Action completed successfully",
+      bool useLoading = true]) async {
     var success = false;
-    if (context.mounted) {
+    T? result;
+    if (useLoading && context.mounted) {
       context.loaderOverlay.show();
     }
     try {
-      var result = await fn();
-      showSuccess(context, successMessage);
+      result = await fn();
+      if (useLoading) showSuccess(context, successMessage!);
       success = true;
-    } catch (e) {
-      await handleError(context, e);
+    } catch (e, stackTrace) {
+      final error = "${e.toString()}\n${stackTrace.toString()}";
+      await handleError(context, error);
     }
-    if (context.loaderOverlay.visible) {
+    if (useLoading && context.loaderOverlay.visible) {
       context.loaderOverlay.hide();
     }
-    return Result(success: success);
+    return Result(success: success, data: result);
+  }
+
+  static Future<Result<T>> tryAsyncNoLoading<T>(
+      Future<T?> Function() fn, BuildContext context) async {
+    return await tryAsync(fn, context, null, false);
   }
 }

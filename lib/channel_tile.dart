@@ -42,10 +42,10 @@ class _ChannelTileState extends State<ChannelTile> {
           focusNode: _focusNode,
           onTap: () => print("Selected ${widget.channel.name}"),
           borderRadius: BorderRadius.circular(10),
-          child: Row(
+          child: Padding(padding: const EdgeInsets.all(10), child: Row(
             children: [
               Expanded(
-                  flex: 4,
+                  flex: 3,
                   child: Align(
                       alignment: Alignment.centerLeft,
                       child: widget.channel.image != null
@@ -57,9 +57,10 @@ class _ChannelTileState extends State<ChannelTile> {
                               "assets/icon.png",
                               fit: BoxFit.contain,
                             ))),
+              const Expanded(flex: 1, child: SizedBox()),
               Expanded(flex: 8, child: Text(widget.channel.name))
             ],
           )),
-    );
+    ));
   }
 }
