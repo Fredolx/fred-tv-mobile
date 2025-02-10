@@ -1,8 +1,11 @@
+import 'package:open_tv/models/media_type.dart';
+import 'package:open_tv/models/view_type.dart';
+
 class Filters {
   String? query;
   List<int> sourceIds;
-  List<int> mediaTypes;
-  int viewType;
+  List<MediaType> mediaTypes;
+  ViewType viewType;
   int page;
   int? seriesId;
   int? groupId;
