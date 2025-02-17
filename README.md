@@ -7,6 +7,7 @@ Open TV for Android and iOS
 - Adding sources ✔️
 - M3U Support ✔️
 - Searching channels ✔️
+- Scroll to load more ✔️
 
-https://github.com/user-attachments/assets/fa80b086-87b0-474d-ac1f-13cf14e79d27
+https://github.com/user-attachments/assets/40def494-26e8-4791-9b0d-372f1247bf96
 
