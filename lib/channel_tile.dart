@@ -1,6 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:open_tv/backend/sql.dart';
 import 'package:open_tv/models/channel.dart';
+import 'package:open_tv/error.dart';
+import 'package:open_tv/models/media_type.dart';
 
 class ChannelTile extends StatefulWidget {
   final Channel channel;
@@ -30,6 +33,16 @@ class _ChannelTileState extends State<ChannelTile> {
     super.dispose();
   }
 
+  void favorite() async {
+    if (widget.channel.mediaType == MediaType.group) return;
+    await Error.tryAsyncNoLoading(() async {
+      await Sql.favoriteChannel(widget.channel.id!, !widget.channel.favorite);
+      setState(() {
+        widget.channel.favorite = !widget.channel.favorite;
+      });
+    }, context);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -37,9 +50,14 @@ class _ChannelTileState extends State<ChannelTile> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
-        color: _focusNode.hasFocus ? Colors.blue.shade100 : Colors.white,
+        color: _focusNode.hasFocus
+            ? Colors.blue.shade100
+            : widget.channel.favorite
+                ? const Color(0xFFFFD700)
+                : Colors.white,
         child: InkWell(
           focusNode: _focusNode,
+          onLongPress: favorite,
           onTap: () => print("Selected ${widget.channel.name}"),
           borderRadius: BorderRadius.circular(10),
           child: Padding(

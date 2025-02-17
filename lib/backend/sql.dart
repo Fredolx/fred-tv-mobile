@@ -268,4 +268,13 @@ class Sql {
     ''');
     return result?.columnAt(0) == 1;
   }
+
+  static Future<void> favoriteChannel(int channelId, bool favorite) async {
+    var db = await DbFactory.db;
+    await db.execute('''
+      UPDATE channels
+      SET favorite = ?
+      WHERE id = ?
+    ''', [favorite ? 1 : 0, channelId]);
+  }
 }
