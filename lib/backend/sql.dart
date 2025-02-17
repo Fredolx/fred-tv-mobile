@@ -202,7 +202,17 @@ class Sql {
     params.add(offset);
     params.add(pageSize);
     var results = await db.getAll(sqlQuery, params);
-    return results.map(rowToChannel).toList();
+    return results.map(groupChannelToRow).toList();
+  }
+
+  static Channel groupChannelToRow(Row row) {
+    return Channel(
+        id: row.columnAt(0),
+        name: row.columnAt(1),
+        image: row.columnAt(2),
+        sourceId: row.columnAt(3),
+        favorite: false,
+        mediaType: MediaType.group);
   }
 
   static Future<bool> sourceNameExists(String? name) async {

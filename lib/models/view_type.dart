@@ -1,1 +1,1 @@
-enum ViewType { all, favorites, categories, settings }
+enum ViewType { all, categories, favorites, settings }
