@@ -111,6 +111,15 @@ class _HomeState extends State<Home> {
                           borderRadius: BorderRadius.circular(8),
                           borderSide: BorderSide.none,
                         ),
+                        suffixIcon: IconButton(
+                            onPressed: () {
+                              filters.useKeywords = !filters.useKeywords;
+                              filters.page = 1;
+                              load(false);
+                            },
+                            icon: Icon(filters.useKeywords
+                                ? Icons.label
+                                : Icons.label_outline)),
                         filled: true,
                         fillColor:
                             Colors.grey[200], // Light background for contrast
