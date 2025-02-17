@@ -6,7 +6,7 @@ class Channel {
   int? groupId;
   String? group;
   String? image;
-  String url;
+  String? url;
   MediaType mediaType;
   int sourceId;
   bool favorite;
@@ -19,7 +19,7 @@ class Channel {
     this.group,
     this.groupId,
     this.image,
-    required this.url,
+    this.url,
     required this.mediaType,
     required this.sourceId,
     required this.favorite,
