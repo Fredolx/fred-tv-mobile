@@ -62,6 +62,7 @@ class _HomeState extends State<Home> {
     } else {
       filters.query = null;
       searchController.clear();
+      _scrollController.jumpTo(0);
       load(false);
     }
   }
