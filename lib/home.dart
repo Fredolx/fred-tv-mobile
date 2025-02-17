@@ -31,9 +31,13 @@ class _HomeState extends State<Home> {
   bool searchMode = false;
   final FocusNode _focusNode = FocusNode();
   TextEditingController searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  bool isLoading = false;
+
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_scrollListener);
     initializeAsync();
   }
 
@@ -58,11 +62,16 @@ class _HomeState extends State<Home> {
     } else {
       filters.query = null;
       searchController.clear();
-      reload();
+      load(false);
     }
   }
 
   Future<void> load([bool more = false]) async {
+    if (more) {
+      filters.page++;
+    } else {
+      filters.page = 1;
+    }
     Error.tryAsyncNoLoading(() async {
       List<Channel> channels = await Sql.search(filters);
       if (!more) {
@@ -81,18 +90,30 @@ class _HomeState extends State<Home> {
   @override
   void dispose() {
     _focusNode.dispose();
+    _scrollController.dispose();
     _debounce?.cancel();
     super.dispose();
   }
 
-  reload() {
-    filters.page = 1;
+  void navbarChanged(ViewType view) {
+    filters.viewType = view;
+    _scrollController.jumpTo(0);
     load(false);
   }
 
-  void navbarChanged(ViewType view) {
-    filters.viewType = view;
-    reload();
+  void _scrollListener() async {
+    if (_scrollController.position.pixels ==
+            _scrollController.position.maxScrollExtent &&
+        !isLoading &&
+        !reachedMax) {
+      setState(() {
+        isLoading = true;
+      });
+      await load(true);
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   @override
@@ -129,7 +150,7 @@ class _HomeState extends State<Home> {
                         suffixIcon: IconButton(
                             onPressed: () {
                               filters.useKeywords = !filters.useKeywords;
-                              reload();
+                              load(false);
                             },
                             icon: Icon(filters.useKeywords
                                 ? Icons.label
@@ -161,6 +182,7 @@ class _HomeState extends State<Home> {
                     .clamp(1, 4)
                     .toInt();
                 return GridView.builder(
+                  controller: _scrollController,
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: crossAxisCount,
                     crossAxisSpacing: 8,
