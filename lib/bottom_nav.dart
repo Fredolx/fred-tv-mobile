@@ -1,17 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:open_tv/models/view_type.dart';
 
 class BottomNav extends StatefulWidget {
+  final Function(ViewType) updateViewMode;
+
+  const BottomNav({super.key, required this.updateViewMode});
+
   @override
   State<BottomNav> createState() => _BottomNavState();
 }
 
 class _BottomNavState extends State<BottomNav> {
   int _selectedIndex = 0;
-
   void onBarTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
+    if (_selectedIndex == ViewType.settings.index) {
+      return;
+    }
+    widget.updateViewMode(ViewType.values[_selectedIndex]);
   }
 
   @override
