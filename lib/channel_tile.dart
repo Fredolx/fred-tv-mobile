@@ -4,6 +4,7 @@ import 'package:open_tv/backend/sql.dart';
 import 'package:open_tv/models/channel.dart';
 import 'package:open_tv/error.dart';
 import 'package:open_tv/models/media_type.dart';
+import 'package:open_tv/player.dart';
 
 class ChannelTile extends StatefulWidget {
   final Channel channel;
@@ -58,7 +59,10 @@ class _ChannelTileState extends State<ChannelTile> {
         child: InkWell(
           focusNode: _focusNode,
           onLongPress: favorite,
-          onTap: () => print("Selected ${widget.channel.name}"),
+          onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (_) => Player(channel: widget.channel))),
           borderRadius: BorderRadius.circular(10),
           child: Padding(
               padding: const EdgeInsets.all(10),

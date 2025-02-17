@@ -48,6 +48,8 @@ dependencies:
   flutter_svg: ^2.0.17
   loader_overlay: ^4.0.4+1
   flutter_spinkit: ^5.2.1
+  video_player: ^2.9.2
+  chewie: ^1.10.0
 
 dev_dependencies:
   flutter_test:
