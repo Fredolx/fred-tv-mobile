@@ -30,7 +30,7 @@ class _HomeState extends State<Home> {
   List<Channel> channels = [];
   bool searchMode = false;
   final FocusNode _focusNode = FocusNode();
-
+  TextEditingController searchController = TextEditingController();
   @override
   void initState() {
     super.initState();
@@ -55,6 +55,10 @@ class _HomeState extends State<Home> {
     if (searchMode) {
       WidgetsBinding.instance.addPostFrameCallback(
           (_) => FocusScope.of(context).requestFocus(_focusNode));
+    } else {
+      filters.query = null;
+      searchController.clear();
+      reload();
     }
   }
 
@@ -105,6 +109,7 @@ class _HomeState extends State<Home> {
                   children: [
                     Expanded(
                         child: TextField(
+                      controller: searchController,
                       focusNode: _focusNode,
                       onChanged: (query) {
                         _debounce?.cancel();
