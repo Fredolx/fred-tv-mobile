@@ -81,12 +81,22 @@ class _HomeState extends State<Home> {
     super.dispose();
   }
 
+  reload() {
+    filters.page = 1;
+    load(false);
+  }
+
+  void navbarChanged(ViewType view) {
+    filters.viewType = view;
+    reload();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         body: Column(children: [
-          Visibility(
-              visible: searchMode,
+          Offstage(
+              offstage: !searchMode,
               child: Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -114,8 +124,7 @@ class _HomeState extends State<Home> {
                         suffixIcon: IconButton(
                             onPressed: () {
                               filters.useKeywords = !filters.useKeywords;
-                              filters.page = 1;
-                              load(false);
+                              reload();
                             },
                             icon: Icon(filters.useKeywords
                                 ? Icons.label
@@ -165,7 +174,9 @@ class _HomeState extends State<Home> {
             ),
           ))
         ]),
-        bottomNavigationBar: BottomNav(),
+        bottomNavigationBar: BottomNav(
+          updateViewMode: navbarChanged,
+        ),
         floatingActionButton: Visibility(
           visible: !searchMode,
           child: FloatingActionButton(
