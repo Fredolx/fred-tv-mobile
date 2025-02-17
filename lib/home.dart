@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:open_tv/backend/sql.dart';
 import 'package:open_tv/bottom_nav.dart';
@@ -16,6 +18,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  Timer? _debounce;
   Filters filters = Filters(
       sourceIds: [],
       mediaTypes: [MediaType.livestream, MediaType.movie, MediaType.serie],
@@ -25,6 +28,9 @@ class _HomeState extends State<Home> {
   bool reachedMax = false;
   final int pageSize = 36;
   List<Channel> channels = [];
+  bool searchMode = false;
+  final FocusNode _focusNode = FocusNode();
+
   @override
   void initState() {
     super.initState();
@@ -42,7 +48,15 @@ class _HomeState extends State<Home> {
     load(true);
   }
 
-  search() {}
+  toggleSearch() {
+    setState(() {
+      searchMode = !searchMode;
+    });
+    if (searchMode) {
+      WidgetsBinding.instance.addPostFrameCallback(
+          (_) => FocusScope.of(context).requestFocus(_focusNode));
+    }
+  }
 
   Future<void> load([bool more = false]) async {
     Error.tryAsyncNoLoading(() async {
@@ -61,42 +75,95 @@ class _HomeState extends State<Home> {
   }
 
   @override
+  void dispose() {
+    _focusNode.dispose();
+    _debounce?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            double cardWidth = 150;
-            double cardHeight = 60;
-            int crossAxisCount = (constraints.maxWidth / cardWidth)
-                .floor()
-                .clamp(1, 4)
-                .toInt();
-            return GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: crossAxisCount,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 12,
-                childAspectRatio: cardWidth / cardHeight,
-              ),
-              itemCount: channels.length,
-              itemBuilder: (context, index) {
-                final channel = channels[index];
-                return ChannelTile(
-                  channel: channel,
+        body: Column(children: [
+          Visibility(
+              visible: searchMode,
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                color: Colors.white, // Background color
+                child: Row(
+                  children: [
+                    Expanded(
+                        child: TextField(
+                      focusNode: _focusNode,
+                      onChanged: (query) {
+                        _debounce?.cancel();
+                        _debounce =
+                            Timer(const Duration(milliseconds: 500), () {
+                          filters.query = query;
+                          load(false);
+                        });
+                      },
+                      decoration: InputDecoration(
+                        hintText: "Search...",
+                        prefixIcon: const Icon(Icons.search),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide.none,
+                        ),
+                        filled: true,
+                        fillColor:
+                            Colors.grey[200], // Light background for contrast
+                        contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                      ),
+                    )),
+                    const SizedBox(width: 10),
+                    SizedBox(
+                        width: 40,
+                        child: IconButton(
+                            onPressed: toggleSearch,
+                            icon: const Icon(Icons.close, color: Colors.black)))
+                  ],
+                ),
+              )),
+          Expanded(
+              child: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                double cardWidth = 150;
+                double cardHeight = 60;
+                int crossAxisCount = (constraints.maxWidth / cardWidth)
+                    .floor()
+                    .clamp(1, 4)
+                    .toInt();
+                return GridView.builder(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: crossAxisCount,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 12,
+                    childAspectRatio: cardWidth / cardHeight,
+                  ),
+                  itemCount: channels.length,
+                  itemBuilder: (context, index) {
+                    final channel = channels[index];
+                    return ChannelTile(
+                      channel: channel,
+                    );
+                  },
                 );
               },
-            );
-          },
-        ),
-      ),
-      bottomNavigationBar: BottomNav(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: search,
-        tooltip: 'Search',
-        child: const Icon(Icons.search),
-      ),
-    );
+            ),
+          ))
+        ]),
+        bottomNavigationBar: BottomNav(),
+        floatingActionButton: Visibility(
+          visible: !searchMode,
+          child: FloatingActionButton(
+            onPressed: toggleSearch,
+            tooltip: 'Search',
+            child: const Icon(Icons.search),
+          ),
+        ));
   }
 }
