@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:open_tv/backend/sql.dart';
 import 'package:open_tv/bottom_nav.dart';
 import 'package:open_tv/channel_tile.dart';
@@ -12,8 +11,8 @@ import 'package:open_tv/models/view_type.dart';
 import 'package:open_tv/error.dart';
 
 class Home extends StatefulWidget {
-  const Home({super.key});
-
+  final ViewType startingView;
+  const Home({super.key, this.startingView = ViewType.all});
   @override
   State<Home> createState() => _HomeState();
 }
