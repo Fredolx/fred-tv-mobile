@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:open_tv/backend/db_factory.dart';
 import 'package:open_tv/models/channel.dart';
 import 'package:open_tv/models/channel_http_headers.dart';
@@ -277,4 +279,41 @@ class Sql {
       WHERE id = ?
     ''', [favorite ? 1 : 0, channelId]);
   }
+
+  static Future<HashMap<String, String>> getSettings() async {
+    var db = await DbFactory.db;
+    var results = await db.getAll('''SELECT key, value FROM Settings''');
+    return HashMap.fromEntries(
+        results.map((f) => MapEntry(f.columnAt(0), f.columnAt(1))));
+  }
+
+  static Future<void> updateSettings(HashMap<String, String> settings) async {
+    var db = await DbFactory.db;
+    await db.writeTransaction((tx) async {
+      for (var entry in settings.entries) {
+        await tx.execute('''
+        INSERT INTO Settings (key, value)
+        VALUES (?, ?)
+        ON CONFLICT(key) DO UPDATE SET value = ?''',
+            [entry.key, entry.value, entry.value]);
+      }
+    });
+  }
+
+//   pub fn update_settings(map: HashMap<String, String>) -> Result<()> {
+//     let mut sql: PooledConnection<SqliteConnectionManager> = get_conn()?;
+//     let tx = sql.transaction()?;
+//     for (key, value) in map {
+//         tx.execute(
+//             r#"
+//             INSERT INTO Settings (key, value)
+//             VALUES (?1, ?2)
+//             ON CONFLICT(key) DO UPDATE SET value = ?2
+//             "#,
+//             params![key, value],
+//         )?;
+//     }
+//     tx.commit()?;
+//     Ok(())
+// }
 }

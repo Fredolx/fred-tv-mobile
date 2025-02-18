@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:open_tv/models/view_type.dart';
+import 'package:open_tv/settings_view.dart';
 
 class BottomNav extends StatefulWidget {
   final Function(ViewType) updateViewMode;
-
-  const BottomNav({super.key, required this.updateViewMode});
+  final ViewType startingView;
+  const BottomNav(
+      {super.key,
+      required this.updateViewMode,
+      this.startingView = ViewType.all});
 
   @override
   State<BottomNav> createState() => _BottomNavState();
@@ -12,11 +16,27 @@ class BottomNav extends StatefulWidget {
 
 class _BottomNavState extends State<BottomNav> {
   int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.startingView.index;
+  }
+
   void onBarTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
     if (_selectedIndex == ViewType.settings.index) {
+      Navigator.push(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (a, b, c) => SettingsView(),
+            transitionDuration: Duration.zero,
+            reverseTransitionDuration: Duration.zero,
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) => child,
+          ));
       return;
     }
     widget.updateViewMode(ViewType.values[_selectedIndex]);
