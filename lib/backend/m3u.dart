@@ -19,7 +19,7 @@ final httpOriginRegex = RegExp(r'http-origin=(.+)');
 final httpReferrerRegex = RegExp(r'http-referrer=(.+)');
 final httpUserAgentRegex = RegExp(r'http-user-agent=(.+)');
 
-Future<void> processM3U(Source source, [String? path]) async {
+Future<void> processM3U(Source source, bool wipe, [String? path]) async {
   path ??= source.url;
   var file = File(path!)
       .openRead()
@@ -28,6 +28,9 @@ Future<void> processM3U(Source source, [String? path]) async {
   List<Future<void> Function(SqliteWriteContext, Map<String, String>)>
       statements = [];
   statements.add(Sql.getOrCreateSourceByName(source));
+  if (wipe) {
+    statements.add(Sql.wipeSource(source.id!));
+  }
   String? lastLine;
   String? channelLine;
   ChannelHttpHeaders? headers;
@@ -120,9 +123,9 @@ bool setChannelHeaders(
   return false;
 }
 
-Future<void> processM3UUrl(Source source) async {
+Future<void> processM3UUrl(Source source, bool wipe) async {
   var path = await downloadM3U(source.url!);
-  await processM3U(source, path);
+  await processM3U(source, wipe, path);
 }
 
 Future<String> downloadM3U(String urlStr) async {

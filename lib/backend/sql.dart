@@ -241,9 +241,10 @@ class Sql {
         id: row.columnAt(0),
         name: row.columnAt(1),
         sourceType: SourceType.values[row.columnAt(2)],
-        username: row.columnAt(3),
-        password: row.columnAt(4),
-        enabled: row.columnAt(5));
+        url: row.columnAt(3),
+        username: row.columnAt(4),
+        password: row.columnAt(5),
+        enabled: row.columnAt(6) == 1);
   }
 
   static Future<List<IdData<SourceType>>> getEnabledSourcesMinimal() async {
@@ -300,20 +301,36 @@ class Sql {
     });
   }
 
-//   pub fn update_settings(map: HashMap<String, String>) -> Result<()> {
-//     let mut sql: PooledConnection<SqliteConnectionManager> = get_conn()?;
-//     let tx = sql.transaction()?;
-//     for (key, value) in map {
-//         tx.execute(
-//             r#"
-//             INSERT INTO Settings (key, value)
-//             VALUES (?1, ?2)
-//             ON CONFLICT(key) DO UPDATE SET value = ?2
-//             "#,
-//             params![key, value],
-//         )?;
-//     }
-//     tx.commit()?;
-//     Ok(())
-// }
+  static deleteSource(int sourceId) async {
+    var db = await DbFactory.db;
+    await db.writeTransaction((tx) async {
+      await tx.execute("DELETE FROM channels WHERE source_id = ?", [sourceId]);
+      await tx.execute("DELETE FROM groups WHERE source_id = ?", [sourceId]);
+      await tx.execute("DELETE FROM sources WHERE id = ?", [sourceId]);
+    });
+  }
+
+  static Future<void> Function(SqliteWriteContext, Map<String, String>)
+      wipeSource(int sourceId) {
+    return (SqliteWriteContext tx, Map<String, String> memory) async {
+      await tx.execute('''
+        DELETE FROM channels 
+        WHERE source_id = ? 
+        AND favorite = 0
+      ''', [sourceId]);
+      await tx.execute('''
+        DELETE FROM groups
+        WHERE source_id = ?
+      ''', [sourceId]);
+    };
+  }
+
+  static updateSource(Source source) async {
+    var db = await DbFactory.db;
+    await db.execute('''
+      UPDATE sources
+      SET url = ?, username = ?, password = ?
+      WHERE id = ?
+    ''', [source.url, source.username, source.password, source.id]);
+  }
 }
