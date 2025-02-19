@@ -75,6 +75,8 @@ class _ChannelTileState extends State<ChannelTile> {
                           child: widget.channel.image != null
                               ? CachedNetworkImage(
                                   fit: BoxFit.contain,
+                                  errorWidget: (_, __, ___) =>
+                                      Image.asset("assets/icon.png"),
                                   imageUrl: widget.channel.image!,
                                 )
                               : Image.asset(
