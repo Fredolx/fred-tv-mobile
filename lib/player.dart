@@ -39,6 +39,7 @@ class _PlayerState extends State<Player> {
         body: Chewie(
           controller: ChewieController(
               videoPlayerController: _controller,
+              allowedScreenSleep: false,
               looping: true,
               isLive: widget.channel.mediaType == MediaType.livestream,
               allowPlaybackSpeedChanging: false,
