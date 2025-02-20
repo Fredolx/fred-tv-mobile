@@ -29,14 +29,16 @@ class _SettingsState extends State<SettingsView> {
   @override
   void initState() {
     super.initState();
-    SettingsService.getSettings().then((val) {
-      setState(() {
-        settings = val;
-      });
+    initAsync();
+  }
+
+  initAsync() async {
+    var results =
+        await Future.wait([SettingsService.getSettings(), Sql.getSources()]);
+    setState(() {
+      settings = results[0] as Settings;
+      sources = results[1] as List<Source>;
     });
-    Sql.getSources().then((data) => setState(() {
-          sources = data;
-        }));
   }
 
   updateView(ViewType view) {
@@ -277,7 +279,7 @@ class _SettingsState extends State<SettingsView> {
                       subtitle: Text(viewTypeToString(settings.defaultView)),
                       onTap: () async => await _showDefaultViewDialog(context)),
                   ListTile(
-                    title: const Text("Update sources on start"),
+                    title: const Text("Refresh sources on start"),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -287,6 +289,7 @@ class _SettingsState extends State<SettingsView> {
                             setState(() {
                               settings.refreshOnStart = value;
                             });
+                            updateSettings();
                           },
                         ),
                       ],

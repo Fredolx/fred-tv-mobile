@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:open_tv/backend/sql.dart';
+import 'package:open_tv/backend/utils.dart';
 import 'package:open_tv/bottom_nav.dart';
 import 'package:open_tv/channel_tile.dart';
 import 'package:open_tv/models/channel.dart';
@@ -35,6 +36,7 @@ class _HomeState extends State<Home> {
   TextEditingController searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   bool isLoading = false;
+  bool blockSettings = false;
 
   @override
   void initState() {
@@ -49,7 +51,20 @@ class _HomeState extends State<Home> {
   Future<void> initializeAsync() async {
     final sources = await Sql.getEnabledSourcesMinimal();
     filters.sourceIds = sources.map((x) => x.id).toList();
+    if (widget.settings?.refreshOnStart == true) {
+      refreshOnStart();
+    }
     await load();
+  }
+
+  refreshOnStart() async {
+    blockSettings = true;
+    await Error.tryAsyncNoLoading(() async {
+      await Utils.refreshAllSources();
+    }, context, true, "Successfully refreshed all sources");
+    setState(() {
+      blockSettings = false;
+    });
   }
 
   Future<void> loadMore() async {
@@ -221,6 +236,7 @@ class _HomeState extends State<Home> {
             bottomNavigationBar: BottomNav(
               updateViewMode: navbarChanged,
               startingView: filters.viewType,
+              blockSettings: blockSettings,
             ),
             floatingActionButton: Visibility(
               visible: !searchMode,
