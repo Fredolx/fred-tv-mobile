@@ -304,11 +304,24 @@ class _SettingsState extends State<SettingsView> {
                     ),
                   ),
                   const Divider(),
-                  const Padding(
-                      padding: EdgeInsets.only(left: 10),
-                      child: Text('Sources',
-                          style: TextStyle(
-                              fontSize: 30, fontWeight: FontWeight.bold))),
+                  Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Padding(
+                            padding: EdgeInsets.only(left: 10),
+                            child: Text('Sources',
+                                style: TextStyle(
+                                    fontSize: 30,
+                                    fontWeight: FontWeight.bold))),
+                        IconButton(
+                            onPressed: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const Setup(
+                                          showAppBar: true,
+                                        ))),
+                            icon: const Icon(Icons.add))
+                      ]),
                   const SizedBox(height: 10),
                   ...sources.map(getSource)
                 ],
