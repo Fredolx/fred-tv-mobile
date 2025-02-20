@@ -22,9 +22,16 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
         title: 'Open TV',
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-          useMaterial3: true,
+          useMaterial3: true, // Enables Material You
+          colorSchemeSeed: Colors.blue, // Uses dynamic color if supported
+          brightness: Brightness.light,
         ),
+        darkTheme: ThemeData(
+          useMaterial3: true,
+          colorSchemeSeed: Colors.blue,
+          brightness: Brightness.dark,
+        ),
+        themeMode: ThemeMode.system,
         debugShowCheckedModeBanner: false,
         home: skipSetup ? const Home() : const Setup());
   }
