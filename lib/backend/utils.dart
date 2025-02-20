@@ -40,4 +40,11 @@ class Utils {
         break;
     }
   }
+
+  static refreshAllSources() async {
+    var sources = await Sql.getSources();
+    for (var source in sources) {
+      await refreshSource(source);
+    }
+  }
 }

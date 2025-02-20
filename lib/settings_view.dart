@@ -313,14 +313,22 @@ class _SettingsState extends State<SettingsView> {
                                 style: TextStyle(
                                     fontSize: 30,
                                     fontWeight: FontWeight.bold))),
-                        IconButton(
-                            onPressed: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const Setup(
-                                          showAppBar: true,
-                                        ))),
-                            icon: const Icon(Icons.add))
+                        Row(children: [
+                          IconButton(
+                              onPressed: () async => await Error.tryAsync(
+                                  () async => await Utils.refreshAllSources(),
+                                  context,
+                                  "Successfully refreshed all sources"),
+                              icon: const Icon(Icons.refresh)),
+                          IconButton(
+                              onPressed: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => const Setup(
+                                            showAppBar: true,
+                                          ))),
+                              icon: const Icon(Icons.add))
+                        ])
                       ]),
                   const SizedBox(height: 10),
                   ...sources.map(getSource)
