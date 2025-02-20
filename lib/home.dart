@@ -7,12 +7,14 @@ import 'package:open_tv/channel_tile.dart';
 import 'package:open_tv/models/channel.dart';
 import 'package:open_tv/models/filters.dart';
 import 'package:open_tv/models/media_type.dart';
+import 'package:open_tv/models/settings.dart';
 import 'package:open_tv/models/view_type.dart';
 import 'package:open_tv/error.dart';
 
 class Home extends StatefulWidget {
+  final Settings? settings;
   final ViewType startingView;
-  const Home({super.key, this.startingView = ViewType.all});
+  const Home({super.key, this.startingView = ViewType.all, this.settings});
   @override
   State<Home> createState() => _HomeState();
 }
@@ -38,6 +40,9 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     _scrollController.addListener(_scrollListener);
+    if (widget.settings != null) {
+      filters.viewType = widget.settings!.defaultView;
+    }
     initializeAsync();
   }
 
@@ -215,6 +220,7 @@ class _HomeState extends State<Home> {
             ]),
             bottomNavigationBar: BottomNav(
               updateViewMode: navbarChanged,
+              startingView: filters.viewType,
             ),
             floatingActionButton: Visibility(
               visible: !searchMode,
