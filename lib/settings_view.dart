@@ -173,21 +173,10 @@ class _SettingsState extends State<SettingsView> {
   }
 
   Widget getSource(Source source) {
-    return Container(
+    return Card(
         margin: const EdgeInsets.symmetric(
             horizontal: 10, vertical: 5), // Spacing around the tile
-        decoration: BoxDecoration(
-          color: Colors.white, // Light grey background
-          borderRadius: BorderRadius.circular(12), // Rounded corners
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.3),
-              blurRadius: 5,
-              spreadRadius: 1,
-              offset: const Offset(0, 5), // Subtle shadow below
-            ),
-          ],
-        ),
+        elevation: 5,
         child: ListTile(
           contentPadding: const EdgeInsets.only(left: 20),
           title: Text(source.name),
