@@ -7,7 +7,6 @@ import 'package:video_player/video_player.dart';
 class Player extends StatefulWidget {
   final Channel channel;
   const Player({super.key, required this.channel});
-
   @override
   State<StatefulWidget> createState() => _PlayerState();
 }
@@ -21,7 +20,6 @@ class _PlayerState extends State<Player> {
     _controller =
         VideoPlayerController.networkUrl(Uri.parse(widget.channel.url!))
           ..initialize().then((_) {
-            // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
             setState(() {});
           });
   }
@@ -38,19 +36,15 @@ class _PlayerState extends State<Player> {
         backgroundColor: Colors.black,
         body: Chewie(
           controller: ChewieController(
-              videoPlayerController: _controller,
-              allowedScreenSleep: false,
-              looping: true,
-              isLive: widget.channel.mediaType == MediaType.livestream,
-              allowPlaybackSpeedChanging: false,
-              additionalOptions: (context) => [
-                    OptionItem(
-                      onTap: (_) => debugPrint('My option works!'),
-                      iconData: Icons.chat,
-                      title: 'My localized title',
-                    )
-                  ],
-              autoPlay: true),
+            videoPlayerController: _controller,
+            fullScreenByDefault: true,
+            allowedScreenSleep: false,
+            looping: true,
+            isLive: widget.channel.mediaType == MediaType.livestream,
+            allowPlaybackSpeedChanging: false,
+            playbackSpeeds: [1],
+            autoPlay: true,
+          ),
         ));
   }
 }
