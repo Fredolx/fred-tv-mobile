@@ -134,7 +134,9 @@ class _HomeState extends State<Home> {
                   child: Container(
                     padding:
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    color: Colors.white, // Background color
+                    color: Theme.of(context)
+                        .colorScheme
+                        .surfaceContainer, // Background color
                     child: Row(
                       children: [
                         Expanded(
@@ -164,9 +166,7 @@ class _HomeState extends State<Home> {
                                 icon: Icon(filters.useKeywords
                                     ? Icons.label
                                     : Icons.label_outline)),
-                            filled: true,
-                            fillColor: Colors
-                                .grey[200], // Light background for contrast
+                            filled: true, // Light background for contrast
                             contentPadding:
                                 const EdgeInsets.symmetric(vertical: 0),
                           ),
@@ -176,8 +176,9 @@ class _HomeState extends State<Home> {
                             width: 40,
                             child: IconButton(
                                 onPressed: toggleSearch,
-                                icon: const Icon(Icons.close,
-                                    color: Colors.black)))
+                                icon: const Icon(
+                                  Icons.close,
+                                )))
                       ],
                     ),
                   )),
