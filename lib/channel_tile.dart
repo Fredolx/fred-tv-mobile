@@ -51,11 +51,6 @@ class _ChannelTileState extends State<ChannelTile> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
-        color: _focusNode.hasFocus
-            ? Colors.blue.shade100
-            : widget.channel.favorite
-                ? const Color(0xFFFFD700)
-                : Colors.white,
         child: InkWell(
           focusNode: _focusNode,
           onLongPress: favorite,
