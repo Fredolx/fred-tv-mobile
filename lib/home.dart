@@ -44,6 +44,16 @@ class _HomeState extends State<Home> {
     _scrollController.addListener(_scrollListener);
     if (widget.settings != null) {
       filters.viewType = widget.settings!.defaultView;
+      filters.mediaTypes.clear();
+      if (widget.settings?.showLivestreams == true) {
+        filters.mediaTypes.add(MediaType.livestream);
+      }
+      if (widget.settings?.showMovies == true) {
+        filters.mediaTypes.add(MediaType.movie);
+      }
+      if (widget.settings?.showSeries == true) {
+        filters.mediaTypes.add(MediaType.serie);
+      }
     }
     initializeAsync();
   }

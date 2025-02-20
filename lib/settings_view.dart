@@ -46,7 +46,15 @@ class _SettingsState extends State<SettingsView> {
       Navigator.push(
           context,
           PageRouteBuilder(
-            pageBuilder: (_, __, ___) => Home(startingView: view),
+            pageBuilder: (_, __, ___) => Home(
+              startingView: view,
+              settings: Settings(
+                  defaultView: settings.defaultView,
+                  refreshOnStart: false,
+                  showLivestreams: settings.showLivestreams,
+                  showMovies: settings.showMovies,
+                  showSeries: settings.showSeries),
+            ),
             transitionDuration: Duration.zero,
             reverseTransitionDuration: Duration.zero,
             transitionsBuilder:
@@ -288,6 +296,57 @@ class _SettingsState extends State<SettingsView> {
                           onChanged: (bool value) {
                             setState(() {
                               settings.refreshOnStart = value;
+                            });
+                            updateSettings();
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  ListTile(
+                    title: const Text("Show livestreams"),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Switch(
+                          value: settings.showLivestreams,
+                          onChanged: (bool value) {
+                            setState(() {
+                              settings.showLivestreams = value;
+                            });
+                            updateSettings();
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  ListTile(
+                    title: const Text("Show movies"),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Switch(
+                          value: settings.showMovies,
+                          onChanged: (bool value) {
+                            setState(() {
+                              settings.showMovies = value;
+                            });
+                            updateSettings();
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  ListTile(
+                    title: const Text("Show series"),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Switch(
+                          value: settings.showSeries,
+                          onChanged: (bool value) {
+                            setState(() {
+                              settings.showSeries = value;
                             });
                             updateSettings();
                           },
