@@ -51,6 +51,9 @@ class _ChannelTileState extends State<ChannelTile> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
+        color: widget.channel.favorite
+            ? Theme.of(context).colorScheme.surfaceContainerHighest
+            : Theme.of(context).colorScheme.surfaceContainer,
         child: InkWell(
           focusNode: _focusNode,
           onLongPress: favorite,
