@@ -99,7 +99,8 @@ class Error {
   static Future<Result<T>> tryAsync<T>(
       Future<T?> Function() fn, BuildContext context,
       [String? successMessage = "Action completed successfully",
-      bool useLoading = true]) async {
+      bool useLoading = true,
+      bool useSuccess = true]) async {
     var success = false;
     T? result;
     if (useLoading && context.mounted) {
@@ -107,7 +108,7 @@ class Error {
     }
     try {
       result = await fn();
-      if (useLoading) showSuccess(context, successMessage!);
+      if (useSuccess) showSuccess(context, successMessage!);
       success = true;
     } catch (e, stackTrace) {
       final error = "${e.toString()}\n${stackTrace.toString()}";
@@ -120,7 +121,8 @@ class Error {
   }
 
   static Future<Result<T>> tryAsyncNoLoading<T>(
-      Future<T?> Function() fn, BuildContext context) async {
-    return await tryAsync(fn, context, null, false);
+      Future<T?> Function() fn, BuildContext context,
+      [bool useSuccess = false, String? successMessage]) async {
+    return await tryAsync(fn, context, successMessage, false, useSuccess);
   }
 }
