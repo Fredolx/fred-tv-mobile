@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:open_tv/backend/m3u.dart';
 import 'package:open_tv/backend/sql.dart';
 import 'package:open_tv/backend/xtream.dart';
@@ -7,7 +6,6 @@ import 'package:open_tv/models/source.dart';
 import 'package:open_tv/models/source_type.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:sqlite_async/sqlite_async.dart';
 
 class Utils {
   static String? _appDir;

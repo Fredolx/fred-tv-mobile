@@ -11,7 +11,7 @@ import 'package:sqlite_async/sqlite_async.dart';
 import 'package:http/http.dart' as http;
 
 final nameRegex = RegExp(r'tvg-name="([^"]*)"');
-final nameRegexAlt = RegExp(r',([^\n\r\t]*)');
+final nameRegexAlt = RegExp(r'^(.*),([^,\n\r\t]*)$');
 final idRegex = RegExp(r'tvg-id="([^"]*)"');
 final logoRegex = RegExp(r'tvg-logo="([^"]*)"');
 final groupRegex = RegExp(r'group-title="([^"]*)"');
@@ -82,12 +82,12 @@ MediaType getMediaType(String url) {
 }
 
 Channel? getChannelFromLines(String l1, String last) {
-  var name = getName(l1);
+  var name = getName(l1)?.trim();
   if (name == null) return null;
   return Channel(
       name: name,
-      group: groupRegex.firstMatch(l1)?[1],
-      image: logoRegex.firstMatch(l1)?[1],
+      group: groupRegex.firstMatch(l1)?[1]?.trim(),
+      image: logoRegex.firstMatch(l1)?[1]?.trim(),
       favorite: false,
       mediaType: getMediaType(last),
       sourceId: -1,
@@ -96,7 +96,7 @@ Channel? getChannelFromLines(String l1, String last) {
 
 String? getName(String l1) {
   var name = nameRegex.firstMatch(l1)?[1];
-  name ??= nameRegexAlt.firstMatch(l1)?[1];
+  name ??= nameRegexAlt.firstMatch(l1)?[2];
   name ??= idRegex.firstMatch(l1)?[1];
   return name;
 }
