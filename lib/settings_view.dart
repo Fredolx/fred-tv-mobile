@@ -47,9 +47,8 @@ class _SettingsState extends State<SettingsView> {
           context,
           PageRouteBuilder(
             pageBuilder: (_, __, ___) => Home(
-              startingView: view,
               settings: Settings(
-                  defaultView: settings.defaultView,
+                  defaultView: view,
                   refreshOnStart: false,
                   showLivestreams: settings.showLivestreams,
                   showMovies: settings.showMovies,
