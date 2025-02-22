@@ -14,8 +14,7 @@ import 'package:open_tv/error.dart';
 
 class Home extends StatefulWidget {
   final Settings? settings;
-  final ViewType startingView;
-  const Home({super.key, this.startingView = ViewType.all, this.settings});
+  const Home({super.key, this.settings});
   @override
   State<Home> createState() => _HomeState();
 }
