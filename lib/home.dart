@@ -36,6 +36,7 @@ class _HomeState extends State<Home> {
   final ScrollController _scrollController = ScrollController();
   bool isLoading = false;
   bool blockSettings = false;
+  String? nodeTitle;
 
   @override
   void initState() {
@@ -103,7 +104,7 @@ class _HomeState extends State<Home> {
     } else {
       filters.page = 1;
     }
-    Error.tryAsyncNoLoading(() async {
+    await Error.tryAsyncNoLoading(() async {
       List<Channel> channels = await Sql.search(filters);
       if (!more) {
         setState(() {
@@ -147,6 +148,23 @@ class _HomeState extends State<Home> {
     }
   }
 
+  removeNode() {
+    filters.groupId = null;
+    filters.seriesId = null;
+    nodeTitle = null;
+    load();
+  }
+
+  setNode(MediaType mediaType, int id, String title) {
+    if (mediaType == MediaType.group) {
+      filters.groupId = id;
+    } else if (mediaType == MediaType.serie) {
+      filters.seriesId = id;
+    }
+    nodeTitle = title;
+    load();
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -157,6 +175,15 @@ class _HomeState extends State<Home> {
           }
         },
         child: Scaffold(
+            appBar: filters.groupId != null || filters.seriesId != null
+                ? AppBar(
+                    title: Text("Viewing $nodeTitle"),
+                    leading: IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: () => removeNode(),
+                    ),
+                  )
+                : null,
             body: Column(children: [
               Offstage(
                   offstage: !searchMode,
@@ -235,6 +262,7 @@ class _HomeState extends State<Home> {
                         final channel = channels[index];
                         return ChannelTile(
                           channel: channel,
+                          updateViewMode: setNode,
                         );
                       },
                     );
