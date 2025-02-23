@@ -165,13 +165,19 @@ class _HomeState extends State<Home> {
     load();
   }
 
+  canPop() {
+    return !searchMode && filters.seriesId == null && filters.groupId == null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
-        canPop: !searchMode,
+        canPop: canPop(),
         onPopInvokedWithResult: (didPop, result) {
           if (searchMode) {
             toggleSearch();
+          } else if (filters.seriesId != null || filters.groupId != null) {
+            removeNode();
           }
         },
         child: Scaffold(
