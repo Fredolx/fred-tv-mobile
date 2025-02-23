@@ -8,11 +8,9 @@ import 'package:open_tv/player.dart';
 
 class ChannelTile extends StatefulWidget {
   final Channel channel;
-
-  const ChannelTile({
-    super.key,
-    required this.channel,
-  });
+  final Function(MediaType, int, String) updateViewMode;
+  const ChannelTile(
+      {super.key, required this.channel, required this.updateViewMode});
 
   @override
   State<ChannelTile> createState() => _ChannelTileState();
@@ -34,7 +32,7 @@ class _ChannelTileState extends State<ChannelTile> {
     super.dispose();
   }
 
-  void favorite() async {
+  favorite() async {
     if (widget.channel.mediaType == MediaType.group) return;
     await Error.tryAsyncNoLoading(() async {
       await Sql.favoriteChannel(widget.channel.id!, !widget.channel.favorite);
@@ -42,6 +40,21 @@ class _ChannelTileState extends State<ChannelTile> {
         widget.channel.favorite = !widget.channel.favorite;
       });
     }, context);
+  }
+
+  play() {
+    if (widget.channel.mediaType == MediaType.group ||
+        widget.channel.mediaType == MediaType.serie) {
+      widget.updateViewMode(
+          widget.channel.mediaType,
+          widget.channel.mediaType == MediaType.group
+              ? widget.channel.id!
+              : int.parse(widget.channel.url!),
+          widget.channel.name);
+    } else {
+      Navigator.push(context,
+          MaterialPageRoute(builder: (_) => Player(channel: widget.channel)));
+    }
   }
 
   @override
@@ -57,10 +70,7 @@ class _ChannelTileState extends State<ChannelTile> {
         child: InkWell(
           focusNode: _focusNode,
           onLongPress: favorite,
-          onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (_) => Player(channel: widget.channel))),
+          onTap: () => play(),
           borderRadius: BorderRadius.circular(10),
           child: Padding(
               padding: const EdgeInsets.all(10),
