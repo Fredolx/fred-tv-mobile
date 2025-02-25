@@ -59,16 +59,23 @@ class _PlayerState extends State<Player> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
-      body: Video(
-          key: key,
-          controller: videoController,
-          onExitFullscreen: () async {
-            Navigator.of(context).pop();
-            Navigator.of(context).pop();
-            SystemChrome.setPreferredOrientations(
-                []); // Allows default device rotation
-          }),
-    );
+        backgroundColor: Colors.black,
+        body: MaterialVideoControlsTheme(
+          normal: const MaterialVideoControlsThemeData(),
+          fullscreen: MaterialVideoControlsThemeData(
+              speedUpOnLongPress: false,
+              seekOnDoubleTap: widget.channel.mediaType != MediaType.livestream,
+              displaySeekBar: widget.channel.mediaType != MediaType.livestream,
+              seekGesture: widget.channel.mediaType != MediaType.livestream),
+          child: Video(
+              key: key,
+              controller: videoController,
+              onExitFullscreen: () async {
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+                SystemChrome.setPreferredOrientations([]);
+                SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+              }),
+        ));
   }
 }

@@ -196,7 +196,8 @@ class _HomeState extends State<Home> {
                     ),
                   )
                 : null,
-            body: Column(children: [
+            body: SafeArea(
+                child: Column(children: [
               Offstage(
                   offstage: !searchMode,
                   child: Container(
@@ -281,7 +282,7 @@ class _HomeState extends State<Home> {
                   },
                 ),
               ))
-            ]),
+            ])),
             bottomNavigationBar: BottomNav(
               updateViewMode: navbarChanged,
               startingView: filters.viewType,
