@@ -270,120 +270,124 @@ class _SettingsState extends State<SettingsView> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Loading(
-          child: Padding(
-              padding: const EdgeInsetsDirectional.symmetric(vertical: 10),
-              child: ListView(
-                children: [
-                  const SizedBox(height: 10),
-                  const Padding(
-                      padding: EdgeInsets.only(left: 10),
-                      child: Text('Settings',
-                          style: TextStyle(
-                              fontSize: 30, fontWeight: FontWeight.bold))),
-                  const SizedBox(height: 10),
-                  ListTile(
-                      title: const Text("Default view"),
-                      subtitle: Text(viewTypeToString(settings.defaultView)),
-                      onTap: () async => await _showDefaultViewDialog(context)),
-                  ListTile(
-                    title: const Text("Refresh sources on start"),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Switch(
-                          value: settings.refreshOnStart,
-                          onChanged: (bool value) {
-                            setState(() {
-                              settings.refreshOnStart = value;
-                            });
-                            updateSettings();
-                          },
+          child: SafeArea(
+              child: Padding(
+                  padding: const EdgeInsetsDirectional.symmetric(vertical: 10),
+                  child: ListView(
+                    children: [
+                      const SizedBox(height: 10),
+                      const Padding(
+                          padding: EdgeInsets.only(left: 10),
+                          child: Text('Settings',
+                              style: TextStyle(
+                                  fontSize: 30, fontWeight: FontWeight.bold))),
+                      const SizedBox(height: 10),
+                      ListTile(
+                          title: const Text("Default view"),
+                          subtitle:
+                              Text(viewTypeToString(settings.defaultView)),
+                          onTap: () async =>
+                              await _showDefaultViewDialog(context)),
+                      ListTile(
+                        title: const Text("Refresh sources on start"),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Switch(
+                              value: settings.refreshOnStart,
+                              onChanged: (bool value) {
+                                setState(() {
+                                  settings.refreshOnStart = value;
+                                });
+                                updateSettings();
+                              },
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
-                  ListTile(
-                    title: const Text("Show livestreams"),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Switch(
-                          value: settings.showLivestreams,
-                          onChanged: (bool value) {
-                            setState(() {
-                              settings.showLivestreams = value;
-                            });
-                            updateSettings();
-                          },
+                      ),
+                      ListTile(
+                        title: const Text("Show livestreams"),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Switch(
+                              value: settings.showLivestreams,
+                              onChanged: (bool value) {
+                                setState(() {
+                                  settings.showLivestreams = value;
+                                });
+                                updateSettings();
+                              },
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
-                  ListTile(
-                    title: const Text("Show movies"),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Switch(
-                          value: settings.showMovies,
-                          onChanged: (bool value) {
-                            setState(() {
-                              settings.showMovies = value;
-                            });
-                            updateSettings();
-                          },
+                      ),
+                      ListTile(
+                        title: const Text("Show movies"),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Switch(
+                              value: settings.showMovies,
+                              onChanged: (bool value) {
+                                setState(() {
+                                  settings.showMovies = value;
+                                });
+                                updateSettings();
+                              },
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
-                  ListTile(
-                    title: const Text("Show series"),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Switch(
-                          value: settings.showSeries,
-                          onChanged: (bool value) {
-                            setState(() {
-                              settings.showSeries = value;
-                            });
-                            updateSettings();
-                          },
+                      ),
+                      ListTile(
+                        title: const Text("Show series"),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Switch(
+                              value: settings.showSeries,
+                              onChanged: (bool value) {
+                                setState(() {
+                                  settings.showSeries = value;
+                                });
+                                updateSettings();
+                              },
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
-                  const Divider(),
-                  Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Padding(
-                            padding: EdgeInsets.only(left: 10),
-                            child: Text('Sources',
-                                style: TextStyle(
-                                    fontSize: 30,
-                                    fontWeight: FontWeight.bold))),
-                        Row(children: [
-                          IconButton(
-                              onPressed: () async => await Error.tryAsync(
-                                  () async => await Utils.refreshAllSources(),
-                                  context,
-                                  "Successfully refreshed all sources"),
-                              icon: const Icon(Icons.refresh)),
-                          IconButton(
-                              onPressed: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => const Setup(
-                                            showAppBar: true,
-                                          ))),
-                              icon: const Icon(Icons.add))
-                        ])
-                      ]),
-                  const SizedBox(height: 10),
-                  ...sources.map(getSource)
-                ],
-              ))),
+                      ),
+                      const Divider(),
+                      Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Padding(
+                                padding: EdgeInsets.only(left: 10),
+                                child: Text('Sources',
+                                    style: TextStyle(
+                                        fontSize: 30,
+                                        fontWeight: FontWeight.bold))),
+                            Row(children: [
+                              IconButton(
+                                  onPressed: () async => await Error.tryAsync(
+                                      () async =>
+                                          await Utils.refreshAllSources(),
+                                      context,
+                                      "Successfully refreshed all sources"),
+                                  icon: const Icon(Icons.refresh)),
+                              IconButton(
+                                  onPressed: () => Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => const Setup(
+                                                showAppBar: true,
+                                              ))),
+                                  icon: const Icon(Icons.add))
+                            ])
+                          ]),
+                      const SizedBox(height: 10),
+                      ...sources.map(getSource)
+                    ],
+                  )))),
       bottomNavigationBar: BottomNav(
         updateViewMode: updateView,
         startingView: ViewType.settings,
