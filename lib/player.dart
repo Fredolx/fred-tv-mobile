@@ -1,8 +1,10 @@
-import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:media_kit_video/media_kit_video.dart';
 import 'package:open_tv/models/channel.dart';
 import 'package:open_tv/models/media_type.dart';
-import 'package:video_player/video_player.dart';
+import 'package:media_kit/media_kit.dart' as mk;
+import 'package:media_kit_video/media_kit_video.dart' as mkvideo;
 
 class Player extends StatefulWidget {
   final Channel channel;
@@ -12,39 +14,61 @@ class Player extends StatefulWidget {
 }
 
 class _PlayerState extends State<Player> {
-  late VideoPlayerController _controller;
-
+  // late BetterPlayerController _controller;
+  late mk.Player player = mk.Player();
+  late mkvideo.VideoController videoController =
+      mkvideo.VideoController(player);
+  late final GlobalKey<VideoState> key = GlobalKey<VideoState>();
   @override
   void initState() {
     super.initState();
-    _controller =
-        VideoPlayerController.networkUrl(Uri.parse(widget.channel.url!))
-          ..initialize().then((_) {
-            setState(() {});
-          });
+    // debugPrint("yoo ${widget.channel.url}");
+    // BetterPlayerDataSource dataSource = BetterPlayerDataSource(
+    //   BetterPlayerDataSourceType.network,
+    //   widget.channel.url!,
+    //   videoFormat: BetterPlayerVideoFormat.hls,
+    //   liveStream: widget.channel.mediaType == MediaType.livestream,
+    // );
+    // _controller = BetterPlayerController(
+    //     const BetterPlayerConfiguration(
+    //         autoPlay: true,
+    //         looping: true,
+    //         autoDispose: true,
+    //         fullScreenByDefault: true,
+    //         controlsConfiguration:
+    //             BetterPlayerControlsConfiguration(enablePlaybackSpeed: false)),
+    //     betterPlayerDataSource: dataSource);
+    mk.MediaKit.ensureInitialized();
+    initAsync();
+  }
+
+  initAsync() async {
+    await player.open(mk.Media(widget.channel.url!));
+    await player.setPlaylistMode(mk.PlaylistMode.single);
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      await key.currentState?.enterFullscreen();
+    });
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    // _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.black,
-        body: Chewie(
-          controller: ChewieController(
-            videoPlayerController: _controller,
-            fullScreenByDefault: true,
-            allowedScreenSleep: false,
-            looping: true,
-            isLive: widget.channel.mediaType == MediaType.livestream,
-            allowPlaybackSpeedChanging: false,
-            playbackSpeeds: [1],
-            autoPlay: true,
-          ),
-        ));
+      backgroundColor: Colors.black,
+      body: Video(
+          key: key,
+          controller: videoController,
+          onExitFullscreen: () async {
+            Navigator.of(context).pop();
+            Navigator.of(context).pop();
+            SystemChrome.setPreferredOrientations(
+                []); // Allows default device rotation
+          }),
+    );
   }
 }

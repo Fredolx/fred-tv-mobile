@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:open_tv/backend/settings_service.dart';
 import 'package:open_tv/backend/sql.dart';
 import 'package:open_tv/home.dart';
@@ -8,7 +7,6 @@ import 'package:open_tv/setup.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   final hasSources = await Sql.hasSources();
   final settings = await SettingsService.getSettings();
   runApp(MyApp(

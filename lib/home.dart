@@ -37,6 +37,7 @@ class _HomeState extends State<Home> {
   bool isLoading = false;
   bool blockSettings = false;
   String? nodeTitle;
+  int? previousScroll;
 
   @override
   void initState() {
@@ -129,6 +130,9 @@ class _HomeState extends State<Home> {
 
   void navbarChanged(ViewType view) {
     filters.viewType = view;
+    filters.groupId = null;
+    filters.seriesId = null;
+    nodeTitle = null;
     _scrollController.jumpTo(0);
     load(false);
   }
@@ -162,6 +166,8 @@ class _HomeState extends State<Home> {
       filters.seriesId = id;
     }
     nodeTitle = title;
+    searchController.clear();
+    _scrollController.jumpTo(0);
     load();
   }
 
