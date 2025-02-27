@@ -13,6 +13,7 @@ import 'package:open_tv/models/source_type.dart';
 import 'package:open_tv/models/view_type.dart';
 import 'package:open_tv/error.dart';
 import 'package:open_tv/setup.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingsView extends StatefulWidget {
   const SettingsView({super.key});
@@ -299,6 +300,15 @@ class _SettingsState extends State<SettingsView> {
                               style: TextStyle(
                                   fontSize: 30, fontWeight: FontWeight.bold))),
                       const SizedBox(height: 10),
+                      ListTile(
+                          title: const Text("Donate"),
+                          subtitle: const Text(
+                              "Open TV needs your help! Consider donating ❤️"),
+                          onTap: () async => await launchUrl(
+                              Uri.parse(
+                                "https://github.com/Fredolx/open-tv-mobile/discussions/1",
+                              ),
+                              mode: LaunchMode.externalApplication)),
                       ListTile(
                           title: const Text("Default view"),
                           subtitle:
