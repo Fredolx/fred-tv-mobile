@@ -14,7 +14,6 @@ class Player extends StatefulWidget {
 }
 
 class _PlayerState extends State<Player> {
-  // late BetterPlayerController _controller;
   late mk.Player player = mk.Player();
   late mkvideo.VideoController videoController =
       mkvideo.VideoController(player);
@@ -22,22 +21,6 @@ class _PlayerState extends State<Player> {
   @override
   void initState() {
     super.initState();
-    // debugPrint("yoo ${widget.channel.url}");
-    // BetterPlayerDataSource dataSource = BetterPlayerDataSource(
-    //   BetterPlayerDataSourceType.network,
-    //   widget.channel.url!,
-    //   videoFormat: BetterPlayerVideoFormat.hls,
-    //   liveStream: widget.channel.mediaType == MediaType.livestream,
-    // );
-    // _controller = BetterPlayerController(
-    //     const BetterPlayerConfiguration(
-    //         autoPlay: true,
-    //         looping: true,
-    //         autoDispose: true,
-    //         fullScreenByDefault: true,
-    //         controlsConfiguration:
-    //             BetterPlayerControlsConfiguration(enablePlaybackSpeed: false)),
-    //     betterPlayerDataSource: dataSource);
     mk.MediaKit.ensureInitialized();
     initAsync();
   }
@@ -52,7 +35,7 @@ class _PlayerState extends State<Player> {
 
   @override
   void dispose() {
-    // _controller.dispose();
+    player.dispose();
     super.dispose();
   }
 
@@ -66,6 +49,7 @@ class _PlayerState extends State<Player> {
               speedUpOnLongPress: false,
               seekOnDoubleTap: widget.channel.mediaType != MediaType.livestream,
               displaySeekBar: widget.channel.mediaType != MediaType.livestream,
+              seekBarMargin: const EdgeInsets.only(bottom: 60),
               seekGesture: widget.channel.mediaType != MediaType.livestream),
           child: Video(
               key: key,

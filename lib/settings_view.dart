@@ -102,12 +102,7 @@ class _SettingsState extends State<SettingsView> {
                                   ? _formKey.currentState?.value["password"]
                                   : null)),
                           context);
-                      await Error.tryAsyncNoLoading(
-                          () async => sources = await Sql.getSources(),
-                          context);
-                      setState(() {
-                        sources;
-                      });
+                      await reloadSources();
                     },
                     child: const Text("Save")),
                 TextButton(
@@ -189,12 +184,23 @@ class _SettingsState extends State<SettingsView> {
     );
   }
 
+  toggleSource(Source source) async {
+    await Error.tryAsyncNoLoading(
+        () async => await Sql.setSourceEnabled(!source.enabled, source.id!),
+        context);
+    await reloadSources();
+  }
+
   Widget getSource(Source source) {
     return Card(
         margin: const EdgeInsets.symmetric(
             horizontal: 10, vertical: 5), // Spacing around the tile
         elevation: 5,
+        color: source.enabled
+            ? Theme.of(context).colorScheme.surfaceContainer
+            : Theme.of(context).colorScheme.surfaceContainerHighest,
         child: ListTile(
+          onLongPress: () => toggleSource(source),
           contentPadding: const EdgeInsets.only(left: 20),
           title: Text(source.name),
           subtitle: Text(getSourceTypeString(source.sourceType)),
@@ -248,12 +254,7 @@ class _SettingsState extends State<SettingsView> {
                           () async => await Sql.deleteSource(source.id!),
                           context,
                           "Successfully deleted source");
-                      await Error.tryAsyncNoLoading(
-                          () async => sources = await Sql.getSources(),
-                          context);
-                      setState(() {
-                        sources;
-                      });
+                      await reloadSources();
                       if (sources.isEmpty) {
                         Navigator.pushReplacement(
                             context,
@@ -267,6 +268,14 @@ class _SettingsState extends State<SettingsView> {
                     child: const Text("Cancel"))
               ],
             ));
+  }
+
+  reloadSources() async {
+    await Error.tryAsyncNoLoading(
+        () async => sources = await Sql.getSources(), context);
+    setState(() {
+      sources;
+    });
   }
 
   updateSettings() async {
