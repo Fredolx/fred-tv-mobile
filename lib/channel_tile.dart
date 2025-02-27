@@ -10,9 +10,13 @@ import 'package:open_tv/player.dart';
 
 class ChannelTile extends StatefulWidget {
   final Channel channel;
+  final BuildContext parentContext;
   final Function(MediaType, int, String) updateViewMode;
   const ChannelTile(
-      {super.key, required this.channel, required this.updateViewMode});
+      {super.key,
+      required this.channel,
+      required this.updateViewMode,
+      required this.parentContext});
 
   @override
   State<ChannelTile> createState() => _ChannelTileState();
@@ -52,7 +56,7 @@ class _ChannelTileState extends State<ChannelTile> {
         await Error.tryAsyncNoLoading(() async {
           await getEpisodes(widget.channel);
           refreshedSeries.add(widget.channel.id!);
-        }, context);
+        }, widget.parentContext);
       }
       widget.updateViewMode(
           widget.channel.mediaType,
