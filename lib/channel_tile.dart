@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:open_tv/backend/sql.dart';
+import 'package:open_tv/backend/xtream.dart';
+import 'package:open_tv/memory.dart';
 import 'package:open_tv/models/channel.dart';
 import 'package:open_tv/error.dart';
 import 'package:open_tv/models/media_type.dart';
@@ -42,9 +44,16 @@ class _ChannelTileState extends State<ChannelTile> {
     }, context);
   }
 
-  play() {
+  play() async {
     if (widget.channel.mediaType == MediaType.group ||
         widget.channel.mediaType == MediaType.serie) {
+      if (widget.channel.mediaType == MediaType.serie &&
+          !refreshedSeries.contains(widget.channel.id)) {
+        await Error.tryAsyncNoLoading(() async {
+          await getEpisodes(widget.channel);
+          refreshedSeries.add(widget.channel.id!);
+        }, context);
+      }
       widget.updateViewMode(
           widget.channel.mediaType,
           widget.channel.mediaType == MediaType.group
@@ -70,7 +79,7 @@ class _ChannelTileState extends State<ChannelTile> {
         child: InkWell(
           focusNode: _focusNode,
           onLongPress: favorite,
-          onTap: () => play(),
+          onTap: () async => await play(),
           borderRadius: BorderRadius.circular(10),
           child: Padding(
               padding: const EdgeInsets.all(10),

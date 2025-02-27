@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:open_tv/backend/sql.dart';
 import 'package:open_tv/backend/utils.dart';
+import 'package:open_tv/backend/xtream.dart';
 import 'package:open_tv/bottom_nav.dart';
 import 'package:open_tv/channel_tile.dart';
 import 'package:open_tv/models/channel.dart';
@@ -159,7 +160,7 @@ class _HomeState extends State<Home> {
     load();
   }
 
-  setNode(MediaType mediaType, int id, String title) {
+  setNode(MediaType mediaType, int id, String title) async {
     if (mediaType == MediaType.group) {
       filters.groupId = id;
     } else if (mediaType == MediaType.serie) {

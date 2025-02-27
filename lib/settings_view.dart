@@ -78,7 +78,9 @@ class _SettingsState extends State<SettingsView> {
   showEditDialog(BuildContext context, final Source source) async {
     await showDialog(
         context: context,
-        builder: (builder) => AlertDialog(
+        builder: (builder) => Center(
+                child: SingleChildScrollView(
+                    child: AlertDialog(
               title: Text("Edit source ${source.name}"),
               actions: [
                 TextButton(
@@ -132,6 +134,9 @@ class _SettingsState extends State<SettingsView> {
                       ),
                       Visibility(
                           visible: source.sourceType == SourceType.xtream,
+                          child: const SizedBox(height: 30)),
+                      Visibility(
+                          visible: source.sourceType == SourceType.xtream,
                           child: FormBuilderTextField(
                             initialValue: source.username,
                             autovalidateMode:
@@ -147,6 +152,9 @@ class _SettingsState extends State<SettingsView> {
                           )),
                       Visibility(
                           visible: source.sourceType == SourceType.xtream,
+                          child: const SizedBox(height: 30)),
+                      Visibility(
+                          visible: source.sourceType == SourceType.xtream,
                           child: FormBuilderTextField(
                             initialValue: source.password,
                             autovalidateMode:
@@ -159,10 +167,10 @@ class _SettingsState extends State<SettingsView> {
                               border: OutlineInputBorder(),
                             ),
                             name: 'password',
-                          ))
+                          )),
                     ],
                   )),
-            ));
+            ))));
   }
 
   _showDefaultViewDialog(BuildContext context) async {
