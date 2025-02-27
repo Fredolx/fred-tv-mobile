@@ -339,4 +339,13 @@ class Sql {
     var result = await db.get('''SELECT * FROM sources WHERE id = ?''', [id]);
     return rowToSource(result);
   }
+
+  static Future<void> setSourceEnabled(bool enabled, int sourceId) async {
+    var db = await DbFactory.db;
+    await db.execute('''
+      UPDATE sources 
+      SET enabled = ? 
+      WHERE id = ?
+    ''', [enabled, sourceId]);
+  }
 }

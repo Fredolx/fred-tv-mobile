@@ -36,7 +36,7 @@ class _BottomNavState extends State<BottomNav> {
       _selectedIndex = index;
     });
     if (_selectedIndex == ViewType.settings.index) {
-      Navigator.push(
+      Navigator.pushReplacement(
           context,
           PageRouteBuilder(
             pageBuilder: (_, __, ___) => const SettingsView(),
