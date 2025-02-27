@@ -34,7 +34,7 @@ class Utils {
         await processM3UUrl(source, wipe);
         break;
       case SourceType.xtream:
-        await processXtream(source, wipe);
+        await getXtream(source, wipe);
         break;
     }
   }

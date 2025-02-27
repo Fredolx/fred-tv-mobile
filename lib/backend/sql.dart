@@ -333,4 +333,10 @@ class Sql {
       WHERE id = ?
     ''', [source.url, source.username, source.password, source.id]);
   }
+
+  static Future<Source> getSourceFromId(int id) async {
+    var db = await DbFactory.db;
+    var result = await db.get('''SELECT * FROM sources WHERE id = ?''', [id]);
+    return rowToSource(result);
+  }
 }
