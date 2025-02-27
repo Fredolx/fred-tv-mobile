@@ -31,17 +31,17 @@ class XtreamStream {
 }
 
 class XtreamSeries {
-  final Map<String, List<XtreamEpisode>> episodes;
+  final List<XtreamEpisode> episodes;
 
   XtreamSeries({required this.episodes});
 
   factory XtreamSeries.fromJson(Map<String, dynamic> json) {
-    return XtreamSeries(
-      episodes: json.map((key, value) => MapEntry(
-            key,
-            (value as List).map((e) => XtreamEpisode.fromJson(e)).toList(),
-          )),
-    );
+    List<XtreamEpisode> episodesList = [];
+    json["episodes"].forEach((season, episodesListForSeason) {
+      episodesList.addAll((episodesListForSeason as List)
+          .map((episodeJson) => XtreamEpisode.fromJson(episodeJson)));
+    });
+    return XtreamSeries(episodes: episodesList);
   }
 }
 
@@ -64,13 +64,14 @@ class XtreamEpisode {
 
   factory XtreamEpisode.fromJson(Map<String, dynamic> json) {
     return XtreamEpisode(
-      id: json['id'],
-      title: json['title'],
-      containerExtension: json['container_extension'],
-      episodeNum: json['episode_num'],
-      season: json['season'],
-      info: XtreamEpisodeInfo.fromJson(json['info']),
-    );
+        id: json['id'],
+        title: json['title'],
+        containerExtension: json['container_extension'],
+        episodeNum: json['episode_num'],
+        season: json['season'],
+        info: json['info'] is! List
+            ? XtreamEpisodeInfo.fromJson(json['info'])
+            : null);
   }
 }
 

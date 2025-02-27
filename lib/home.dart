@@ -277,6 +277,7 @@ class _HomeState extends State<Home> {
                         return ChannelTile(
                           channel: channel,
                           updateViewMode: setNode,
+                          parentContext: context,
                         );
                       },
                     );

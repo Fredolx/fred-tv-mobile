@@ -65,7 +65,7 @@ Future<void> getXtream(Source source, bool wipe) async {
           processJsonList(results[4], XtreamStream.fromJson),
           processJsonList(results[5], XtreamCategory.fromJson),
           source,
-          MediaType.movie);
+          MediaType.serie);
     } catch (e) {
       failCount++;
     }
@@ -83,9 +83,10 @@ List<T> processJsonList<T>(
       .toList();
 }
 
-Future<T?> getXtreamHttpData<T>(String action, Source source) async {
+Future<dynamic> getXtreamHttpData(String action, Source source,
+    [Map<String, String>? extraQueryParams]) async {
   try {
-    var url = buildXtreamUrl(source, action);
+    var url = buildXtreamUrl(source, action, extraQueryParams);
     final response = await http.get(url);
     if (response.statusCode != 200) {
       return null;
@@ -147,12 +148,16 @@ getXtreamMediaTypeStr(MediaType type) {
   }
 }
 
-Uri buildXtreamUrl(Source source, String action) {
+Uri buildXtreamUrl(Source source, String action,
+    [Map<String, String>? extraQueryParams]) {
   var params = {
     'username': source.username,
     'password': source.password,
-    'action': action
+    'action': action,
   };
+  if (extraQueryParams != null) {
+    params.addAll(extraQueryParams);
+  }
   var url = Uri.parse(source.url!).replace(queryParameters: params);
   return url;
 }
@@ -163,12 +168,9 @@ getEpisodes(Channel channel) async {
   var seriesId = int.parse(channel.url!);
   var source = await Sql.getSourceFromId(channel.sourceId);
   source.urlOrigin = Uri.parse(source.url!).origin;
-  var episodes =
-      XtreamSeries.fromJson(await getXtreamHttpData(getSeriesInfo, source))
-          .episodes
-          .values
-          .expand((x) => x)
-          .toList();
+  var episodes = XtreamSeries.fromJson(await getXtreamHttpData(
+          getSeriesInfo, source, {'series_id': seriesId.toString()}))
+      .episodes;
   episodes.sort((a, b) {
     int seasonComparison = a.season.compareTo(b.season);
     if (seasonComparison != 0) {

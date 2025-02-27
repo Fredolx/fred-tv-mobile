@@ -45,7 +45,9 @@ class Sql {
         channel.name,
         channel.image,
         channel.url,
-        int.parse(memory['sourceId']!),
+        channel.sourceId == -1
+            ? int.parse(memory['sourceId']!)
+            : channel.sourceId,
         channel.mediaType.index,
         channel.seriesId,
         channel.favorite,
