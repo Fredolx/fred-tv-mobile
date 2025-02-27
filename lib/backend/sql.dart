@@ -348,4 +348,24 @@ class Sql {
       WHERE id = ?
     ''', [enabled, sourceId]);
   }
+
+  static Future setPosition(int channelId, int seconds) async {
+    var db = await DbFactory.db;
+    await db.execute('''
+      INSERT INTO movie_positions (channel_id, position)
+      VALUES (?, ?)
+      ON CONFLICT (channel_id)
+      DO UPDATE SET
+      position = excluded.position;
+    ''', [channelId, seconds]);
+  }
+
+  static Future<int?> getPosition(int channelId) async {
+    var db = await DbFactory.db;
+    var result = await db.getOptional('''
+      SELECT position FROM movie_positions
+      WHERE channel_id = ?
+    ''', [channelId]);
+    return result?.columnAt(0);
+  }
 }

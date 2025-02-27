@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:media_kit_video/media_kit_video.dart';
+import 'package:open_tv/backend/sql.dart';
 import 'package:open_tv/models/channel.dart';
 import 'package:open_tv/models/media_type.dart';
 import 'package:media_kit/media_kit.dart' as mk;
@@ -15,6 +18,7 @@ class Player extends StatefulWidget {
 
 class _PlayerState extends State<Player> {
   late mk.Player player = mk.Player();
+  late StreamSubscription<Duration> subscription;
   late mkvideo.VideoController videoController =
       mkvideo.VideoController(player);
   late final GlobalKey<VideoState> key = GlobalKey<VideoState>();
@@ -27,10 +31,24 @@ class _PlayerState extends State<Player> {
 
   initAsync() async {
     await player.open(mk.Media(widget.channel.url!));
-    await player.setPlaylistMode(mk.PlaylistMode.single);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       await key.currentState?.enterFullscreen();
     });
+    player.setPlaylistMode(mk.PlaylistMode.single);
+    if (widget.channel.mediaType == MediaType.movie) {
+      setLastPosition();
+    }
+  }
+
+  setLastPosition() async {
+    var seconds = await Sql.getPosition(widget.channel.id!);
+    if (seconds != null) {
+      subscription = player.stream.duration.listen((event) {
+        if (event.inSeconds == 0) return;
+        player.seek(Duration(seconds: seconds));
+        subscription.cancel();
+      });
+    }
   }
 
   @override
@@ -55,6 +73,10 @@ class _PlayerState extends State<Player> {
               key: key,
               controller: videoController,
               onExitFullscreen: () async {
+                if (widget.channel.mediaType == MediaType.movie) {
+                  Sql.setPosition(
+                      widget.channel.id!, player.state.position.inSeconds);
+                }
                 Navigator.of(context).pop();
                 Navigator.of(context).pop();
                 SystemChrome.setPreferredOrientations([]);

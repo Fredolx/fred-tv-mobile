@@ -49,7 +49,12 @@ class DbFactory {
         );
         ''');
         await tx.execute('''
-          CREATE UNIQUE INDEX index_channel_http_headers_channel_id ON channel_http_headers(channel_id);
+        CREATE TABLE "movie_positions" (
+          "id" INTEGER PRIMARY KEY,
+          "channel_id" integer,
+          "position" int,
+          FOREIGN KEY (channel_id) REFERENCES channels(id) ON DELETE CASCADE
+        )
         ''');
         await tx.execute('''
         CREATE TABLE "settings" (
@@ -93,6 +98,12 @@ class DbFactory {
             '''CREATE INDEX index_channels_group_name ON channels(group_name);''');
         await tx.execute(
             '''CREATE INDEX index_group_source_id ON groups(source_id);''');
+        await tx.execute('''
+          CREATE UNIQUE INDEX index_channel_http_headers_channel_id ON channel_http_headers(channel_id);
+        ''');
+        await tx.execute('''
+          CREATE UNIQUE INDEX index_movie_positions_channel_id ON movie_positions(channel_id);
+        ''');
       }));
     await migrations.migrate(db);
     return db;
