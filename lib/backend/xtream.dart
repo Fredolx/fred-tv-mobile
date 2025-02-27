@@ -118,7 +118,7 @@ Channel xtreamToChannel(XtreamStream stream, Source source,
   return Channel(
       name: stream.name!,
       mediaType: streamType,
-      sourceId: source.id!,
+      sourceId: -1,
       favorite: false,
       group: categoryName,
       image: stream.streamIcon?.trim() ?? stream.cover?.trim(),
