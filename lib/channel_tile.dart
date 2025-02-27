@@ -69,7 +69,7 @@ class _ChannelTileState extends State<ChannelTile> {
   @override
   Widget build(BuildContext context) {
     return Card(
-        elevation: _focusNode.hasFocus ? 8.0 : 4.0, // Highlight when focused
+        elevation: _focusNode.hasFocus ? 8.0 : 4.0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
@@ -91,6 +91,7 @@ class _ChannelTileState extends State<ChannelTile> {
                           alignment: Alignment.centerLeft,
                           child: widget.channel.image != null
                               ? CachedNetworkImage(
+                                  width: 1000,
                                   fit: BoxFit.contain,
                                   errorWidget: (_, __, ___) =>
                                       Image.asset("assets/icon.png"),
