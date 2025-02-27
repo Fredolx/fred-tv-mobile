@@ -199,8 +199,9 @@ class _SetupState extends State<Setup> {
                                     .path
                                 : (_formKey.currentState?.value["url"]
                                     as String);
-                            if (sourceType == SourceType.m3u && url == null)
+                            if (sourceType == SourceType.m3u && url == null) {
                               return;
+                            }
                             final result = await Error.tryAsync(() async {
                               await Utils.processSource(
                                 Source(
