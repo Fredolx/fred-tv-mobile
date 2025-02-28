@@ -6,6 +6,7 @@ import 'package:open_tv/backend/utils.dart';
 import 'package:open_tv/backend/xtream.dart';
 import 'package:open_tv/bottom_nav.dart';
 import 'package:open_tv/channel_tile.dart';
+import 'package:open_tv/loading.dart';
 import 'package:open_tv/models/channel.dart';
 import 'package:open_tv/models/filters.dart';
 import 'package:open_tv/models/media_type.dart';
@@ -197,8 +198,9 @@ class _HomeState extends State<Home> {
                     ),
                   )
                 : null,
-            body: SafeArea(
-                child: Column(children: [
+            body: Loading(
+                child: SafeArea(
+                    child: Column(children: [
               Offstage(
                   offstage: !searchMode,
                   child: Container(
@@ -284,7 +286,7 @@ class _HomeState extends State<Home> {
                   },
                 ),
               ))
-            ])),
+            ]))),
             bottomNavigationBar: BottomNav(
               updateViewMode: navbarChanged,
               startingView: filters.viewType,

@@ -53,10 +53,10 @@ class _ChannelTileState extends State<ChannelTile> {
         widget.channel.mediaType == MediaType.serie) {
       if (widget.channel.mediaType == MediaType.serie &&
           !refreshedSeries.contains(widget.channel.id)) {
-        await Error.tryAsyncNoLoading(() async {
+        await Error.tryAsync(() async {
           await getEpisodes(widget.channel);
           refreshedSeries.add(widget.channel.id!);
-        }, widget.parentContext);
+        }, widget.parentContext, null, true, false);
       }
       widget.updateViewMode(
           widget.channel.mediaType,
