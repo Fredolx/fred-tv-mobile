@@ -11,7 +11,9 @@ class Error {
         SnackBar(
             backgroundColor: Colors.red[700],
             content: const Text(
-                "An error occured. Click on 'Details' for more information"),
+              "An error occured. Click on 'Details' for more information",
+              style: TextStyle(color: Colors.white),
+            ),
             action: SnackBarAction(
                 label: 'Details',
                 textColor: Colors.white,

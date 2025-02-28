@@ -73,6 +73,7 @@ Future<void> getXtream(Source source, bool wipe) async {
   if (failCount > 1) {
     return;
   }
+  statements.add(Sql.updateGroups());
   await Sql.commitWrite(statements);
 }
 
@@ -104,7 +105,7 @@ processXtream(
     Source source,
     MediaType mediaType) {
   Map<String, String> catsMap = Map.fromEntries(
-      cats.map((x) => MapEntry(x.categoryName, x.categoryName)));
+      cats.map((x) => MapEntry(x.categoryId, x.categoryName)));
   for (var live in streams) {
     var cname = catsMap[live.categoryId];
     try {
