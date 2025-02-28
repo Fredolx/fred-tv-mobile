@@ -86,7 +86,7 @@ class _ChannelTileState extends State<ChannelTile> {
           onTap: () async => await play(),
           borderRadius: BorderRadius.circular(10),
           child: Padding(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(5),
               child: Row(
                 children: [
                   Expanded(
