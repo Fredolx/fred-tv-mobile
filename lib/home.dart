@@ -256,7 +256,7 @@ class _HomeState extends State<Home> {
                   )),
               Expanded(
                   child: Padding(
-                padding: const EdgeInsets.all(10.0),
+                padding: const EdgeInsets.all(5.0),
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     double cardWidth = 150;
