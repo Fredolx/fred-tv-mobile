@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:open_tv/backend/sql.dart';
 import 'package:open_tv/backend/utils.dart';
-import 'package:open_tv/backend/xtream.dart';
 import 'package:open_tv/bottom_nav.dart';
 import 'package:open_tv/channel_tile.dart';
 import 'package:open_tv/loading.dart';
@@ -260,7 +259,7 @@ class _HomeState extends State<Home> {
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     double cardWidth = 150;
-                    double cardHeight = 60;
+                    double cardHeight = 70;
                     int crossAxisCount = (constraints.maxWidth / cardWidth)
                         .floor()
                         .clamp(1, 4)
