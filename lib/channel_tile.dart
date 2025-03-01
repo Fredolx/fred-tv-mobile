@@ -111,7 +111,7 @@ class _ChannelTileState extends State<ChannelTile> {
                       child: Text(
                         widget.channel.name,
                         overflow: TextOverflow.ellipsis,
-                        maxLines: 2,
+                        maxLines: 3,
                       ))
                 ],
               )),
