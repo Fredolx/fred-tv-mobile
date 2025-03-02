@@ -79,7 +79,12 @@ class _PlayerState extends State<Player> {
                 }
                 Navigator.of(context).pop();
                 Navigator.of(context).pop();
-                SystemChrome.setPreferredOrientations([]);
+                SystemChrome.setPreferredOrientations([
+                  DeviceOrientation.portraitUp,
+                  DeviceOrientation.portraitDown,
+                  DeviceOrientation.landscapeLeft,
+                  DeviceOrientation.landscapeRight,
+                ]);
                 SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
               }),
         ));

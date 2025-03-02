@@ -1,0 +1,2 @@
+/Users/fred/git/open-tv-mobile/android/app/.cxx/Debug/663i243d/x86/CMakeFiles/edit_cache.dir
+/Users/fred/git/open-tv-mobile/android/app/.cxx/Debug/663i243d/x86/CMakeFiles/rebuild_cache.dir

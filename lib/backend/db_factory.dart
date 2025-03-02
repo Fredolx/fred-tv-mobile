@@ -1,12 +1,11 @@
+import 'package:open_tv/backend/utils.dart';
 import 'package:sqlite_async/sqlite_async.dart';
-
-const String dbName = "/data/data/dev.fredol.open_tv/db.sqlite";
 
 class DbFactory {
   static SqliteDatabase? _db;
 
   static Future<SqliteDatabase> _createDB() async {
-    var db = SqliteDatabase(path: dbName);
+    var db = SqliteDatabase(path: "${await Utils.appDir}/db.sqlite");
     var migrations = SqliteMigrations()
       ..add(SqliteMigration(1, (tx) async {
         await tx.execute('''
