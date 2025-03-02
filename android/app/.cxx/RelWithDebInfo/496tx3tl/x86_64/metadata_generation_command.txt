@@ -1,0 +1,20 @@
+                        -H/opt/homebrew/Caskroom/flutter/3.24.3/flutter/packages/flutter_tools/gradle/src/main/groovy
+-DCMAKE_SYSTEM_NAME=Android
+-DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+-DCMAKE_SYSTEM_VERSION=21
+-DANDROID_PLATFORM=android-21
+-DANDROID_ABI=x86_64
+-DCMAKE_ANDROID_ARCH_ABI=x86_64
+-DANDROID_NDK=/Users/fred/Library/Android/sdk/ndk/25.1.8937393
+-DCMAKE_ANDROID_NDK=/Users/fred/Library/Android/sdk/ndk/25.1.8937393
+-DCMAKE_TOOLCHAIN_FILE=/Users/fred/Library/Android/sdk/ndk/25.1.8937393/build/cmake/android.toolchain.cmake
+-DCMAKE_MAKE_PROGRAM=/Users/fred/Library/Android/sdk/cmake/3.22.1/bin/ninja
+-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=/Users/fred/git/open-tv-mobile/build/app/intermediates/cxx/RelWithDebInfo/496tx3tl/obj/x86_64
+-DCMAKE_RUNTIME_OUTPUT_DIRECTORY=/Users/fred/git/open-tv-mobile/build/app/intermediates/cxx/RelWithDebInfo/496tx3tl/obj/x86_64
+-DCMAKE_BUILD_TYPE=RelWithDebInfo
+-B/Users/fred/git/open-tv-mobile/android/app/.cxx/RelWithDebInfo/496tx3tl/x86_64
+-GNinja
+-Wno-dev
+--no-warn-unused-cli
+                        Build command args: []
+                        Version: 2
