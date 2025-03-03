@@ -11,4 +11,4 @@ PRODUCT_NAME = open-tv
 PRODUCT_BUNDLE_IDENTIFIER = dev.fredol.open-tv
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2024 com.example. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2024 Frederic Lachapelle All rights reserved.
