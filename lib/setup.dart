@@ -23,6 +23,25 @@ class _SetupState extends State<Setup> {
   final _formKey = GlobalKey<FormBuilderState>();
   bool formValid = false;
   Set<String> existingSourceNames = {};
+
+  showXtreamCorrectionModal() async {
+    return await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: const Text("Is this the right URL?"),
+              actions: [
+                TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: const Text("Proceed anyway")),
+                TextButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    child: const Text("Correct URL automatically"))
+              ],
+              content: const Text(
+                  "It seems your url is not pointing to an Xtream API server, Open TV can correct the URL automatically for you"),
+            ));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -192,7 +211,7 @@ class _SetupState extends State<Setup> {
                             }
                             final sourceType =
                                 SourceType.values[_selectedIndex];
-                            final url = sourceType == SourceType.m3u
+                            var url = sourceType == SourceType.m3u
                                 ? (await FilePicker.platform.pickFiles())
                                     ?.files
                                     .single
@@ -201,6 +220,15 @@ class _SetupState extends State<Setup> {
                                     as String);
                             if (sourceType == SourceType.m3u && url == null) {
                               return;
+                            }
+                            if (sourceType == SourceType.xtream) {
+                              var uri = Uri.parse(url!);
+                              if (uri.path == "/" || uri.path == "") {
+                                if (await showXtreamCorrectionModal()) {
+                                  url =
+                                      uri.resolve("player_api.php").toString();
+                                }
+                              }
                             }
                             final result = await Error.tryAsync(() async {
                               await Utils.processSource(
