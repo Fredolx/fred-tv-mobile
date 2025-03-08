@@ -42,6 +42,19 @@ class _SetupState extends State<Setup> {
             ));
   }
 
+  Future<String> fixUrl(String url) async {
+    var uri = Uri.parse(url);
+    if (uri.scheme.isEmpty) {
+      uri = Uri.parse("http://$uri");
+    }
+    if (uri.path == "/" || uri.path.isEmpty) {
+      if (await showXtreamCorrectionModal()) {
+        uri = uri.resolve("player_api.php");
+      }
+    }
+    return uri.toString();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -222,13 +235,7 @@ class _SetupState extends State<Setup> {
                               return;
                             }
                             if (sourceType == SourceType.xtream) {
-                              var uri = Uri.parse(url!);
-                              if (uri.path == "/" || uri.path == "") {
-                                if (await showXtreamCorrectionModal()) {
-                                  url =
-                                      uri.resolve("player_api.php").toString();
-                                }
-                              }
+                              url = await fixUrl(url!);
                             }
                             final result = await Error.tryAsync(() async {
                               await Utils.processSource(
