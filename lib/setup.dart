@@ -72,13 +72,9 @@ class _SetupState extends State<Setup> {
                       });
                     },
                     key: _formKey,
-                    child: SingleChildScrollView(
+                    child: Center(
+                        child: SingleChildScrollView(
                       child: Column(children: [
-                        SizedBox(
-                            height: MediaQuery.of(context).orientation ==
-                                    Orientation.portrait
-                                ? 100
-                                : 10),
                         ToggleButtons(
                           isSelected: List.generate(
                               3, (index) => index == _selectedIndex),
@@ -266,6 +262,6 @@ class _SetupState extends State<Setup> {
                           child: const Text("Submit"),
                         )
                       ]),
-                    )))));
+                    ))))));
   }
 }
