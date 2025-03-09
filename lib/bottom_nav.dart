@@ -80,6 +80,12 @@ class _BottomNavState extends State<BottomNav> {
               icon: Icon(Icons.star),
               label: 'Favorites',
             ),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.history), label: "History"),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.settings),
+              label: 'Settings',
+            ),
           ],
           currentIndex: _selectedIndex,
           onTap: onBarTapped,

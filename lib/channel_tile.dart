@@ -65,6 +65,7 @@ class _ChannelTileState extends State<ChannelTile> {
               : int.parse(widget.channel.url!),
           widget.channel.name);
     } else {
+      Sql.addToHistory(widget.channel.id!);
       Navigator.push(context,
           MaterialPageRoute(builder: (_) => Player(channel: widget.channel)));
     }

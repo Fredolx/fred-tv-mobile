@@ -103,6 +103,15 @@ class DbFactory {
         await tx.execute('''
           CREATE UNIQUE INDEX index_movie_positions_channel_id ON movie_positions(channel_id);
         ''');
+      }))
+      ..add(SqliteMigration(2, (tx) async {
+        await tx.execute('''
+          ALTER TABLE channels
+          ADD COLUMN last_watched integer;
+        ''');
+        await tx.execute('''
+          CREATE INDEX index_channel_last_watched ON channels(last_watched);
+        ''');
       }));
     await migrations.migrate(db);
     return db;
