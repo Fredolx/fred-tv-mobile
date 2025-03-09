@@ -200,59 +200,63 @@ class _HomeState extends State<Home> {
             body: Loading(
                 child: SafeArea(
                     child: Column(children: [
-              Offstage(
-                  offstage: !searchMode,
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    color: Theme.of(context)
-                        .colorScheme
-                        .surfaceContainer, // Background color
-                    child: Row(
-                      children: [
-                        Expanded(
-                            child: TextField(
-                          controller: searchController,
-                          focusNode: _focusNode,
-                          onChanged: (query) {
-                            _debounce?.cancel();
-                            _debounce =
-                                Timer(const Duration(milliseconds: 500), () {
-                              filters.query = query;
-                              load(false);
-                            });
-                          },
-                          decoration: InputDecoration(
-                            hintText: "Search...",
-                            prefixIcon: const Icon(Icons.search),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide.none,
-                            ),
-                            suffixIcon: IconButton(
-                                onPressed: () {
-                                  filters.useKeywords = !filters.useKeywords;
-                                  load(false);
+              AnimatedSize(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  child: searchMode
+                      ? Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 8),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainer, // Background color
+                          child: Row(
+                            children: [
+                              Expanded(
+                                  child: TextField(
+                                controller: searchController,
+                                focusNode: _focusNode,
+                                onChanged: (query) {
+                                  _debounce?.cancel();
+                                  _debounce = Timer(
+                                      const Duration(milliseconds: 500), () {
+                                    filters.query = query;
+                                    load(false);
+                                  });
                                 },
-                                icon: Icon(filters.useKeywords
-                                    ? Icons.label
-                                    : Icons.label_outline)),
-                            filled: true, // Light background for contrast
-                            contentPadding:
-                                const EdgeInsets.symmetric(vertical: 0),
+                                decoration: InputDecoration(
+                                  hintText: "Search...",
+                                  prefixIcon: const Icon(Icons.search),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  suffixIcon: IconButton(
+                                      onPressed: () {
+                                        filters.useKeywords =
+                                            !filters.useKeywords;
+                                        load(false);
+                                      },
+                                      icon: Icon(filters.useKeywords
+                                          ? Icons.label
+                                          : Icons.label_outline)),
+                                  filled: true, // Light background for contrast
+                                  contentPadding:
+                                      const EdgeInsets.symmetric(vertical: 0),
+                                ),
+                              )),
+                              const SizedBox(width: 10),
+                              SizedBox(
+                                  width: 40,
+                                  child: IconButton(
+                                      onPressed: toggleSearch,
+                                      icon: const Icon(
+                                        Icons.close,
+                                      )))
+                            ],
                           ),
-                        )),
-                        const SizedBox(width: 10),
-                        SizedBox(
-                            width: 40,
-                            child: IconButton(
-                                onPressed: toggleSearch,
-                                icon: const Icon(
-                                  Icons.close,
-                                )))
-                      ],
-                    ),
-                  )),
+                        )
+                      : SizedBox.shrink()),
               Expanded(
                   child: Padding(
                 padding: const EdgeInsets.fromLTRB(5, 5, 5, 0),
