@@ -256,7 +256,7 @@ class _HomeState extends State<Home> {
                             ],
                           ),
                         )
-                      : SizedBox.shrink()),
+                      : const SizedBox.shrink()),
               Expanded(
                   child: Padding(
                 padding: const EdgeInsets.fromLTRB(5, 5, 5, 0),
