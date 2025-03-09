@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:open_tv/backend/db_factory.dart';
 import 'package:open_tv/models/channel.dart';
 import 'package:open_tv/models/channel_http_headers.dart';
+import 'package:open_tv/models/channel_preserve.dart';
 import 'package:open_tv/models/filters.dart';
 import 'package:open_tv/models/id_data.dart';
 import 'package:open_tv/models/media_type.dart';
@@ -143,6 +144,10 @@ class Sql {
     List<Object> params = [];
     if (filters.viewType == ViewType.favorites && filters.seriesId == null) {
       sqlQuery += "\nAND favorite = 1";
+    }
+    if (filters.viewType == ViewType.history) {
+      sqlQuery += "\nAND last_watched IS NOT NULL";
+      sqlQuery += "\nORDER BY last_watched ASC";
     }
     if (filters.seriesId != null) {
       sqlQuery += "\nAND series_id = ?";
@@ -318,7 +323,6 @@ class Sql {
       await tx.execute('''
         DELETE FROM channels 
         WHERE source_id = ? 
-        AND favorite = 0
       ''', [sourceId]);
       await tx.execute('''
         DELETE FROM groups
@@ -369,5 +373,56 @@ class Sql {
       WHERE channel_id = ?
     ''', [channelId]);
     return result?.columnAt(0);
+  }
+
+  static Future<void> addToHistory(int id) async {
+    var db = await DbFactory.db;
+    await db.execute('''
+      UPDATE channels
+      SET last_watched = strftime('%s', 'now')
+      WHERE id = ?
+    ''', [id]);
+    await db.execute('''
+      UPDATE channels
+      SET last_watched = NULL
+      WHERE id NOT IN (
+        SELECT id
+        FROM channels
+        ORDER BY last_watched ASC
+        LIMIT 36
+      );
+    ''', [id]);
+  }
+
+  static Future<List<ChannelPreserve>> getChannelsPreserve(int sourceId) async {
+    var db = await DbFactory.db;
+    var results = await db.getAll('''
+      SELECT name, favorite, last_watched
+      FROM channels
+      WHERE (favorite = 1 OR last_watched IS NOT NULL) AND source_id = ?
+    ''', [sourceId]);
+    return results.map(rowToChannelPreserve).toList();
+  }
+
+  static ChannelPreserve rowToChannelPreserve(Row row) {
+    return ChannelPreserve(
+        name: row.columnAt(0),
+        favorite: row.columnAt(1),
+        lastWatched: row.columnAt(2));
+  }
+
+  static Future<void> Function(SqliteWriteContext, Map<String, String>)
+      restorePreserve(List<ChannelPreserve> preserve) {
+    return (SqliteWriteContext tx, Map<String, String> memory) async {
+      final sourceId = int.parse(memory['sourceId']!);
+      for (var channel in preserve) {
+        await tx.execute('''
+          UPDATE channels
+          SET favorite = ?, last_watched = ?
+          WHERE name = ?
+          AND source_id = ?
+        ''', [channel.favorite, channel.lastWatched, channel.name, sourceId]);
+      }
+    };
   }
 }

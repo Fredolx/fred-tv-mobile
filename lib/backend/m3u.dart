@@ -5,6 +5,7 @@ import 'package:open_tv/backend/sql.dart';
 import 'package:open_tv/backend/utils.dart';
 import 'package:open_tv/models/channel.dart';
 import 'package:open_tv/models/channel_http_headers.dart';
+import 'package:open_tv/models/channel_preserve.dart';
 import 'package:open_tv/models/media_type.dart';
 import 'package:open_tv/models/source.dart';
 import 'package:sqlite_async/sqlite_async.dart';
@@ -21,6 +22,7 @@ final httpUserAgentRegex = RegExp(r'http-user-agent=(.+)');
 
 Future<void> processM3U(Source source, bool wipe, [String? path]) async {
   path ??= source.url;
+  List<ChannelPreserve>? preserve;
   var file = File(path!)
       .openRead()
       .transform(utf8.decoder)
@@ -29,6 +31,7 @@ Future<void> processM3U(Source source, bool wipe, [String? path]) async {
       statements = [];
   statements.add(Sql.getOrCreateSourceByName(source));
   if (wipe) {
+    preserve = await Sql.getChannelsPreserve(source.id!);
     statements.add(Sql.wipeSource(source.id!));
   }
   String? lastLine;
@@ -57,10 +60,13 @@ Future<void> processM3U(Source source, bool wipe, [String? path]) async {
   }
   commitChannel(channelLine!, lastLine!, headers, statements);
   statements.add(Sql.updateGroups());
+  if (preserve != null) {
+    statements.add(Sql.restorePreserve(preserve));
+  }
   await Sql.commitWrite(statements);
 }
 
-void  commitChannel(
+void commitChannel(
     String l1,
     String last,
     ChannelHttpHeaders? headers,

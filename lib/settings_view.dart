@@ -179,7 +179,7 @@ class _SettingsState extends State<SettingsView> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children:
-                ViewType.values.take(3).map(getDefaultViewDialogItem).toList(),
+                ViewType.values.take(4).map(getDefaultViewDialogItem).toList(),
           ),
         );
       },

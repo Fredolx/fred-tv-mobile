@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:open_tv/backend/sql.dart';
 import 'package:open_tv/models/channel.dart';
+import 'package:open_tv/models/channel_preserve.dart';
 import 'package:open_tv/models/media_type.dart';
 import 'package:open_tv/models/source.dart';
 import 'package:open_tv/models/xtream_types.dart';
@@ -20,8 +21,10 @@ const String liveStreamExtension = "ts";
 Future<void> getXtream(Source source, bool wipe) async {
   List<Future<void> Function(SqliteWriteContext, Map<String, String>)>
       statements = [];
+  List<ChannelPreserve>? preserve;
   statements.add(Sql.getOrCreateSourceByName(source));
   if (wipe) {
+    preserve = await Sql.getChannelsPreserve(source.id!);
     statements.add(Sql.wipeSource(source.id!));
   }
   source.urlOrigin = Uri.parse(source.url!).origin;
@@ -74,6 +77,9 @@ Future<void> getXtream(Source source, bool wipe) async {
     return;
   }
   statements.add(Sql.updateGroups());
+  if (preserve != null) {
+    statements.add(Sql.restorePreserve(preserve));
+  }
   await Sql.commitWrite(statements);
 }
 
@@ -104,8 +110,8 @@ processXtream(
     List<XtreamCategory> cats,
     Source source,
     MediaType mediaType) {
-  Map<String, String> catsMap = Map.fromEntries(
-      cats.map((x) => MapEntry(x.categoryId, x.categoryName)));
+  Map<String, String> catsMap =
+      Map.fromEntries(cats.map((x) => MapEntry(x.categoryId, x.categoryName)));
   for (var live in streams) {
     var cname = catsMap[live.categoryId];
     try {
