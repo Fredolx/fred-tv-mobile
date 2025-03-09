@@ -69,7 +69,7 @@ class XtreamEpisode {
         containerExtension: json['container_extension'],
         episodeNum: json['episode_num'],
         season: json['season'],
-        info: json['info'] is! List
+        info: (json['info'] is Map)
             ? XtreamEpisodeInfo.fromJson(json['info'])
             : null);
   }
