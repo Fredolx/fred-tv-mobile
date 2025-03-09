@@ -109,11 +109,20 @@ class _ChannelTileState extends State<ChannelTile> {
                   const Expanded(flex: 1, child: SizedBox()),
                   Expanded(
                       flex: 8,
-                      child: Text(
-                        widget.channel.name,
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 3,
-                      ))
+                      child: LayoutBuilder(builder: (context, constraints) {
+                        final style = Theme.of(context).textTheme.bodyMedium!;
+                        final fontSize = MediaQuery.of(context)
+                            .textScaler
+                            .scale(style.fontSize!);
+                        final lineHeight = style.height! * fontSize;
+                        final maxLines =
+                            (constraints.maxHeight / lineHeight).floor();
+                        return Text(
+                          widget.channel.name,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: maxLines,
+                        );
+                      }))
                 ],
               )),
         ));
