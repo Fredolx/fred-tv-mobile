@@ -147,7 +147,7 @@ class Sql {
     }
     if (filters.viewType == ViewType.history) {
       sqlQuery += "\nAND last_watched IS NOT NULL";
-      sqlQuery += "\nORDER BY last_watched ASC";
+      sqlQuery += "\nORDER BY last_watched DESC";
     }
     if (filters.seriesId != null) {
       sqlQuery += "\nAND series_id = ?";
@@ -385,13 +385,15 @@ class Sql {
     await db.execute('''
       UPDATE channels
       SET last_watched = NULL
-      WHERE id NOT IN (
-        SELECT id
-        FROM channels
-        ORDER BY last_watched ASC
-        LIMIT 36
-      );
-    ''', [id]);
+      WHERE last_watched IS NOT NULL
+		  AND id NOT IN (
+				SELECT id 
+				FROM channels
+				WHERE last_watched IS NOT NULL
+				ORDER BY last_watched DESC
+				LIMIT 36
+		  )
+    ''');
   }
 
   static Future<List<ChannelPreserve>> getChannelsPreserve(int sourceId) async {
