@@ -79,11 +79,6 @@ class _HomeState extends State<Home> {
     });
   }
 
-  Future<void> loadMore() async {
-    filters.page++;
-    load(true);
-  }
-
   toggleSearch() {
     setState(() {
       searchMode = !searchMode;
@@ -139,8 +134,8 @@ class _HomeState extends State<Home> {
   }
 
   void _scrollListener() async {
-    if (_scrollController.position.pixels ==
-            _scrollController.position.maxScrollExtent &&
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent * 0.75 &&
         !isLoading &&
         !reachedMax) {
       setState(() {
