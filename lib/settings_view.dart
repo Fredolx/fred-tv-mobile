@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:open_tv/backend/settings_service.dart';
 import 'package:open_tv/backend/sql.dart';
 import 'package:open_tv/backend/utils.dart';
 import 'package:open_tv/bottom_nav.dart';
 import 'package:open_tv/confirm_delete.dart';
+import 'package:open_tv/edit_dialog.dart';
 import 'package:open_tv/home.dart';
 import 'package:open_tv/loading.dart';
 import 'package:open_tv/models/settings.dart';
@@ -26,7 +25,6 @@ class SettingsView extends StatefulWidget {
 class _SettingsState extends State<SettingsView> {
   Settings settings = Settings();
   List<Source> sources = [];
-  final _formKey = GlobalKey<FormBuilderState>();
   bool loading = true;
   @override
   void initState() {
@@ -81,94 +79,8 @@ class _SettingsState extends State<SettingsView> {
   Future<void> showEditDialog(BuildContext context, final Source source) async {
     await showDialog(
         context: context,
-        builder: (builder) => Center(
-                child: SingleChildScrollView(
-                    child: AlertDialog(
-              title: Text("Edit source ${source.name}"),
-              actions: [
-                TextButton(
-                    onPressed: () async {
-                      if (!_formKey.currentState!.saveAndValidate()) {
-                        return;
-                      }
-                      Navigator.of(context).pop();
-                      await Error.tryAsyncNoLoading(
-                          () async => await Sql.updateSource(Source(
-                              id: source.id,
-                              name: source.name,
-                              sourceType: source.sourceType,
-                              url: _formKey.currentState?.value["url"],
-                              username: source.sourceType == SourceType.xtream
-                                  ? _formKey.currentState?.value["username"]
-                                  : null,
-                              password: source.sourceType == SourceType.xtream
-                                  ? _formKey.currentState?.value["password"]
-                                  : null)),
-                          context);
-                      await reloadSources();
-                    },
-                    child: const Text("Save")),
-                TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text("Cancel"))
-              ],
-              content: FormBuilder(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const SizedBox(height: 15),
-                      FormBuilderTextField(
-                        initialValue: source.url,
-                        autovalidateMode: AutovalidateMode.onUserInteraction,
-                        validator: FormBuilderValidators.compose(
-                            [FormBuilderValidators.required()]),
-                        decoration: const InputDecoration(
-                          labelText: 'Url',
-                          prefixIcon: Icon(Icons.link),
-                          border: OutlineInputBorder(),
-                        ),
-                        name: 'url',
-                      ),
-                      Visibility(
-                          visible: source.sourceType == SourceType.xtream,
-                          child: const SizedBox(height: 30)),
-                      Visibility(
-                          visible: source.sourceType == SourceType.xtream,
-                          child: FormBuilderTextField(
-                            initialValue: source.username,
-                            autovalidateMode:
-                                AutovalidateMode.onUserInteraction,
-                            validator: FormBuilderValidators.compose(
-                                [FormBuilderValidators.required()]),
-                            decoration: const InputDecoration(
-                              labelText: 'Username',
-                              prefixIcon: Icon(Icons.account_circle),
-                              border: OutlineInputBorder(),
-                            ),
-                            name: 'username',
-                          )),
-                      Visibility(
-                          visible: source.sourceType == SourceType.xtream,
-                          child: const SizedBox(height: 30)),
-                      Visibility(
-                          visible: source.sourceType == SourceType.xtream,
-                          child: FormBuilderTextField(
-                            initialValue: source.password,
-                            autovalidateMode:
-                                AutovalidateMode.onUserInteraction,
-                            validator: FormBuilderValidators.compose(
-                                [FormBuilderValidators.required()]),
-                            decoration: const InputDecoration(
-                              labelText: 'Password',
-                              prefixIcon: Icon(Icons.password),
-                              border: OutlineInputBorder(),
-                            ),
-                            name: 'password',
-                          )),
-                    ],
-                  )),
-            ))));
+        builder: (builder) =>
+            EditDialog(source: source, afterSave: reloadSources));
   }
 
   Future<void> _showDefaultViewDialog(BuildContext context) async {
