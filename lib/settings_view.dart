@@ -5,6 +5,7 @@ import 'package:open_tv/backend/settings_service.dart';
 import 'package:open_tv/backend/sql.dart';
 import 'package:open_tv/backend/utils.dart';
 import 'package:open_tv/bottom_nav.dart';
+import 'package:open_tv/confirm_delete.dart';
 import 'package:open_tv/home.dart';
 import 'package:open_tv/loading.dart';
 import 'package:open_tv/models/settings.dart';
@@ -239,37 +240,20 @@ class _SettingsState extends State<SettingsView> {
   Future<void> showConfirmDeleteDialog(Source source) async {
     await showDialog(
         context: context,
-        builder: (builder) => AlertDialog(
-              title: const Text("Confirm deletion"),
-              content: Text.rich(TextSpan(children: [
-                const TextSpan(text: "You are about to delete source "),
-                TextSpan(
-                    text: source.name,
-                    style: const TextStyle(fontWeight: FontWeight.bold)),
-                const TextSpan(text: ", are you sure?"),
-              ])),
-              actions: [
-                TextButton(
-                    onPressed: () async {
-                      Navigator.of(context).pop();
-                      await Error.tryAsync(
-                          () async => await Sql.deleteSource(source.id!),
-                          context,
-                          "Successfully deleted source");
-                      await reloadSources();
-                      if (sources.isEmpty) {
-                        Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const Setup()));
-                      }
-                    },
-                    child: const Text("Confirm")),
-                TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text("Cancel"))
-              ],
-            ));
+        builder: (builder) => ConfirmDelete(
+            type: "source",
+            name: source.name,
+            confirm: () async {
+              await Error.tryAsync(
+                  () async => await Sql.deleteSource(source.id!),
+                  context,
+                  "Successfully deleted source");
+              await reloadSources();
+              if (sources.isEmpty) {
+                Navigator.pushReplacement(context,
+                    MaterialPageRoute(builder: (context) => const Setup()));
+              }
+            }));
   }
 
   Future<void> reloadSources() async {
