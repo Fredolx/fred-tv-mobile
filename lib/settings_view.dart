@@ -4,6 +4,7 @@ import 'package:open_tv/backend/sql.dart';
 import 'package:open_tv/backend/utils.dart';
 import 'package:open_tv/bottom_nav.dart';
 import 'package:open_tv/confirm_delete.dart';
+import 'package:open_tv/default_view_dialog.dart';
 import 'package:open_tv/edit_dialog.dart';
 import 'package:open_tv/home.dart';
 import 'package:open_tv/loading.dart';
@@ -63,19 +64,6 @@ class _SettingsState extends State<SettingsView> {
     }
   }
 
-  Widget getDefaultViewDialogItem(ViewType view) {
-    return ListTile(
-      title: Text(viewTypeToString(view)),
-      onTap: () {
-        setState(() {
-          settings.defaultView = view;
-          updateSettings();
-        });
-        Navigator.of(context).pop();
-      },
-    );
-  }
-
   Future<void> showEditDialog(BuildContext context, final Source source) async {
     await showDialog(
         context: context,
@@ -85,18 +73,16 @@ class _SettingsState extends State<SettingsView> {
 
   Future<void> _showDefaultViewDialog(BuildContext context) async {
     showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Default view"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children:
-                ViewType.values.take(4).map(getDefaultViewDialogItem).toList(),
-          ),
-        );
-      },
-    );
+        context: context,
+        builder: (BuildContext context) {
+          return DefaultViewDialog(action: (view) {
+            setState(() {
+              settings.defaultView = view;
+              updateSettings();
+            });
+            Navigator.of(context).pop();
+          });
+        });
   }
 
   Future<void> toggleSource(Source source) async {
