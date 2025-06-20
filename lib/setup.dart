@@ -4,6 +4,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:open_tv/backend/sql.dart';
 import 'package:open_tv/backend/utils.dart';
+import 'package:open_tv/correction_modal.dart';
 import 'package:open_tv/home.dart';
 import 'package:open_tv/loading.dart';
 import 'package:open_tv/models/source.dart';
@@ -26,20 +27,7 @@ class _SetupState extends State<Setup> {
 
   showXtreamCorrectionModal() async {
     return await showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-              title: const Text("Is this the right URL?"),
-              actions: [
-                TextButton(
-                    onPressed: () => Navigator.pop(context, false),
-                    child: const Text("Proceed anyway")),
-                TextButton(
-                    onPressed: () => Navigator.pop(context, true),
-                    child: const Text("Correct URL automatically"))
-              ],
-              content: const Text(
-                  "It seems your url is not pointing to an Xtream API server, Open TV can correct the URL automatically for you"),
-            ));
+        context: context, builder: (context) => CorrectionModal());
   }
 
   Future<String> fixUrl(String url) async {
