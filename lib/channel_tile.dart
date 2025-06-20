@@ -38,7 +38,7 @@ class _ChannelTileState extends State<ChannelTile> {
     super.dispose();
   }
 
-  favorite() async {
+  Future<void> favorite() async {
     if (widget.channel.mediaType == MediaType.group) return;
     await Error.tryAsyncNoLoading(() async {
       await Sql.favoriteChannel(widget.channel.id!, !widget.channel.favorite);
@@ -48,7 +48,7 @@ class _ChannelTileState extends State<ChannelTile> {
     }, context);
   }
 
-  play() async {
+  Future<void> play() async {
     if (widget.channel.mediaType == MediaType.group ||
         widget.channel.mediaType == MediaType.serie) {
       if (widget.channel.mediaType == MediaType.serie &&

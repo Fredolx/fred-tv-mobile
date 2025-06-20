@@ -103,7 +103,7 @@ Future<dynamic> getXtreamHttpData(String action, Source source,
   return null;
 }
 
-processXtream(
+void processXtream(
     List<Future<void> Function(SqliteWriteContext, Map<String, String>)>
         statements,
     List<XtreamStream> streams,
@@ -142,7 +142,7 @@ String getUrl(
   return "${source.urlOrigin}/${getXtreamMediaTypeStr(streamType)}/${source.username}/${source.password}/$streamId.${extension ?? liveStreamExtension}";
 }
 
-getXtreamMediaTypeStr(MediaType type) {
+String getXtreamMediaTypeStr(MediaType type) {
   switch (type) {
     case MediaType.livestream:
       return "live";
@@ -169,7 +169,7 @@ Uri buildXtreamUrl(Source source, String action,
   return url;
 }
 
-getEpisodes(Channel channel) async {
+Future<void> getEpisodes(Channel channel) async {
   List<Future<void> Function(SqliteWriteContext, Map<String, String>)>
       statements = [];
   var seriesId = int.parse(channel.url!);
@@ -194,7 +194,7 @@ getEpisodes(Channel channel) async {
   await Sql.commitWrite(statements);
 }
 
-episodeToChannel(XtreamEpisode episode, Source source, int seriesId) {
+Channel episodeToChannel(XtreamEpisode episode, Source source, int seriesId) {
   return Channel(
       image: episode.info?.movieImage,
       mediaType: MediaType.movie,

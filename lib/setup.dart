@@ -25,7 +25,7 @@ class _SetupState extends State<Setup> {
   bool formValid = false;
   Set<String> existingSourceNames = {};
 
-  showXtreamCorrectionModal() async {
+  Future showXtreamCorrectionModal() async {
     return await showDialog(
         context: context, builder: (context) => CorrectionModal());
   }

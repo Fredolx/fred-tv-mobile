@@ -16,7 +16,7 @@ import 'package:sqlite_async/sqlite_async.dart';
 const int pageSize = 36;
 
 class Sql {
-  static commitWrite(
+  static Future<void> commitWrite(
       List<Future<void> Function(SqliteWriteContext, Map<String, String>)>
           commits) async {
     var db = await DbFactory.db;
@@ -188,7 +188,7 @@ class Sql {
     return List.filled(size, "?").join(",");
   }
 
-  static getKeywordsSql(int size) {
+  static String getKeywordsSql(int size) {
     return List.generate(size, (_) => "name LIKE ?").join(" AND ");
   }
 
@@ -308,7 +308,7 @@ class Sql {
     });
   }
 
-  static deleteSource(int sourceId) async {
+  static Future<void> deleteSource(int sourceId) async {
     var db = await DbFactory.db;
     await db.writeTransaction((tx) async {
       await tx.execute("DELETE FROM channels WHERE source_id = ?", [sourceId]);
@@ -331,7 +331,7 @@ class Sql {
     };
   }
 
-  static updateSource(Source source) async {
+  static Future<void> updateSource(Source source) async {
     var db = await DbFactory.db;
     await db.execute('''
       UPDATE sources

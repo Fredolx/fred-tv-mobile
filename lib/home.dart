@@ -69,7 +69,7 @@ class _HomeState extends State<Home> {
     await load();
   }
 
-  refreshOnStart() async {
+  Future<void> refreshOnStart() async {
     blockSettings = true;
     await Error.tryAsyncNoLoading(() async {
       await Utils.refreshAllSources();
@@ -79,7 +79,7 @@ class _HomeState extends State<Home> {
     });
   }
 
-  toggleSearch() {
+  void toggleSearch() {
     setState(() {
       searchMode = !searchMode;
     });
@@ -148,14 +148,14 @@ class _HomeState extends State<Home> {
     }
   }
 
-  removeNode() {
+  void removeNode() {
     filters.groupId = null;
     filters.seriesId = null;
     nodeTitle = null;
     load();
   }
 
-  setNode(MediaType mediaType, int id, String title) async {
+  Future<void> setNode(MediaType mediaType, int id, String title) async {
     if (mediaType == MediaType.group) {
       filters.groupId = id;
     } else if (mediaType == MediaType.serie) {
@@ -167,7 +167,7 @@ class _HomeState extends State<Home> {
     load();
   }
 
-  canPop() {
+  bool canPop() {
     return !searchMode && filters.seriesId == null && filters.groupId == null;
   }
 
