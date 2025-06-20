@@ -33,7 +33,7 @@ class _SettingsState extends State<SettingsView> {
     initAsync();
   }
 
-  initAsync() async {
+  Future<void> initAsync() async {
     var results =
         await Future.wait([SettingsService.getSettings(), Sql.getSources()]);
     setState(() {
@@ -43,7 +43,7 @@ class _SettingsState extends State<SettingsView> {
     });
   }
 
-  updateView(ViewType view) {
+  void updateView(ViewType view) {
     if (view != ViewType.settings) {
       Navigator.push(
           context,
@@ -77,7 +77,7 @@ class _SettingsState extends State<SettingsView> {
     );
   }
 
-  showEditDialog(BuildContext context, final Source source) async {
+  Future<void> showEditDialog(BuildContext context, final Source source) async {
     await showDialog(
         context: context,
         builder: (builder) => Center(
@@ -170,7 +170,7 @@ class _SettingsState extends State<SettingsView> {
             ))));
   }
 
-  _showDefaultViewDialog(BuildContext context) async {
+  Future<void> _showDefaultViewDialog(BuildContext context) async {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -186,7 +186,7 @@ class _SettingsState extends State<SettingsView> {
     );
   }
 
-  toggleSource(Source source) async {
+  Future<void> toggleSource(Source source) async {
     await Error.tryAsyncNoLoading(
         () async => await Sql.setSourceEnabled(!source.enabled, source.id!),
         context);
@@ -236,7 +236,7 @@ class _SettingsState extends State<SettingsView> {
         ));
   }
 
-  showConfirmDeleteDialog(Source source) async {
+  Future<void> showConfirmDeleteDialog(Source source) async {
     await showDialog(
         context: context,
         builder: (builder) => AlertDialog(
@@ -272,7 +272,7 @@ class _SettingsState extends State<SettingsView> {
             ));
   }
 
-  reloadSources() async {
+  Future<void> reloadSources() async {
     await Error.tryAsyncNoLoading(
         () async => sources = await Sql.getSources(), context);
     setState(() {
@@ -280,7 +280,7 @@ class _SettingsState extends State<SettingsView> {
     });
   }
 
-  updateSettings() async {
+  Future<void> updateSettings() async {
     await Error.tryAsyncNoLoading(
         () async => await SettingsService.updateSettings(settings), context);
   }

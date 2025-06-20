@@ -39,7 +39,7 @@ class Utils {
     }
   }
 
-  static refreshAllSources() async {
+  static Future<void> refreshAllSources() async {
     var sources = await Sql.getSources();
     for (var source in sources) {
       await refreshSource(source);

@@ -29,7 +29,7 @@ class _PlayerState extends State<Player> {
     initAsync();
   }
 
-  initAsync() async {
+  Future<void> initAsync() async {
     await player.open(mk.Media(widget.channel.url!));
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       await key.currentState?.enterFullscreen();
@@ -40,7 +40,7 @@ class _PlayerState extends State<Player> {
     }
   }
 
-  setLastPosition() async {
+  Future<void> setLastPosition() async {
     var seconds = await Sql.getPosition(widget.channel.id!);
     if (seconds != null) {
       subscription = player.stream.duration.listen((event) {
