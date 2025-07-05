@@ -253,37 +253,26 @@ class _HomeState extends State<Home> {
                         )
                       : const SizedBox.shrink()),
               Expanded(
-                  child: Padding(
-                padding: const EdgeInsets.fromLTRB(5, 5, 5, 0),
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    double cardWidth = 150;
-                    double cardHeight = 70;
-                    int crossAxisCount = (constraints.maxWidth / cardWidth)
-                        .floor()
-                        .clamp(1, 4)
-                        .toInt();
-                    return GridView.builder(
-                      controller: _scrollController,
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: crossAxisCount,
-                        crossAxisSpacing: 8,
-                        mainAxisSpacing: 12,
-                        childAspectRatio: cardWidth / cardHeight,
-                      ),
-                      itemCount: channels.length,
-                      itemBuilder: (context, index) {
-                        final channel = channels[index];
-                        return ChannelTile(
-                          channel: channel,
-                          updateViewMode: setNode,
-                          parentContext: context,
-                        );
-                      },
-                    );
-                  },
+                  child: GridView.builder(
+                shrinkWrap: true,
+                controller: _scrollController,
+                padding: const EdgeInsets.fromLTRB(16, 15, 16, 5),
+                itemCount: channels.length,
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: 315,
+                  mainAxisExtent: 120,
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
                 ),
-              ))
+                itemBuilder: (context, index) {
+                  final channel = channels[index];
+                  return ChannelTile(
+                    channel: channel,
+                    updateViewMode: setNode,
+                    parentContext: context,
+                  );
+                },
+              )),
             ]))),
             bottomNavigationBar: BottomNav(
               updateViewMode: navbarChanged,
