@@ -1,4 +1,4 @@
-# open-tv-mobile
+# Open TV Mobile
 
 Open TV for Android and iOS
 
