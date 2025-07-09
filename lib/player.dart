@@ -6,9 +6,11 @@ import 'package:media_kit_video/media_kit_video.dart';
 import 'package:open_tv/backend/sql.dart';
 import 'package:open_tv/home.dart';
 import 'package:open_tv/models/channel.dart';
+import 'package:open_tv/models/id_data.dart';
 import 'package:open_tv/models/media_type.dart';
 import 'package:media_kit/media_kit.dart' as mk;
 import 'package:media_kit_video/media_kit_video.dart' as mkvideo;
+import 'package:open_tv/select_dialog.dart';
 
 class Player extends StatefulWidget {
   final Channel channel;
@@ -49,6 +51,27 @@ class _PlayerState extends State<Player> {
     super.dispose();
   }
 
+  Future<void> openSubtitlesModal() async {
+    await showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (context) => SelectDialog(
+            title: "Select subtitles",
+            action: (id) async {
+              player.setSubtitleTrack(player.state.tracks.subtitle[id]);
+              Navigator.of(context).pop();
+            },
+            data: player.state.tracks.subtitle
+                .asMap()
+                .entries
+                .map((entry) => IdData(
+                    id: entry.key,
+                    data: entry.value.language != null
+                        ? "${entry.value.language} - ${entry.value.id}"
+                        : entry.value.id))
+                .toList()));
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -75,8 +98,9 @@ class _PlayerState extends State<Player> {
     if (widget.channel.mediaType == MediaType.movie) {
       Sql.setPosition(widget.channel.id!, player.state.position.inSeconds);
     }
-    if (key.currentState!.isFullscreen())
+    if (key.currentState!.isFullscreen()) {
       await key.currentState!.exitFullscreen();
+    }
     Navigator.of(context).pop();
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -89,21 +113,30 @@ class _PlayerState extends State<Player> {
 
   MaterialVideoControlsThemeData getThemeData(BuildContext context) {
     return MaterialVideoControlsThemeData(
-      speedUpOnLongPress: false,
-      seekOnDoubleTap: widget.channel.mediaType != MediaType.livestream,
-      displaySeekBar: widget.channel.mediaType != MediaType.livestream,
-      seekBarMargin: const EdgeInsets.only(bottom: 60),
-      seekBarThumbSize: 20,
-      seekBarHeight: 10,
-      seekGesture: widget.channel.mediaType != MediaType.livestream,
-      topButtonBar: [
-        IconButton(
-          onPressed: onExit,
-          icon: const Icon(Icons.arrow_back, color: Colors.white, size: 32),
-        ),
-        const SizedBox(width: 10),
-        Text(widget.channel.name),
-      ],
-    );
+        speedUpOnLongPress: false,
+        seekOnDoubleTap: widget.channel.mediaType != MediaType.livestream,
+        displaySeekBar: widget.channel.mediaType != MediaType.livestream,
+        seekBarMargin: const EdgeInsets.only(bottom: 60),
+        seekBarThumbSize: 20,
+        seekBarHeight: 10,
+        seekGesture: widget.channel.mediaType != MediaType.livestream,
+        topButtonBar: [
+          IconButton(
+            onPressed: onExit,
+            icon: const Icon(Icons.arrow_back, color: Colors.white, size: 32),
+          ),
+          const SizedBox(width: 10),
+          Text(widget.channel.name),
+        ],
+        bottomButtonBar: [
+          IconButton(
+            onPressed: openSubtitlesModal,
+            icon: const Icon(Icons.subtitles, color: Colors.white, size: 32),
+          ),
+          IconButton(
+            onPressed: onExit,
+            icon: const Icon(Icons.music_note, color: Colors.white, size: 32),
+          ),
+        ]);
   }
 }
