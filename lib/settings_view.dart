@@ -148,8 +148,10 @@ class _SettingsState extends State<SettingsView> {
                   "Successfully deleted source");
               await reloadSources();
               if (sources.isEmpty) {
-                Navigator.pushReplacement(context,
-                    MaterialPageRoute(builder: (context) => const Setup()));
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => const Setup()),
+                    (route) => false);
               }
             }));
   }

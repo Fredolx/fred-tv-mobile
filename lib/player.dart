@@ -9,10 +9,12 @@ import 'package:open_tv/models/channel.dart';
 import 'package:open_tv/models/media_type.dart';
 import 'package:media_kit/media_kit.dart' as mk;
 import 'package:media_kit_video/media_kit_video.dart' as mkvideo;
+import 'package:open_tv/models/snapshot.dart';
 
 class Player extends StatefulWidget {
   final Channel channel;
-  const Player({super.key, required this.channel});
+  final Snapshot snapshot;
+  const Player({super.key, required this.channel, required this.snapshot});
   @override
   State<StatefulWidget> createState() => _PlayerState();
 }
@@ -23,6 +25,7 @@ class _PlayerState extends State<Player> {
   late mkvideo.VideoController videoController =
       mkvideo.VideoController(player);
   late final GlobalKey<VideoState> key = GlobalKey<VideoState>();
+  bool exiting = false;
   @override
   void initState() {
     super.initState();
@@ -50,26 +53,39 @@ class _PlayerState extends State<Player> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: Colors.black,
-        body: MaterialVideoControlsTheme(
-          normal: getThemeData(context),
-          fullscreen: getThemeData(context),
-          child: Video(
-            key: key,
-            controller: videoController,
-            onExitFullscreen: () async => onExit(),
-          ),
-        ));
+    return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) {
+          onExit();
+        },
+        child: Scaffold(
+            backgroundColor: Colors.black,
+            body: MaterialVideoControlsTheme(
+              normal: getThemeData(context),
+              fullscreen: getThemeData(context),
+              child: Video(
+                key: key,
+                controller: videoController,
+                onExitFullscreen: () async => onExit(),
+              ),
+            )));
   }
 
   void onExit() async {
+    if (exiting) return;
+    exiting = true;
+    print("exiting");
     if (widget.channel.mediaType == MediaType.movie) {
       Sql.setPosition(widget.channel.id!, player.state.position.inSeconds);
     }
     await key.currentState!.exitFullscreen();
-    Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (context) => Home()));
+    Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+            builder: (context) => Home(
+                  snapshot: widget.snapshot,
+                )),
+        (route) => false);
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,

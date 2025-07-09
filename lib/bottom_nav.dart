@@ -23,7 +23,9 @@ class _BottomNavState extends State<BottomNav> {
   @override
   void initState() {
     super.initState();
-    _selectedIndex = widget.startingView.index;
+    setState(() {
+      _selectedIndex = widget.startingView.index;
+    });
   }
 
   void onBarTapped(int index) {
@@ -36,15 +38,17 @@ class _BottomNavState extends State<BottomNav> {
       _selectedIndex = index;
     });
     if (_selectedIndex == ViewType.settings.index) {
-      Navigator.pushReplacement(
-          context,
-          PageRouteBuilder(
-            pageBuilder: (_, __, ___) => const SettingsView(),
-            transitionDuration: Duration.zero,
-            reverseTransitionDuration: Duration.zero,
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) => child,
-          ));
+      Navigator.pushAndRemoveUntil(
+        context,
+        PageRouteBuilder(
+          pageBuilder: (_, __, ___) => const SettingsView(),
+          transitionDuration: Duration.zero,
+          reverseTransitionDuration: Duration.zero,
+          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+              child,
+        ),
+        (route) => false,
+      );
       return;
     }
     widget.updateViewMode(ViewType.values[_selectedIndex]);
@@ -52,12 +56,6 @@ class _BottomNavState extends State<BottomNav> {
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Container(
         decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surfaceBright,

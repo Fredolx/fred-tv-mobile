@@ -6,16 +6,21 @@ import 'package:open_tv/memory.dart';
 import 'package:open_tv/models/channel.dart';
 import 'package:open_tv/error.dart';
 import 'package:open_tv/models/media_type.dart';
+import 'package:open_tv/models/node.dart';
+import 'package:open_tv/models/node_type.dart';
+import 'package:open_tv/models/snapshot.dart';
 import 'package:open_tv/player.dart';
 
 class ChannelTile extends StatefulWidget {
   final Channel channel;
   final BuildContext parentContext;
-  final Function(MediaType, int, String) updateViewMode;
+  final Function(Node node) setNode;
+  final Snapshot Function() getSnapshot;
   const ChannelTile(
       {super.key,
       required this.channel,
-      required this.updateViewMode,
+      required this.setNode,
+      required this.getSnapshot,
       required this.parentContext});
 
   @override
@@ -58,16 +63,21 @@ class _ChannelTileState extends State<ChannelTile> {
           refreshedSeries.add(widget.channel.id!);
         }, widget.parentContext, null, true, false);
       }
-      widget.updateViewMode(
-          widget.channel.mediaType,
-          widget.channel.mediaType == MediaType.group
+      widget.setNode(Node(
+          id: widget.channel.mediaType == MediaType.group
               ? widget.channel.id!
               : int.parse(widget.channel.url!),
-          widget.channel.name);
+          name: widget.channel.name,
+          type: fromMediaType(widget.channel.mediaType)));
     } else {
       Sql.addToHistory(widget.channel.id!);
-      Navigator.push(context,
-          MaterialPageRoute(builder: (_) => Player(channel: widget.channel)));
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (_) => Player(
+                    channel: widget.channel,
+                    snapshot: widget.getSnapshot(),
+                  )));
     }
   }
 
