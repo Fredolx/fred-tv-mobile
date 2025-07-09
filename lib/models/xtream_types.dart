@@ -19,11 +19,11 @@ class XtreamStream {
 
   factory XtreamStream.fromJson(Map<String, dynamic> json) {
     return XtreamStream(
-      streamId: json['stream_id'],
+      streamId: json['stream_id']?.toString(),
       name: json['name'],
-      categoryId: json['category_id'],
+      categoryId: json['category_id']?.toString(),
       streamIcon: json['stream_icon'],
-      seriesId: json['series_id'],
+      seriesId: json['series_id']?.toString(),
       cover: json['cover'],
       containerExtension: json['container_extension'],
     );
@@ -64,11 +64,11 @@ class XtreamEpisode {
 
   factory XtreamEpisode.fromJson(Map<String, dynamic> json) {
     return XtreamEpisode(
-        id: json['id'],
+        id: json['id'].toString(),
         title: json['title'],
         containerExtension: json['container_extension'],
-        episodeNum: json['episode_num'],
-        season: json['season'],
+        episodeNum: json['episode_num'].toString(),
+        season: json['season'].toString(),
         info: (json['info'] is Map)
             ? XtreamEpisodeInfo.fromJson(json['info'])
             : null);
@@ -98,7 +98,7 @@ class XtreamCategory {
 
   factory XtreamCategory.fromJson(Map<String, dynamic> json) {
     return XtreamCategory(
-      categoryId: json['category_id'],
+      categoryId: json['category_id'].toString(),
       categoryName: json['category_name'],
     );
   }
@@ -135,7 +135,7 @@ class XtreamEPGItem {
 
   factory XtreamEPGItem.fromJson(Map<String, dynamic> json) {
     return XtreamEPGItem(
-      id: json['id'],
+      id: json['id'].toString(),
       title: json['title'],
       description: json['description'],
       startTimestamp: json['start_timestamp'],
