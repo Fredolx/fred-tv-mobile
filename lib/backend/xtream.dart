@@ -132,13 +132,13 @@ Channel xtreamToChannel(XtreamStream stream, Source source,
       image: stream.streamIcon?.trim() ?? stream.cover?.trim(),
       url: streamType == MediaType.serie
           ? stream.seriesId.toString()
-          : getUrl(
-              stream.streamId, source, streamType, stream.containerExtension),
-      streamId: stream.streamId);
+          : getUrl(stream.streamId?.trim(), source, streamType,
+              stream.containerExtension),
+      streamId: int.tryParse(stream.streamId ?? "") ?? -1);
 }
 
 String getUrl(
-    int? streamId, Source source, MediaType streamType, String? extension) {
+    String? streamId, Source source, MediaType streamType, String? extension) {
   return "${source.urlOrigin}/${getXtreamMediaTypeStr(streamType)}/${source.username}/${source.password}/$streamId.${extension ?? liveStreamExtension}";
 }
 
@@ -201,7 +201,7 @@ Channel episodeToChannel(XtreamEpisode episode, Source source, int seriesId) {
       name: episode.title.trim(),
       sourceId: source.id!,
       favorite: false,
-      url: getUrl(int.parse(episode.id), source, MediaType.serie,
-          episode.containerExtension),
+      url: getUrl(
+          episode.id, source, MediaType.serie, episode.containerExtension),
       seriesId: seriesId);
 }
