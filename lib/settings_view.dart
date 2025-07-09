@@ -65,6 +65,7 @@ class _SettingsState extends State<SettingsView> {
 
   Future<void> showEditDialog(BuildContext context, final Source source) async {
     await showDialog(
+        barrierDismissible: true,
         context: context,
         builder: (builder) =>
             EditDialog(source: source, afterSave: reloadSources));
@@ -72,6 +73,7 @@ class _SettingsState extends State<SettingsView> {
 
   Future<void> _showDefaultViewDialog(BuildContext context) async {
     showDialog(
+        barrierDismissible: true,
         context: context,
         builder: (BuildContext context) {
           return SelectDialog(
@@ -142,6 +144,7 @@ class _SettingsState extends State<SettingsView> {
 
   Future<void> showConfirmDeleteDialog(Source source) async {
     await showDialog(
+        barrierDismissible: true,
         context: context,
         builder: (builder) => ConfirmDelete(
             type: "source",

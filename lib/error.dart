@@ -19,6 +19,7 @@ class Error {
                 textColor: Colors.white,
                 onPressed: () async => {
                       await showDialog(
+                          barrierDismissible: true,
                           context: context,
                           builder: (builder) => AlertDialog(
                                 title: const Text('Error'),
