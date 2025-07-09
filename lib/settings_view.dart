@@ -4,11 +4,13 @@ import 'package:open_tv/backend/sql.dart';
 import 'package:open_tv/backend/utils.dart';
 import 'package:open_tv/bottom_nav.dart';
 import 'package:open_tv/confirm_delete.dart';
-import 'package:open_tv/default_view_dialog.dart';
+import 'package:open_tv/models/filters.dart';
+import 'package:open_tv/select_dialog.dart';
 import 'package:open_tv/edit_dialog.dart';
 import 'package:open_tv/home.dart';
 import 'package:open_tv/loading.dart';
 import 'package:open_tv/models/home_manager.dart';
+import 'package:open_tv/models/id_data.dart';
 import 'package:open_tv/models/settings.dart';
 import 'package:open_tv/models/source.dart';
 import 'package:open_tv/models/source_type.dart';
@@ -46,16 +48,18 @@ class _SettingsState extends State<SettingsView> {
 
   void updateView(ViewType view) {
     if (view != ViewType.settings) {
-      Navigator.push(
-          context,
-          PageRouteBuilder(
-            pageBuilder: (_, __, ___) =>
-                Home(home: HomeManager.defaultManager()),
-            transitionDuration: Duration.zero,
-            reverseTransitionDuration: Duration.zero,
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) => child,
-          ));
+      Navigator.pushAndRemoveUntil(
+        context,
+        PageRouteBuilder(
+          pageBuilder: (_, __, ___) =>
+              Home(home: HomeManager(filters: Filters(viewType: view))),
+          transitionDuration: Duration.zero,
+          reverseTransitionDuration: Duration.zero,
+          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+              child,
+        ),
+        (route) => false,
+      );
     }
   }
 
@@ -70,13 +74,19 @@ class _SettingsState extends State<SettingsView> {
     showDialog(
         context: context,
         builder: (BuildContext context) {
-          return DefaultViewDialog(action: (view) {
-            setState(() {
-              settings.defaultView = view;
-              updateSettings();
-            });
-            Navigator.of(context).pop();
-          });
+          return SelectDialog(
+              title: "Default view",
+              data: ViewType.values
+                  .take(4)
+                  .map((x) => IdData(id: x.index, data: x.name))
+                  .toList(),
+              action: (view) {
+                setState(() {
+                  settings.defaultView = ViewType.values[view];
+                  updateSettings();
+                });
+                Navigator.of(context).pop();
+              });
         });
   }
 
