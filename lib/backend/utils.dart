@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:open_tv/backend/m3u.dart';
 import 'package:open_tv/backend/sql.dart';
 import 'package:open_tv/backend/xtream.dart';
+import 'package:open_tv/memory.dart';
 import 'package:open_tv/models/source.dart';
 import 'package:open_tv/models/source_type.dart';
 import 'package:path/path.dart';
@@ -22,6 +23,7 @@ class Utils {
   }
 
   static Future<void> refreshSource(Source source) async {
+    refreshedSeries.clear();
     await processSource(source, true);
   }
 
