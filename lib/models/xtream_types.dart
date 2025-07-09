@@ -1,9 +1,9 @@
 class XtreamStream {
-  final int? streamId;
+  final String? streamId;
   final String? name;
   final String? categoryId;
   final String? streamIcon;
-  final int? seriesId;
+  final String? seriesId;
   final String? cover;
   final String? containerExtension;
 
@@ -49,8 +49,8 @@ class XtreamEpisode {
   final String id;
   final String title;
   final String containerExtension;
-  final int episodeNum;
-  final int season;
+  final String episodeNum;
+  final String season;
   final XtreamEpisodeInfo? info;
 
   XtreamEpisode({
