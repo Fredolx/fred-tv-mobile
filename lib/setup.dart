@@ -7,6 +7,7 @@ import 'package:open_tv/backend/utils.dart';
 import 'package:open_tv/correction_modal.dart';
 import 'package:open_tv/home.dart';
 import 'package:open_tv/loading.dart';
+import 'package:open_tv/models/home_manager.dart';
 import 'package:open_tv/models/source.dart';
 import 'package:open_tv/models/source_type.dart';
 import 'package:open_tv/error.dart';
@@ -244,7 +245,8 @@ class _SetupState extends State<Setup> {
                               Navigator.pushAndRemoveUntil(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => const Home()),
+                                    builder: (context) => Home(
+                                        home: HomeManager.defaultManager())),
                                 (route) => false,
                               );
                             }

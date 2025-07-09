@@ -8,6 +8,7 @@ import 'package:open_tv/default_view_dialog.dart';
 import 'package:open_tv/edit_dialog.dart';
 import 'package:open_tv/home.dart';
 import 'package:open_tv/loading.dart';
+import 'package:open_tv/models/home_manager.dart';
 import 'package:open_tv/models/settings.dart';
 import 'package:open_tv/models/source.dart';
 import 'package:open_tv/models/source_type.dart';
@@ -48,14 +49,8 @@ class _SettingsState extends State<SettingsView> {
       Navigator.push(
           context,
           PageRouteBuilder(
-            pageBuilder: (_, __, ___) => Home(
-              settings: Settings(
-                  defaultView: view,
-                  refreshOnStart: false,
-                  showLivestreams: settings.showLivestreams,
-                  showMovies: settings.showMovies,
-                  showSeries: settings.showSeries),
-            ),
+            pageBuilder: (_, __, ___) =>
+                Home(home: HomeManager.defaultManager()),
             transitionDuration: Duration.zero,
             reverseTransitionDuration: Duration.zero,
             transitionsBuilder:

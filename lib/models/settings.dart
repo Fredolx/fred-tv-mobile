@@ -1,3 +1,5 @@
+import 'package:open_tv/backend/settings_service.dart';
+import 'package:open_tv/models/media_type.dart';
 import 'package:open_tv/models/view_type.dart';
 
 class Settings {
@@ -12,4 +14,12 @@ class Settings {
       this.showLivestreams = true,
       this.showMovies = true,
       this.showSeries = true});
+
+  List<MediaType> getMediaTypes() {
+    return [
+      if (showLivestreams) MediaType.livestream,
+      if (showMovies) MediaType.movie,
+      if (showSeries) MediaType.serie
+    ];
+  }
 }
