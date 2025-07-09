@@ -9,13 +9,18 @@ import 'package:open_tv/loading.dart';
 import 'package:open_tv/models/channel.dart';
 import 'package:open_tv/models/filters.dart';
 import 'package:open_tv/models/media_type.dart';
+import 'package:open_tv/models/node.dart';
+import 'package:open_tv/models/node_type.dart';
 import 'package:open_tv/models/settings.dart';
+import 'package:open_tv/models/snapshot.dart';
+import 'package:open_tv/models/stack.dart' as fstack;
 import 'package:open_tv/models/view_type.dart';
 import 'package:open_tv/error.dart';
 
 class Home extends StatefulWidget {
   final Settings? settings;
-  const Home({super.key, this.settings});
+  final Snapshot? snapshot;
+  const Home({super.key, this.settings, this.snapshot});
   @override
   State<Home> createState() => _HomeState();
 }
@@ -37,12 +42,13 @@ class _HomeState extends State<Home> {
   final ScrollController _scrollController = ScrollController();
   bool isLoading = false;
   bool blockSettings = false;
-  String? nodeTitle;
   int? previousScroll;
+  fstack.Stack nodeStack = fstack.Stack();
 
   @override
   void initState() {
     super.initState();
+    bool restoreState = widget.snapshot != null;
     _scrollController.addListener(_scrollListener);
     if (widget.settings != null) {
       filters.viewType = widget.settings!.defaultView;
@@ -56,17 +62,30 @@ class _HomeState extends State<Home> {
       if (widget.settings?.showSeries == true) {
         filters.mediaTypes.add(MediaType.serie);
       }
+    } else if (restoreState) {
+      filters = widget.snapshot!.filters;
+      nodeStack = widget.snapshot!.stack;
+      if (filters.query != null) {
+        searchMode = true;
+        searchController.text = filters.query!;
+      }
     }
-    initializeAsync();
+    initializeAsync(restoreState);
   }
 
-  Future<void> initializeAsync() async {
-    final sources = await Sql.getEnabledSourcesMinimal();
-    filters.sourceIds = sources.map((x) => x.id).toList();
-    if (widget.settings?.refreshOnStart == true) {
-      refreshOnStart();
+  Future<void> initializeAsync(bool restoreState) async {
+    if (!restoreState) {
+      final sources = await Sql.getEnabledSourcesMinimal();
+      filters.sourceIds = sources.map((x) => x.id).toList();
+      if (widget.settings?.refreshOnStart == true) {
+        refreshOnStart();
+      }
     }
     await load();
+  }
+
+  Snapshot getSnapshot() {
+    return Snapshot(stack: nodeStack, filters: filters);
   }
 
   Future<void> refreshOnStart() async {
@@ -124,11 +143,16 @@ class _HomeState extends State<Home> {
     super.dispose();
   }
 
+  void clearFilters() {
+    filters.seriesId = null;
+    filters.groupId = null;
+    filters.page = 1;
+    nodeStack.clear();
+  }
+
   void navbarChanged(ViewType view) {
     filters.viewType = view;
-    filters.groupId = null;
-    filters.seriesId = null;
-    nodeTitle = null;
+    clearFilters();
     _scrollController.jumpTo(0);
     load(false);
   }
@@ -148,27 +172,78 @@ class _HomeState extends State<Home> {
     }
   }
 
-  void removeNode() {
-    filters.groupId = null;
-    filters.seriesId = null;
-    nodeTitle = null;
-    load();
+  void handleBack() {
+    if (nodeStack.hasNodes()) {
+      undoFiltersNode(nodeStack.pop());
+      load();
+    } else if (searchMode) {
+      toggleSearch();
+    }
   }
 
-  Future<void> setNode(MediaType mediaType, int id, String title) async {
-    if (mediaType == MediaType.group) {
-      filters.groupId = id;
-    } else if (mediaType == MediaType.serie) {
-      filters.seriesId = id;
-    }
-    nodeTitle = title;
-    searchController.clear();
+  bool canPop() {
+    return !searchMode && !nodeStack.hasNodes();
+  }
+
+  void setNode(Node node) {
+    node.query = filters.query;
+    nodeStack.add(node);
+    setFiltersNode(node);
     _scrollController.jumpTo(0);
     load();
   }
 
-  bool canPop() {
-    return !searchMode && filters.seriesId == null && filters.groupId == null;
+  void setFiltersNode(Node node) {
+    clearSearch();
+    filters.page = 1;
+    switch (node.type) {
+      case NodeType.category:
+        filters.viewType = ViewType.all;
+        filters.groupId = node.id;
+        break;
+      case NodeType.series:
+        filters.viewType = ViewType.all;
+        filters.seriesId = node.id;
+        break;
+    }
+  }
+
+  void clearSearch() {
+    filters.query = null;
+    searchController.clear();
+  }
+
+  void undoFiltersNode(Node currentNode) {
+    switch (currentNode.type) {
+      case NodeType.category:
+        filters.groupId = null;
+        break;
+      case NodeType.series:
+        filters.seriesId = null;
+    }
+    reapplyFilters(currentNode);
+    filters.viewType = currentNode.type == NodeType.category
+        ? ViewType.categories
+        : ViewType.all;
+  }
+
+  void reapplyFilters(Node node) {
+    if (node.query != null && node.query!.isNotEmpty) {
+      filters.query = node.query;
+      searchController.text = filters.query!;
+    } else {
+      clearSearch();
+    }
+  }
+
+  ViewType getStartingView() {
+    if (widget.snapshot == null) {
+      return filters.viewType;
+    }
+    if (widget.snapshot!.filters.groupId != null) {
+      return ViewType.categories;
+    }
+    return ViewType.all;
   }
 
   @override
@@ -176,19 +251,15 @@ class _HomeState extends State<Home> {
     return PopScope(
         canPop: canPop(),
         onPopInvokedWithResult: (didPop, result) {
-          if (searchMode) {
-            toggleSearch();
-          } else if (filters.seriesId != null || filters.groupId != null) {
-            removeNode();
-          }
+          handleBack();
         },
         child: Scaffold(
-            appBar: filters.groupId != null || filters.seriesId != null
+            appBar: nodeStack.hasNodes()
                 ? AppBar(
-                    title: Text("Viewing $nodeTitle"),
+                    title: Text(nodeStack.get().toString()),
                     leading: IconButton(
                       icon: const Icon(Icons.arrow_back),
-                      onPressed: () => removeNode(),
+                      onPressed: () => handleBack(),
                     ),
                   )
                 : null,
@@ -268,15 +339,16 @@ class _HomeState extends State<Home> {
                   final channel = channels[index];
                   return ChannelTile(
                     channel: channel,
-                    updateViewMode: setNode,
+                    setNode: setNode,
                     parentContext: context,
+                    getSnapshot: getSnapshot,
                   );
                 },
               )),
             ]))),
             bottomNavigationBar: BottomNav(
               updateViewMode: navbarChanged,
-              startingView: filters.viewType,
+              startingView: getStartingView(),
               blockSettings: blockSettings,
             ),
             floatingActionButton: Visibility(

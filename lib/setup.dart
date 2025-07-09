@@ -241,10 +241,12 @@ class _SetupState extends State<Setup> {
                               );
                             }, context, "Successfully added source");
                             if (result.success) {
-                              Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => const Home()));
+                              Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const Home()),
+                                (route) => false,
+                              );
                             }
                           },
                           child: const Text("Submit"),
