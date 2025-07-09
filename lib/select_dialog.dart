@@ -13,14 +13,14 @@ class SelectDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-        child: AlertDialog(
+    return AlertDialog(
       title: Text(title),
-      content: Column(
+      content: SingleChildScrollView(
+          child: Column(
         mainAxisSize: MainAxisSize.min,
         children: data.map(getItem).toList(),
-      ),
-    ));
+      )),
+    );
   }
 
   Widget getItem(IdData<String> item) {
