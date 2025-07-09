@@ -3,8 +3,8 @@ import 'package:open_tv/models/view_type.dart';
 
 class Filters {
   String? query;
-  List<int> sourceIds;
-  List<MediaType> mediaTypes;
+  List<int>? sourceIds;
+  List<MediaType>? mediaTypes;
   ViewType viewType;
   int page;
   int? seriesId;
@@ -13,12 +13,12 @@ class Filters {
 
   Filters({
     this.query,
-    required this.sourceIds,
-    required this.mediaTypes,
+    this.sourceIds,
+    this.mediaTypes,
     required this.viewType,
-    required this.page,
+    this.page = 1,
     this.seriesId,
     this.groupId,
-    required this.useKeywords,
+    this.useKeywords = false,
   });
 }

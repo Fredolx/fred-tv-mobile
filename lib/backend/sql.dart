@@ -128,8 +128,9 @@ class Sql {
     }
     var db = await DbFactory.db;
     var offset = filters.page * pageSize - pageSize;
-    var mediaTypes =
-        filters.seriesId == null ? filters.mediaTypes.map((x) => x.index) : [1];
+    var mediaTypes = filters.seriesId == null
+        ? filters.mediaTypes!.map((x) => x.index)
+        : [1];
     var query = filters.query ?? "";
     var keywords = filters.useKeywords
         ? query.split(" ").map((f) => "%$f%").toList()
@@ -138,7 +139,7 @@ class Sql {
         SELECT * FROM channels 
         WHERE (${getKeywordsSql(keywords.length)})
         AND media_type IN (${generatePlaceholders(mediaTypes.length)})
-        AND source_id IN (${generatePlaceholders(filters.sourceIds.length)})
+        AND source_id IN (${generatePlaceholders(filters.sourceIds!.length)})
         AND url IS NOT NULL
     ''';
     List<Object> params = [];
@@ -157,7 +158,7 @@ class Sql {
     sqlQuery += "\nLIMIT ?, ?";
     params.addAll(keywords);
     params.addAll(mediaTypes);
-    params.addAll(filters.sourceIds);
+    params.addAll(filters.sourceIds!);
     if (filters.seriesId != null) {
       params.add(filters.seriesId!);
     } else if (filters.groupId != null) {
@@ -202,12 +203,12 @@ class Sql {
     var sqlQuery = '''
         SELECT * FROM groups 
         WHERE (${getKeywordsSql(keywords.length)})
-        AND source_id IN (${generatePlaceholders(filters.sourceIds.length)})
+        AND source_id IN (${generatePlaceholders(filters.sourceIds!.length)})
         LIMIT ?, ?
     ''';
     List<Object> params = [];
     params.addAll(keywords);
-    params.addAll(filters.sourceIds);
+    params.addAll(filters.sourceIds!);
     params.add(offset);
     params.add(pageSize);
     var results = await db.getAll(sqlQuery, params);

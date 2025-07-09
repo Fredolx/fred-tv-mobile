@@ -15,12 +15,10 @@ class ChannelTile extends StatefulWidget {
   final Channel channel;
   final BuildContext parentContext;
   final Function(Node node) setNode;
-  final Snapshot Function() getSnapshot;
   const ChannelTile(
       {super.key,
       required this.channel,
       required this.setNode,
-      required this.getSnapshot,
       required this.parentContext});
 
   @override
@@ -76,7 +74,6 @@ class _ChannelTileState extends State<ChannelTile> {
           MaterialPageRoute(
               builder: (_) => Player(
                     channel: widget.channel,
-                    snapshot: widget.getSnapshot(),
                   )));
     }
   }

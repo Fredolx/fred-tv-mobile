@@ -1,38 +1,29 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:open_tv/backend/settings_service.dart';
 import 'package:open_tv/backend/sql.dart';
-import 'package:open_tv/backend/utils.dart';
 import 'package:open_tv/bottom_nav.dart';
 import 'package:open_tv/channel_tile.dart';
 import 'package:open_tv/loading.dart';
 import 'package:open_tv/models/channel.dart';
 import 'package:open_tv/models/filters.dart';
-import 'package:open_tv/models/media_type.dart';
+import 'package:open_tv/models/home_manager.dart';
+import 'package:open_tv/models/no_push_animation_material_page_route.dart';
 import 'package:open_tv/models/node.dart';
 import 'package:open_tv/models/node_type.dart';
-import 'package:open_tv/models/settings.dart';
-import 'package:open_tv/models/snapshot.dart';
-import 'package:open_tv/models/stack.dart' as fstack;
 import 'package:open_tv/models/view_type.dart';
 import 'package:open_tv/error.dart';
 
 class Home extends StatefulWidget {
-  final Settings? settings;
-  final Snapshot? snapshot;
-  const Home({super.key, this.settings, this.snapshot});
+  final HomeManager home;
+  const Home({super.key, required this.home});
   @override
   State<Home> createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
   Timer? _debounce;
-  Filters filters = Filters(
-      sourceIds: [],
-      mediaTypes: [MediaType.livestream, MediaType.movie, MediaType.serie],
-      viewType: ViewType.all,
-      page: 1,
-      useKeywords: false);
   bool reachedMax = false;
   final int pageSize = 36;
   List<Channel> channels = [];
@@ -43,59 +34,24 @@ class _HomeState extends State<Home> {
   bool isLoading = false;
   bool blockSettings = false;
   int? previousScroll;
-  fstack.Stack nodeStack = fstack.Stack();
 
   @override
   void initState() {
     super.initState();
-    bool restoreState = widget.snapshot != null;
     _scrollController.addListener(_scrollListener);
-    if (widget.settings != null) {
-      filters.viewType = widget.settings!.defaultView;
-      filters.mediaTypes.clear();
-      if (widget.settings?.showLivestreams == true) {
-        filters.mediaTypes.add(MediaType.livestream);
-      }
-      if (widget.settings?.showMovies == true) {
-        filters.mediaTypes.add(MediaType.movie);
-      }
-      if (widget.settings?.showSeries == true) {
-        filters.mediaTypes.add(MediaType.serie);
-      }
-    } else if (restoreState) {
-      filters = widget.snapshot!.filters;
-      nodeStack = widget.snapshot!.stack;
-      if (filters.query != null) {
-        searchMode = true;
-        searchController.text = filters.query!;
-      }
-    }
-    initializeAsync(restoreState);
+    initializeAsync();
   }
 
-  Future<void> initializeAsync(bool restoreState) async {
-    if (!restoreState) {
+  Future<void> initializeAsync() async {
+    if (widget.home.filters.sourceIds == null) {
       final sources = await Sql.getEnabledSourcesMinimal();
-      filters.sourceIds = sources.map((x) => x.id).toList();
-      if (widget.settings?.refreshOnStart == true) {
-        refreshOnStart();
-      }
+      widget.home.filters.sourceIds = sources.map((x) => x.id).toList();
+    }
+    if (widget.home.filters.mediaTypes == null) {
+      widget.home.filters.mediaTypes =
+          (await SettingsService.getSettings()).getMediaTypes();
     }
     await load();
-  }
-
-  Snapshot getSnapshot() {
-    return Snapshot(stack: nodeStack, filters: filters);
-  }
-
-  Future<void> refreshOnStart() async {
-    blockSettings = true;
-    await Error.tryAsyncNoLoading(() async {
-      await Utils.refreshAllSources();
-    }, context, true, "Successfully refreshed all sources");
-    setState(() {
-      blockSettings = false;
-    });
   }
 
   void toggleSearch() {
@@ -107,7 +63,7 @@ class _HomeState extends State<Home> {
           (_) => FocusScope.of(context).requestFocus(_focusNode));
     } else {
       FocusScope.of(context).unfocus();
-      filters.query = null;
+      widget.home.filters.query = null;
       searchController.clear();
       _scrollController.jumpTo(0);
       load(false);
@@ -116,12 +72,12 @@ class _HomeState extends State<Home> {
 
   Future<void> load([bool more = false]) async {
     if (more) {
-      filters.page++;
+      widget.home.filters.page++;
     } else {
-      filters.page = 1;
+      widget.home.filters.page = 1;
     }
     await Error.tryAsyncNoLoading(() async {
-      List<Channel> channels = await Sql.search(filters);
+      List<Channel> channels = await Sql.search(widget.home.filters);
       if (!more) {
         setState(() {
           this.channels = channels;
@@ -143,20 +99,6 @@ class _HomeState extends State<Home> {
     super.dispose();
   }
 
-  void clearFilters() {
-    filters.seriesId = null;
-    filters.groupId = null;
-    filters.page = 1;
-    nodeStack.clear();
-  }
-
-  void navbarChanged(ViewType view) {
-    filters.viewType = view;
-    clearFilters();
-    _scrollController.jumpTo(0);
-    load(false);
-  }
-
   void _scrollListener() async {
     if (_scrollController.position.pixels >=
             _scrollController.position.maxScrollExtent * 0.75 &&
@@ -173,77 +115,52 @@ class _HomeState extends State<Home> {
   }
 
   void handleBack() {
-    if (nodeStack.hasNodes()) {
-      undoFiltersNode(nodeStack.pop());
-      load();
-    } else if (searchMode) {
-      toggleSearch();
-    }
+    toggleSearch();
   }
 
   bool canPop() {
-    return !searchMode && !nodeStack.hasNodes();
-  }
-
-  void setNode(Node node) {
-    node.query = filters.query;
-    nodeStack.add(node);
-    setFiltersNode(node);
-    _scrollController.jumpTo(0);
-    load();
-  }
-
-  void setFiltersNode(Node node) {
-    clearSearch();
-    filters.page = 1;
-    switch (node.type) {
-      case NodeType.category:
-        filters.viewType = ViewType.all;
-        filters.groupId = node.id;
-        break;
-      case NodeType.series:
-        filters.viewType = ViewType.all;
-        filters.seriesId = node.id;
-        break;
-    }
+    return !searchMode;
   }
 
   void clearSearch() {
-    filters.query = null;
+    widget.home.filters.query = null;
     searchController.clear();
   }
 
-  void undoFiltersNode(Node currentNode) {
-    switch (currentNode.type) {
-      case NodeType.category:
-        filters.groupId = null;
-        break;
-      case NodeType.series:
-        filters.seriesId = null;
-    }
-    reapplyFilters(currentNode);
-    filters.viewType = currentNode.type == NodeType.category
-        ? ViewType.categories
-        : ViewType.all;
-  }
-
-  void reapplyFilters(Node node) {
-    if (node.query != null && node.query!.isNotEmpty) {
-      filters.query = node.query;
-      searchController.text = filters.query!;
-    } else {
-      clearSearch();
-    }
-  }
-
   ViewType getStartingView() {
-    if (widget.snapshot == null) {
-      return filters.viewType;
-    }
-    if (widget.snapshot!.filters.groupId != null) {
+    if (widget.home.filters.groupId != null) {
       return ViewType.categories;
     }
-    return ViewType.all;
+    return widget.home.filters.viewType;
+  }
+
+  void updateViewMode(ViewType type) {
+    Navigator.of(context).pushAndRemoveUntil(
+        NoPushAnimationMaterialPageRoute(
+            builder: (context) => Home(
+                home: HomeManager(
+                    filters: Filters(
+                        viewType: type,
+                        mediaTypes: widget.home.filters.mediaTypes,
+                        sourceIds: widget.home.filters.sourceIds)))),
+        (route) => false);
+  }
+
+  void setNode(Node node) {
+    final home = HomeManager(
+        node: node,
+        filters: Filters(
+            viewType: ViewType.all,
+            mediaTypes: widget.home.filters.mediaTypes,
+            sourceIds: widget.home.filters.sourceIds));
+    if (widget.home.filters.groupId != null) {
+      home.filters.groupId = widget.home.filters.groupId;
+    } else if (node.type == NodeType.category) {
+      home.filters.groupId = node.id;
+    }
+    if (node.type == NodeType.series) home.filters.seriesId = node.id;
+    Navigator.of(context).push(NoPushAnimationMaterialPageRoute(
+        builder: (context) => Home(home: home)));
   }
 
   @override
@@ -254,12 +171,12 @@ class _HomeState extends State<Home> {
           handleBack();
         },
         child: Scaffold(
-            appBar: nodeStack.hasNodes()
+            appBar: widget.home.node != null
                 ? AppBar(
-                    title: Text(nodeStack.get().toString()),
+                    title: Text(widget.home.node.toString()),
                     leading: IconButton(
                       icon: const Icon(Icons.arrow_back),
-                      onPressed: () => handleBack(),
+                      onPressed: () => Navigator.of(context).pop(),
                     ),
                   )
                 : null,
@@ -286,7 +203,7 @@ class _HomeState extends State<Home> {
                                   _debounce?.cancel();
                                   _debounce = Timer(
                                       const Duration(milliseconds: 500), () {
-                                    filters.query = query;
+                                    widget.home.filters.query = query;
                                     load(false);
                                   });
                                 },
@@ -299,11 +216,11 @@ class _HomeState extends State<Home> {
                                   ),
                                   suffixIcon: IconButton(
                                       onPressed: () {
-                                        filters.useKeywords =
-                                            !filters.useKeywords;
+                                        widget.home.filters.useKeywords =
+                                            !widget.home.filters.useKeywords;
                                         load(false);
                                       },
-                                      icon: Icon(filters.useKeywords
+                                      icon: Icon(widget.home.filters.useKeywords
                                           ? Icons.label
                                           : Icons.label_outline)),
                                   filled: true, // Light background for contrast
@@ -339,17 +256,16 @@ class _HomeState extends State<Home> {
                   final channel = channels[index];
                   return ChannelTile(
                     channel: channel,
-                    setNode: setNode,
                     parentContext: context,
-                    getSnapshot: getSnapshot,
+                    setNode: setNode,
                   );
                 },
               )),
             ]))),
             bottomNavigationBar: BottomNav(
-              updateViewMode: navbarChanged,
               startingView: getStartingView(),
-              blockSettings: blockSettings,
+              blockSettings: false,
+              updateViewMode: updateViewMode,
             ),
             floatingActionButton: Visibility(
               visible: !searchMode,
