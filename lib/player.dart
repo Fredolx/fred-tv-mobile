@@ -72,6 +72,27 @@ class _PlayerState extends State<Player> {
                 .toList()));
   }
 
+  Future<void> openAudioModal() async {
+    await showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (context) => SelectDialog(
+            title: "Select audio",
+            action: (id) async {
+              player.setAudioTrack(player.state.tracks.audio[id]);
+              Navigator.of(context).pop();
+            },
+            data: player.state.tracks.audio
+                .asMap()
+                .entries
+                .map((entry) => IdData(
+                    id: entry.key,
+                    data: entry.value.title ??
+                        entry.value.language ??
+                        entry.value.id))
+                .toList()));
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -133,8 +154,11 @@ class _PlayerState extends State<Player> {
             onPressed: openSubtitlesModal,
             icon: const Icon(Icons.subtitles, color: Colors.white, size: 32),
           ),
+          SizedBox(
+            width: 20,
+          ),
           IconButton(
-            onPressed: onExit,
+            onPressed: openAudioModal,
             icon: const Icon(Icons.music_note, color: Colors.white, size: 32),
           ),
         ]);
