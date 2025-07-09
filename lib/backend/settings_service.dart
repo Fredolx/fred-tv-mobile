@@ -3,12 +3,14 @@ import 'dart:collection';
 import 'package:open_tv/backend/sql.dart';
 import 'package:open_tv/models/settings.dart';
 import 'package:open_tv/models/view_type.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 const defaultView = "defaultView";
 const refreshOnStart = "refreshOnStart";
 const showLivestreams = "showLivestreams";
 const showMovies = "showMovies";
 const showSeries = "showSeries";
+const lastSeenVersion = "lastSeenVersion";
 
 class SettingsService {
   static Future<Settings> getSettings() async {
@@ -46,5 +48,19 @@ class SettingsService {
     settingsMap[showMovies] = (settings.showMovies ? 1 : 0).toString();
     settingsMap[showSeries] = (settings.showSeries ? 1 : 0).toString();
     await Sql.updateSettings(settingsMap);
+  }
+
+  static Future<void> updateLastSeenVersion() async {
+    final packageInfo = await PackageInfo.fromPlatform();
+    HashMap<String, String> lastSeenMap = HashMap();
+    lastSeenMap[lastSeenVersion] = packageInfo.version;
+    await Sql.updateSettings(lastSeenMap);
+  }
+
+  static Future<String?> shouldShowWhatsNew() async {
+    final String version = (await PackageInfo.fromPlatform()).version;
+    return (await Sql.getSettings())[lastSeenVersion] != version
+        ? version
+        : null;
   }
 }

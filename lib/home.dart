@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:open_tv/backend/settings_service.dart';
 import 'package:open_tv/backend/sql.dart';
+import 'package:open_tv/backend/utils.dart';
 import 'package:open_tv/bottom_nav.dart';
 import 'package:open_tv/channel_tile.dart';
 import 'package:open_tv/loading.dart';
@@ -14,10 +15,17 @@ import 'package:open_tv/models/node.dart';
 import 'package:open_tv/models/node_type.dart';
 import 'package:open_tv/models/view_type.dart';
 import 'package:open_tv/error.dart';
+import 'package:open_tv/whats_new_modal.dart';
 
 class Home extends StatefulWidget {
   final HomeManager home;
-  const Home({super.key, required this.home});
+  final bool refresh;
+  final firstLaunch;
+  const Home(
+      {super.key,
+      required this.home,
+      this.refresh = false,
+      this.firstLaunch = false});
   @override
   State<Home> createState() => _HomeState();
 }
@@ -52,6 +60,27 @@ class _HomeState extends State<Home> {
           (await SettingsService.getSettings()).getMediaTypes();
     }
     await load();
+    final String? version = await SettingsService.shouldShowWhatsNew();
+    if (widget.firstLaunch && version != null) {
+      await showWhatsNew(version);
+    }
+    if (widget.refresh) {
+      Error.tryAsyncNoLoading(() async {
+        setState(() {
+          blockSettings = true;
+        });
+        await Utils.refreshAllSources();
+      }, context, true, "Refreshed all sources");
+      setState(() {
+        blockSettings = false;
+      });
+    }
+  }
+
+  Future<void> showWhatsNew(String version) async {
+    showDialog(
+        context: context,
+        builder: (context) => WhatsNewModal(version: version));
   }
 
   void toggleSearch() {
@@ -264,7 +293,7 @@ class _HomeState extends State<Home> {
             ]))),
             bottomNavigationBar: BottomNav(
               startingView: getStartingView(),
-              blockSettings: false,
+              blockSettings: blockSettings,
               updateViewMode: updateViewMode,
             ),
             floatingActionButton: Visibility(
