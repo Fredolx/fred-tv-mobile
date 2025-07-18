@@ -96,6 +96,26 @@ class Sql {
     };
   }
 
+  static Future<ChannelHttpHeaders?> getChannelHeaders(int channelId) async {
+    var db = await DbFactory.db;
+    var result = await db.getOptional('''
+        SELECT * FROM channel_http_headers
+        WHERE channel_id = ?
+        LIMIT 1
+    ''', [channelId]);
+    return result != null ? _rowToHeaders(result) : null;
+  }
+
+  static ChannelHttpHeaders _rowToHeaders(Row row) {
+    return ChannelHttpHeaders(
+        id: row.columnAt(0),
+        channelId: row.columnAt(1),
+        referrer: row.columnAt(2),
+        userAgent: row.columnAt(3),
+        httpOrigin: row.columnAt(4),
+        ignoreSSL: row.columnAt(5));
+  }
+
   static Future<void> Function(SqliteWriteContext, Map<String, String>)
       getOrCreateSourceByName(Source source) {
     return (SqliteWriteContext tx, Map<String, String> memory) async {
