@@ -34,13 +34,19 @@ class _PlayerState extends State<Player> {
   }
 
   Future<void> initAsync() async {
+    final headers = await Sql.getChannelHeaders(widget.channel.id!);
     final seconds = widget.channel.mediaType == MediaType.movie
         ? await Sql.getPosition(widget.channel.id!)
         : null;
-    await player.open(mk.Media(
-      widget.channel.url!,
-      start: seconds != null ? Duration(seconds: seconds) : null,
-    ));
+    await player.open(mk.Media(widget.channel.url!,
+        start: seconds != null ? Duration(seconds: seconds) : null,
+        httpHeaders: headers != null
+            ? {
+                if (headers.referrer != null) "Referer": headers.referrer!,
+                if (headers.httpOrigin != null) "Origin": headers.httpOrigin!,
+                if (headers.userAgent != null) "User-Agent": headers.userAgent!,
+              }
+            : null));
     await key.currentState?.enterFullscreen();
     player.setPlaylistMode(mk.PlaylistMode.single);
   }
