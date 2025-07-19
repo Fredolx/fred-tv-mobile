@@ -21,11 +21,12 @@ class Player extends StatefulWidget {
 
 class _PlayerState extends State<Player> {
   late mk.Player player = mk.Player();
-  late StreamSubscription<Duration> subscription;
   late mkvideo.VideoController videoController =
       mkvideo.VideoController(player);
   late final GlobalKey<VideoState> key = GlobalKey<VideoState>();
   bool exiting = false;
+  bool fill = false;
+
   @override
   void initState() {
     super.initState();
@@ -138,6 +139,16 @@ class _PlayerState extends State<Player> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   }
 
+  toggleZoom() {
+    final videoAspectRatio = player.state.width! / player.state.height!;
+    final deviceAspectRatio = MediaQuery.of(context).size.aspectRatio;
+    key.currentState!
+        .update(aspectRatio: fill ? videoAspectRatio : deviceAspectRatio);
+    setState(() {
+      fill = !fill;
+    });
+  }
+
   MaterialVideoControlsThemeData getThemeData(BuildContext context) {
     return MaterialVideoControlsThemeData(
         speedUpOnLongPress: false,
@@ -166,6 +177,14 @@ class _PlayerState extends State<Player> {
           IconButton(
             onPressed: openAudioModal,
             icon: const Icon(Icons.music_note, color: Colors.white, size: 32),
+          ),
+          SizedBox(
+            width: 20,
+          ),
+          IconButton(
+            icon: Icon(fill ? Icons.zoom_out : Icons.zoom_in,
+                color: Colors.white, size: 32),
+            onPressed: toggleZoom,
           ),
         ]);
   }
