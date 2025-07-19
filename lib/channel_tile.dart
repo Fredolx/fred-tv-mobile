@@ -8,7 +8,6 @@ import 'package:open_tv/error.dart';
 import 'package:open_tv/models/media_type.dart';
 import 'package:open_tv/models/node.dart';
 import 'package:open_tv/models/node_type.dart';
-import 'package:open_tv/models/snapshot.dart';
 import 'package:open_tv/player.dart';
 
 class ChannelTile extends StatefulWidget {

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:open_tv/backend/sql.dart';
-import 'package:open_tv/home.dart';
 import 'package:open_tv/models/channel.dart';
 import 'package:open_tv/models/id_data.dart';
 import 'package:open_tv/models/media_type.dart';
@@ -139,7 +138,7 @@ class _PlayerState extends State<Player> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   }
 
-  toggleZoom() {
+  void toggleZoom() {
     final videoAspectRatio = player.state.width! / player.state.height!;
     final deviceAspectRatio = MediaQuery.of(context).size.aspectRatio;
     key.currentState!
@@ -182,7 +181,7 @@ class _PlayerState extends State<Player> {
             width: 20,
           ),
           IconButton(
-            icon: Icon(fill ? Icons.zoom_out : Icons.zoom_in,
+            icon: Icon(Icons.aspect_ratio_outlined,
                 color: Colors.white, size: 32),
             onPressed: toggleZoom,
           ),
