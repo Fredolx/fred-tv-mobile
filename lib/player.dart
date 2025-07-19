@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:open_tv/backend/sql.dart';
-import 'package:open_tv/home.dart';
 import 'package:open_tv/models/channel.dart';
 import 'package:open_tv/models/id_data.dart';
 import 'package:open_tv/models/media_type.dart';
@@ -21,11 +20,12 @@ class Player extends StatefulWidget {
 
 class _PlayerState extends State<Player> {
   late mk.Player player = mk.Player();
-  late StreamSubscription<Duration> subscription;
   late mkvideo.VideoController videoController =
       mkvideo.VideoController(player);
   late final GlobalKey<VideoState> key = GlobalKey<VideoState>();
   bool exiting = false;
+  bool fill = false;
+
   @override
   void initState() {
     super.initState();
@@ -138,6 +138,16 @@ class _PlayerState extends State<Player> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   }
 
+  void toggleZoom() {
+    final videoAspectRatio = player.state.width! / player.state.height!;
+    final deviceAspectRatio = MediaQuery.of(context).size.aspectRatio;
+    key.currentState!
+        .update(aspectRatio: fill ? videoAspectRatio : deviceAspectRatio);
+    setState(() {
+      fill = !fill;
+    });
+  }
+
   MaterialVideoControlsThemeData getThemeData(BuildContext context) {
     return MaterialVideoControlsThemeData(
         speedUpOnLongPress: false,
@@ -166,6 +176,14 @@ class _PlayerState extends State<Player> {
           IconButton(
             onPressed: openAudioModal,
             icon: const Icon(Icons.music_note, color: Colors.white, size: 32),
+          ),
+          SizedBox(
+            width: 20,
+          ),
+          IconButton(
+            icon: Icon(Icons.aspect_ratio_outlined,
+                color: Colors.white, size: 32),
+            onPressed: toggleZoom,
           ),
         ]);
   }
