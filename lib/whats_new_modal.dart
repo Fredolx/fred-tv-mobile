@@ -35,15 +35,12 @@ class WhatsNewModal extends StatelessWidget {
                   padding: EdgeInsets.only(right: 8.0),
                   child: const Text(
                     '''
-Hi! Thanks for supporting Open TV. I am really sorry for the many bugs that have been missed in testing. The good news is, they're getting fixed! Here's everything new:
+Hi! Thanks for supporting Open TV. Here's everything new:
 
-- Vastly improved navigation. Going back in a view doesn't reset it anymore, including your scroll position.
-- Added subtitles and audio options in player
-- Fixed xtream bugs
-- Added a notification when successfully adding favorites
-- Lots more behind the scenes. 
+- Fixed some streams not playing by adding support for HTTP headers. Some streams still might still not play; I am actively working on it. Please open a issue on GitHub if you are experiencing playback issues.
+- Added aspect ratio button for filling the entire screen
+- Added media type filtering for categories
 
-Big thank you for everyone that donated and purchased the app. It wouldn't be possible without your help. I will continue working very hard on it and I am terribly sorry if you experienced bugs with this first version.
 If you like Open TV, please consider donating (Even a dollar helps tremendously), reporting issues on the github and sharing it with your friends.
 ''',
                   ))),

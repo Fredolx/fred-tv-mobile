@@ -65,16 +65,18 @@ class Sql {
     return (SqliteWriteContext tx, Map<String, String> memory) async {
       var sourceId = int.parse(memory['sourceId']!);
       await tx.execute('''
-      INSERT INTO groups (name, image, source_id)
-      SELECT group_name, image, ?
+      INSERT INTO groups (name, image, source_id, media_type)
+      SELECT group_name, image, ?, media_type
       FROM channels
       WHERE source_id = ?
       GROUP BY group_name;
-      ON CONFLICT(name, source_id) DO NOTHING;
+      ON CONFLICT(name, source_id)  
+      DO UPDATE SET
+          media_type = excluded.media_type;
     ''', [sourceId, sourceId]);
       await tx.execute('''
       UPDATE channels
-      SET group_id = (SELECT id FROM groups WHERE groups.name = channels.group_name);
+      SET group_id = (SELECT id FROM groups WHERE groups.name = channels.group_name LIMIT 1);
       WHERE source_id = ?;
     ''');
     };
@@ -220,14 +222,17 @@ class Sql {
     var keywords = filters.useKeywords
         ? query.split(" ").map((f) => "%$f%").toList()
         : ["%$query%"];
+    var mediaTypes = filters.mediaTypes!.map((x) => x.index);
     var sqlQuery = '''
         SELECT * FROM groups 
         WHERE (${getKeywordsSql(keywords.length)})
+        AND (media_type IS NULL OR media_type IN (${generatePlaceholders(mediaTypes.length)}))
         AND source_id IN (${generatePlaceholders(filters.sourceIds!.length)})
         LIMIT ?, ?
     ''';
     List<Object> params = [];
     params.addAll(keywords);
+    params.addAll(mediaTypes);
     params.addAll(filters.sourceIds!);
     params.add(offset);
     params.add(pageSize);
