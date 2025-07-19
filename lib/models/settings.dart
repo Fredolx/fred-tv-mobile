@@ -1,4 +1,3 @@
-import 'package:open_tv/backend/settings_service.dart';
 import 'package:open_tv/models/media_type.dart';
 import 'package:open_tv/models/view_type.dart';
 
