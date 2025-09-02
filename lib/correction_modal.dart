@@ -16,7 +16,7 @@ class CorrectionModal extends StatelessWidget {
             child: const Text("Correct URL automatically"))
       ],
       content: const Text(
-          "It seems your url is not pointing to an Xtream API server, Open TV can correct the URL automatically for you"),
+          "It seems your url is not pointing to an Xtream API server, Fred TV can correct the URL automatically for you"),
     );
   }
 }

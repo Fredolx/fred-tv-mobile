@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Open TV',
+        title: 'Fred TV',
         theme: ThemeData(
           useMaterial3: true, // Enables Material You
           brightness: Brightness.light,

@@ -200,10 +200,10 @@ class _SettingsState extends State<SettingsView> {
                           ListTile(
                               title: const Text("Donate"),
                               subtitle: const Text(
-                                  "Open TV needs your help! Consider donating ❤️"),
+                                  "Fred TV needs your help! Consider donating ❤️"),
                               onTap: () async => await launchUrl(
                                   Uri.parse(
-                                    "https://github.com/Fredolx/open-tv-mobile/discussions/1",
+                                    "https://github.com/Fredolx/fred-tv-mobile/discussions/1",
                                   ),
                                   mode: LaunchMode.externalApplication)),
                           ListTile(
