@@ -63,6 +63,7 @@ class _SetupState extends State<Setup> {
                     key: _formKey,
                     child: Center(
                         child: SingleChildScrollView(
+                            child: FocusTraversalGroup(
                       child: Column(children: [
                         ToggleButtons(
                           isSelected: List.generate(
@@ -122,6 +123,7 @@ class _SetupState extends State<Setup> {
                               border: OutlineInputBorder(),
                             ),
                             name: 'name',
+                            textInputAction: TextInputAction.next,
                           ),
                         ),
                         if (_selectedIndex == SourceType.xtream.index ||
@@ -145,6 +147,7 @@ class _SetupState extends State<Setup> {
                                   border: OutlineInputBorder(),
                                 ),
                                 name: 'url',
+                                textInputAction: TextInputAction.next,
                               )),
                         if (_selectedIndex == SourceType.xtream.index)
                           const SizedBox(height: 15),
@@ -166,6 +169,7 @@ class _SetupState extends State<Setup> {
                                   border: OutlineInputBorder(),
                                 ),
                                 name: 'username',
+                                textInputAction: TextInputAction.next,
                               )),
                         if (_selectedIndex == SourceType.xtream.index)
                           const SizedBox(height: 15),
@@ -187,6 +191,7 @@ class _SetupState extends State<Setup> {
                                   border: OutlineInputBorder(),
                                 ),
                                 name: 'password',
+                                textInputAction: TextInputAction.next,
                               )),
                         const SizedBox(height: 20),
                         ElevatedButton(
@@ -254,6 +259,6 @@ class _SetupState extends State<Setup> {
                           child: const Text("Submit"),
                         )
                       ]),
-                    ))))));
+                    )))))));
   }
 }
