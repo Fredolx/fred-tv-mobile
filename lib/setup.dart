@@ -17,7 +17,7 @@ class Setup extends StatefulWidget {
 
 class _SetupState extends State<Setup> {
   Steps step = Steps.welcome;
-  int selected = 0;
+  SourceType selectedSourceType = SourceType.xtream;
   bool isForward = true;
   bool formValid = false;
   final _formKey = GlobalKey<FormBuilderState>();
@@ -25,18 +25,29 @@ class _SetupState extends State<Setup> {
 
   Future<void> nextStep() async {
     isForward = true;
-    if (step == Steps.sourceType && selected == SourceType.m3u.index) {
-      if (!await SelectFile()) return;
-      step = Steps.finish;
+    if (step == Steps.sourceType && selectedSourceType == SourceType.m3u) {
+      if (!await selectFile()) return;
+      finish();
       return;
     }
     setState(() {
+      if ((selectedSourceType == SourceType.m3uUrl && step == Steps.url) ||
+          step == Steps.password) {
+        finish();
+        return;
+      }
       step = Steps.values[step.index + 1];
       formValid = false;
     });
   }
 
-  Future<bool> SelectFile() async {
+  void finish() {
+    setState(() {
+      step = Steps.finish;
+    });
+  }
+
+  Future<bool> selectFile() async {
     var path = (await FilePicker.platform.pickFiles())?.files.single.path;
     if (path == null) return false;
     return true;
@@ -112,11 +123,12 @@ class _SetupState extends State<Setup> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   AnimatedOpacity(
-                    opacity: step != Steps.welcome ? 1 : 0,
+                    opacity:
+                        step != Steps.welcome && step != Steps.finish ? 1 : 0,
                     duration: const Duration(milliseconds: 300),
                     curve: Curves.easeInOut,
                     child: IgnorePointer(
-                      ignoring: step == Steps.welcome,
+                      ignoring: step == Steps.welcome || step == Steps.finish,
                       child: FilledButton.tonal(
                         onPressed: prevStep,
                         style: FilledButton.styleFrom(
@@ -137,7 +149,8 @@ class _SetupState extends State<Setup> {
                           horizontal: 24, vertical: 16),
                     ),
                     child: Text(
-                      step == Steps.welcome && selected == SourceType.m3u.index
+                      step == Steps.sourceType &&
+                              selectedSourceType == SourceType.m3u
                           ? "Select file"
                           : step == Steps.finish
                               ? "Finish"
@@ -167,7 +180,7 @@ class _SetupState extends State<Setup> {
           null,
           List.generate(SourceType.values.length, (i) {
             return Card(
-              color: selected == i
+              color: selectedSourceType.index == i
                   ? Theme.of(context).colorScheme.primaryContainer
                   : Theme.of(context).cardTheme.color,
               shape: RoundedRectangleBorder(
@@ -179,7 +192,7 @@ class _SetupState extends State<Setup> {
                 title: Text((SourceType.values[i]).label),
                 onTap: () {
                   setState(() {
-                    selected = i;
+                    selectedSourceType = SourceType.values[i];
                   });
                 },
               ),
