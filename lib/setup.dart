@@ -23,24 +23,6 @@ class _SetupState extends State<Setup> {
   final _formKey = GlobalKey<FormBuilderState>();
   final formPages = {Steps.name, Steps.url, Steps.username, Steps.password};
 
-  Future<void> nextStep() async {
-    isForward = true;
-    if (step == Steps.sourceType && selectedSourceType == SourceType.m3u) {
-      if (!await selectFile()) return;
-      finish();
-      return;
-    }
-    setState(() {
-      if ((selectedSourceType == SourceType.m3uUrl && step == Steps.url) ||
-          step == Steps.password) {
-        finish();
-        return;
-      }
-      step = Steps.values[step.index + 1];
-      formValid = false;
-    });
-  }
-
   void finish() {
     setState(() {
       step = Steps.finish;
@@ -60,8 +42,22 @@ class _SetupState extends State<Setup> {
     });
   }
 
-  void handleNext() {
-    nextStep();
+  Future<void> handleNext() async {
+    isForward = true;
+    if (step == Steps.sourceType && selectedSourceType == SourceType.m3u) {
+      if (!await selectFile()) return;
+      finish();
+      return;
+    }
+    if ((selectedSourceType == SourceType.m3uUrl && step == Steps.url) ||
+        step == Steps.password) {
+      finish();
+      return;
+    }
+    setState(() {
+      step = Steps.values[step.index + 1];
+      formValid = false;
+    });
   }
 
   @override
