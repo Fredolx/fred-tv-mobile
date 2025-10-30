@@ -1,16 +1,7 @@
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:animations/animations.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
-import 'package:open_tv/backend/sql.dart';
-import 'package:open_tv/backend/utils.dart';
-import 'package:open_tv/correction_modal.dart';
-import 'package:open_tv/home.dart';
-import 'package:open_tv/loading.dart';
-import 'package:open_tv/models/home_manager.dart';
-import 'package:open_tv/models/source.dart';
-import 'package:open_tv/models/source_type.dart';
-import 'package:open_tv/error.dart';
 
 class Setup extends StatefulWidget {
   final bool showAppBar;
@@ -21,244 +12,256 @@ class Setup extends StatefulWidget {
 }
 
 class _SetupState extends State<Setup> {
-  int _selectedIndex = 0;
-  final _formKey = GlobalKey<FormBuilderState>();
+  int step = 0;
+  int selected = 0;
+  bool isForward = true;
   bool formValid = false;
-  Set<String> existingSourceNames = {};
+  final _formKey = GlobalKey<FormBuilderState>();
+  List<String> options = ["Xtream", "M3U Url", "M3U File"];
+  final formPages = {2, 3, 4};
 
-  Future showXtreamCorrectionModal() async {
-    return await showDialog(
-        context: context, builder: (context) => CorrectionModal());
+  void nextStep() {
+    isForward = true;
+    setState(() {
+      step++;
+      formValid = false;
+    });
   }
 
-  Future<String> fixUrl(String url) async {
-    var uri = Uri.parse(url);
-    if (uri.scheme.isEmpty) {
-      uri = Uri.parse("http://$uri");
-    }
-    if (uri.path == "/" || uri.path.isEmpty) {
-      if (await showXtreamCorrectionModal()) {
-        uri = uri.resolve("player_api.php");
-      }
-    }
-    return uri.toString();
+  void prevStep() {
+    isForward = false;
+
+    if (step > 0) setState(() => step--);
+  }
+
+  void handleNext() {
+    nextStep();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: widget.showAppBar
-            ? AppBar(title: const Text("Adding a new source"))
-            : null,
-        body: Loading(
-            child: SafeArea(
-                child: FormBuilder(
-                    onChanged: () {
-                      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-                        setState(() {
-                          formValid = _formKey.currentState?.isValid == true;
+      body: SafeArea(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16),
+              child: TweenAnimationBuilder<double>(
+                tween: Tween<double>(
+                  begin: 0,
+                  end: (step + 1) / 7,
+                ),
+                duration: const Duration(milliseconds: 400),
+                curve: Curves.easeInOut,
+                builder: (context, value, child) {
+                  return ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: value,
+                      backgroundColor: Colors.grey[850],
+                      minHeight: 6,
+                    ),
+                  );
+                },
+              ),
+            ),
+            Expanded(
+              child: PageTransitionSwitcher(
+                  duration: const Duration(milliseconds: 400),
+                  reverse: !isForward,
+                  transitionBuilder:
+                      (child, primaryAnimation, secondaryAnimation) {
+                    return SharedAxisTransition(
+                      animation: primaryAnimation,
+                      secondaryAnimation: secondaryAnimation,
+                      transitionType: SharedAxisTransitionType.horizontal,
+                      child: child,
+                    );
+                  },
+                  child: FormBuilder(
+                      onChanged: () {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          setState(() {
+                            formValid = _formKey.currentState?.isValid == true;
+                          });
                         });
-                      });
-                    },
-                    key: _formKey,
-                    child: Center(
-                        child: SingleChildScrollView(
-                            child: FocusTraversalGroup(
-                      child: Column(children: [
-                        ToggleButtons(
-                          isSelected: List.generate(
-                              3, (index) => index == _selectedIndex),
-                          onPressed: (index) {
-                            setState(() {
-                              _selectedIndex = index;
-                            });
-                            WidgetsBinding.instance
-                                .addPostFrameCallback((timeStamp) {
-                              setState(() {
-                                formValid =
-                                    _formKey.currentState?.isValid == true;
-                              });
-                            });
-                          },
-                          children: const <Widget>[
-                            Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 16.0),
-                              child: Text('Xtream'),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 16.0),
-                              child: Text('M3U URL'),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 16.0),
-                              child: Text('M3U File'),
-                            ),
-                          ],
+                      },
+                      key: _formKey,
+                      child: currentPage)),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  AnimatedOpacity(
+                    opacity: step > 0 ? 1 : 0,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                    child: IgnorePointer(
+                      ignoring: step == 0,
+                      child: FilledButton.tonal(
+                        onPressed: prevStep,
+                        style: FilledButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 16),
                         ),
-                        const SizedBox(height: 20),
-                        Padding(
-                          padding: EdgeInsets.symmetric(
-                              horizontal:
-                                  MediaQuery.of(context).size.width * 0.1),
-                          child: FormBuilderTextField(
-                            autovalidateMode:
-                                AutovalidateMode.onUserInteraction,
-                            validator: FormBuilderValidators.compose([
-                              FormBuilderValidators.required(),
-                              (value) {
-                                var trimmed = value?.trim();
-                                if (trimmed == null || trimmed.isEmpty) {
-                                  return null;
-                                }
-                                if (existingSourceNames.contains(trimmed)) {
-                                  return "Name already exists";
-                                }
-                                return null;
-                              }
-                            ]),
-                            decoration: const InputDecoration(
-                              labelText: 'Name', // Label inside the input
-                              prefixIcon: Icon(Icons
-                                  .edit), // Icon inside the input (left side)
-                              border: OutlineInputBorder(),
-                            ),
-                            name: 'name',
-                            textInputAction: TextInputAction.next,
-                          ),
-                        ),
-                        if (_selectedIndex == SourceType.xtream.index ||
-                            _selectedIndex == SourceType.m3uUrl.index)
-                          const SizedBox(height: 15),
-                        if (_selectedIndex == SourceType.xtream.index ||
-                            _selectedIndex == SourceType.m3uUrl.index)
-                          Padding(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal:
-                                      MediaQuery.of(context).size.width * 0.1),
-                              child: FormBuilderTextField(
-                                autovalidateMode:
-                                    AutovalidateMode.onUserInteraction,
-                                validator: FormBuilderValidators.compose(
-                                    [FormBuilderValidators.required()]),
-                                decoration: const InputDecoration(
-                                  labelText: 'URL', // Label inside the input
-                                  prefixIcon: Icon(Icons
-                                      .link), // Icon inside the input (left side)
-                                  border: OutlineInputBorder(),
-                                ),
-                                name: 'url',
-                                textInputAction: TextInputAction.next,
-                              )),
-                        if (_selectedIndex == SourceType.xtream.index)
-                          const SizedBox(height: 15),
-                        if (_selectedIndex == SourceType.xtream.index)
-                          Padding(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal:
-                                      MediaQuery.of(context).size.width * 0.1),
-                              child: FormBuilderTextField(
-                                autovalidateMode:
-                                    AutovalidateMode.onUserInteraction,
-                                validator: FormBuilderValidators.compose(
-                                    [FormBuilderValidators.required()]),
-                                decoration: const InputDecoration(
-                                  labelText:
-                                      'Username', // Label inside the input
-                                  prefixIcon: Icon(Icons
-                                      .account_circle), // Icon inside the input (left side)
-                                  border: OutlineInputBorder(),
-                                ),
-                                name: 'username',
-                                textInputAction: TextInputAction.next,
-                              )),
-                        if (_selectedIndex == SourceType.xtream.index)
-                          const SizedBox(height: 15),
-                        if (_selectedIndex == SourceType.xtream.index)
-                          Padding(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal:
-                                      MediaQuery.of(context).size.width * 0.1),
-                              child: FormBuilderTextField(
-                                autovalidateMode:
-                                    AutovalidateMode.onUserInteraction,
-                                validator: FormBuilderValidators.compose(
-                                    [FormBuilderValidators.required()]),
-                                decoration: const InputDecoration(
-                                  labelText:
-                                      'Password', // Label inside the input
-                                  prefixIcon: Icon(Icons
-                                      .password), // Icon inside the input (left side)
-                                  border: OutlineInputBorder(),
-                                ),
-                                name: 'password',
-                                textInputAction: TextInputAction.next,
-                              )),
-                        const SizedBox(height: 20),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: formValid
-                                ? Colors.blue
-                                : Colors.grey, // Disabled color
-                            foregroundColor: Colors.white, // Text color
-                          ),
-                          onPressed: () async {
-                            final sourceName = (_formKey.currentState
-                                    ?.instantValue["name"] as String)
-                                .trim();
-                            if (await Sql.sourceNameExists(sourceName)) {
-                              existingSourceNames.add(sourceName);
-                            }
-                            if (_formKey.currentState?.saveAndValidate() ==
-                                false) {
-                              return;
-                            }
-                            final sourceType =
-                                SourceType.values[_selectedIndex];
-                            var url = sourceType == SourceType.m3u
-                                ? (await FilePicker.platform.pickFiles())
-                                    ?.files
-                                    .single
-                                    .path
-                                : (_formKey.currentState?.value["url"]
-                                    as String);
-                            if (sourceType == SourceType.m3u && url == null) {
-                              return;
-                            }
-                            if (sourceType == SourceType.xtream) {
-                              url = await fixUrl(url!);
-                            }
-                            final result = await Error.tryAsync(() async {
-                              await Utils.processSource(
-                                Source(
-                                  name: sourceName,
-                                  sourceType: sourceType,
-                                  url: url,
-                                  username: sourceType == SourceType.xtream
-                                      ? (_formKey.currentState
-                                              ?.value["username"] as String)
-                                          .trim()
-                                      : null,
-                                  password: sourceType == SourceType.xtream
-                                      ? (_formKey.currentState
-                                              ?.value["password"] as String)
-                                          .trim()
-                                      : null,
-                                ),
-                              );
-                            }, context, "Successfully added source");
-                            if (result.success) {
-                              Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => Home(
-                                        home: HomeManager.defaultManager())),
-                                (route) => false,
-                              );
-                            }
-                          },
-                          child: const Text("Submit"),
-                        )
-                      ]),
-                    )))))));
+                        child:
+                            const Text("Back", style: TextStyle(fontSize: 18)),
+                      ),
+                    ),
+                  ),
+                  FilledButton(
+                    onPressed: !formPages.contains(step) || formValid
+                        ? handleNext
+                        : null,
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 16),
+                    ),
+                    child: Text(
+                      step == 6 ? "Finish" : "Next",
+                      style: const TextStyle(
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget get currentPage {
+    switch (step) {
+      case 0:
+        return getPage(
+            "Welcome to Fred TV", "Let's set up your first source", null);
+      case 1:
+        return getPage(
+          "What is your provider type?",
+          null,
+          List.generate(options.length, (i) {
+            return Card(
+              color: selected == i
+                  ? Theme.of(context).colorScheme.primaryContainer
+                  : Theme.of(context).cardTheme.color,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              clipBehavior: Clip.antiAlias,
+              elevation: 2,
+              child: ListTile(
+                title: Text(options[i]),
+                onTap: () {
+                  setState(() {
+                    selected = i;
+                  });
+                },
+              ),
+            );
+          }),
+        );
+      case 2:
+        return getPage("What should we name this source?", null, [
+          FormBuilderTextField(
+            autocorrect: false,
+            decoration: InputDecoration(
+                labelText: "Name",
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.label_outline)),
+            textInputAction: TextInputAction.next,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            validator: FormBuilderValidators.minLength(1),
+            name: 'name',
+          ),
+        ]);
+      case 3:
+        return getPage("What is your provider's URL?", null, [
+          FormBuilderTextField(
+            autocorrect: false,
+            decoration: InputDecoration(
+                labelText: "URL",
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.link)),
+            textInputAction: TextInputAction.next,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            validator: FormBuilderValidators.minLength(1),
+            name: 'url',
+          ),
+        ]);
+      case 4:
+        return getPage("What is your username?", null, [
+          FormBuilderTextField(
+            autocorrect: false,
+            decoration: InputDecoration(
+                labelText: "Username",
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.person)),
+            textInputAction: TextInputAction.next,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            validator: FormBuilderValidators.minLength(1),
+            name: 'username',
+          )
+        ]);
+      case 5:
+        return getPage("What is your password?", null, [
+          FormBuilderTextField(
+            autocorrect: false,
+            decoration: InputDecoration(
+                labelText: "Password",
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.password)),
+            textInputAction: TextInputAction.next,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            validator: FormBuilderValidators.minLength(1),
+            name: 'password',
+          ),
+        ]);
+      case 6:
+        return getPage("Done!", "You're all set 🎉", null);
+      default:
+        return const SizedBox();
+    }
+  }
+
+  Widget getPage(
+      final String title, final String? subtitle, final List<Widget>? content) {
+    return Center(
+      key: ValueKey(title),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            if (subtitle != null) ...[
+              const SizedBox(height: 12),
+              Text(
+                subtitle,
+                style: const TextStyle(color: Colors.white70, fontSize: 20),
+                textAlign: TextAlign.center,
+              ),
+            ],
+            if (content != null) ...[
+              const SizedBox(height: 24),
+              ...content,
+            ],
+          ],
+        ),
+      ),
+    );
   }
 }
