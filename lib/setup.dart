@@ -1,7 +1,11 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:open_tv/models/source.dart';
+import 'package:open_tv/models/source_type.dart';
+import 'package:open_tv/models/steps.dart';
 
 class Setup extends StatefulWidget {
   final bool showAppBar;
@@ -12,26 +16,37 @@ class Setup extends StatefulWidget {
 }
 
 class _SetupState extends State<Setup> {
-  int step = 0;
+  Steps step = Steps.welcome;
   int selected = 0;
   bool isForward = true;
   bool formValid = false;
   final _formKey = GlobalKey<FormBuilderState>();
-  List<String> options = ["Xtream", "M3U Url", "M3U File"];
-  final formPages = {2, 3, 4};
+  final formPages = {Steps.name, Steps.url, Steps.username, Steps.password};
 
-  void nextStep() {
+  Future<void> nextStep() async {
     isForward = true;
+    if (step == Steps.sourceType && selected == SourceType.m3u.index) {
+      if (!await SelectFile()) return;
+      step = Steps.finish;
+      return;
+    }
     setState(() {
-      step++;
+      step = Steps.values[step.index + 1];
       formValid = false;
     });
   }
 
+  Future<bool> SelectFile() async {
+    var path = (await FilePicker.platform.pickFiles())?.files.single.path;
+    if (path == null) return false;
+    return true;
+  }
+
   void prevStep() {
     isForward = false;
-
-    if (step > 0) setState(() => step--);
+    setState(() {
+      step = Steps.values[step.index - 1];
+    });
   }
 
   void handleNext() {
@@ -51,7 +66,7 @@ class _SetupState extends State<Setup> {
               child: TweenAnimationBuilder<double>(
                 tween: Tween<double>(
                   begin: 0,
-                  end: (step + 1) / 7,
+                  end: (step.index + 1) / Steps.values.length,
                 ),
                 duration: const Duration(milliseconds: 400),
                 curve: Curves.easeInOut,
@@ -97,11 +112,11 @@ class _SetupState extends State<Setup> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   AnimatedOpacity(
-                    opacity: step > 0 ? 1 : 0,
+                    opacity: step != Steps.welcome ? 1 : 0,
                     duration: const Duration(milliseconds: 300),
                     curve: Curves.easeInOut,
                     child: IgnorePointer(
-                      ignoring: step == 0,
+                      ignoring: step == Steps.welcome,
                       child: FilledButton.tonal(
                         onPressed: prevStep,
                         style: FilledButton.styleFrom(
@@ -122,7 +137,11 @@ class _SetupState extends State<Setup> {
                           horizontal: 24, vertical: 16),
                     ),
                     child: Text(
-                      step == 6 ? "Finish" : "Next",
+                      step == Steps.welcome && selected == SourceType.m3u.index
+                          ? "Select file"
+                          : step == Steps.finish
+                              ? "Finish"
+                              : "Next",
                       style: const TextStyle(
                         fontSize: 18,
                       ),
@@ -139,14 +158,14 @@ class _SetupState extends State<Setup> {
 
   Widget get currentPage {
     switch (step) {
-      case 0:
+      case Steps.welcome:
         return getPage(
             "Welcome to Fred TV", "Let's set up your first source", null);
-      case 1:
+      case Steps.sourceType:
         return getPage(
           "What is your provider type?",
           null,
-          List.generate(options.length, (i) {
+          List.generate(SourceType.values.length, (i) {
             return Card(
               color: selected == i
                   ? Theme.of(context).colorScheme.primaryContainer
@@ -157,7 +176,7 @@ class _SetupState extends State<Setup> {
               clipBehavior: Clip.antiAlias,
               elevation: 2,
               child: ListTile(
-                title: Text(options[i]),
+                title: Text((SourceType.values[i]).label),
                 onTap: () {
                   setState(() {
                     selected = i;
@@ -167,7 +186,7 @@ class _SetupState extends State<Setup> {
             );
           }),
         );
-      case 2:
+      case Steps.name:
         return getPage("What should we name this source?", null, [
           FormBuilderTextField(
             autocorrect: false,
@@ -181,7 +200,7 @@ class _SetupState extends State<Setup> {
             name: 'name',
           ),
         ]);
-      case 3:
+      case Steps.url:
         return getPage("What is your provider's URL?", null, [
           FormBuilderTextField(
             autocorrect: false,
@@ -195,7 +214,7 @@ class _SetupState extends State<Setup> {
             name: 'url',
           ),
         ]);
-      case 4:
+      case Steps.username:
         return getPage("What is your username?", null, [
           FormBuilderTextField(
             autocorrect: false,
@@ -209,7 +228,7 @@ class _SetupState extends State<Setup> {
             name: 'username',
           )
         ]);
-      case 5:
+      case Steps.password:
         return getPage("What is your password?", null, [
           FormBuilderTextField(
             autocorrect: false,
@@ -223,10 +242,8 @@ class _SetupState extends State<Setup> {
             name: 'password',
           ),
         ]);
-      case 6:
+      case Steps.finish:
         return getPage("Done!", "You're all set 🎉", null);
-      default:
-        return const SizedBox();
     }
   }
 
