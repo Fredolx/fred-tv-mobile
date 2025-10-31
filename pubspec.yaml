@@ -53,6 +53,7 @@ dependencies:
   media_kit_libs_video: ^1.0.7 # Native video dependencies.
   package_info_plus: ^8.3.0
   animations: ^2.1.0
+  dynamic_color: ^1.8.1
 
 dev_dependencies:
   flutter_test:

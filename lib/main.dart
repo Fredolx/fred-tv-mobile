@@ -27,11 +27,13 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
         title: 'Fred TV',
         theme: ThemeData(
-          useMaterial3: true, // Enables Material You
+          useMaterial3: true,
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
           brightness: Brightness.light,
         ),
         darkTheme: ThemeData(
           useMaterial3: true,
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
           brightness: Brightness.dark,
         ),
         themeMode: ThemeMode.system,

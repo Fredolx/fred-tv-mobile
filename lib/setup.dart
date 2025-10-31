@@ -71,7 +71,7 @@ class _SetupState extends State<Setup> {
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {
-        formValid = _formKeys[step]!.currentState?.isValid == true;
+        formValid = _formKeys[step]?.currentState?.isValid == true;
       });
     });
   }
@@ -96,7 +96,7 @@ class _SetupState extends State<Setup> {
       });
       WidgetsBinding.instance.addPostFrameCallback((_) {
         setState(() {
-          formValid = _formKeys[step]!.currentState?.isValid == true;
+          formValid = _formKeys[step]?.currentState?.isValid == true;
         });
       });
     }
@@ -361,7 +361,6 @@ class _SetupState extends State<Setup> {
             Text(
               title,
               style: const TextStyle(
-                color: Colors.white,
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
               ),
@@ -370,7 +369,7 @@ class _SetupState extends State<Setup> {
               const SizedBox(height: 12),
               Text(
                 subtitle,
-                style: const TextStyle(color: Colors.white70, fontSize: 20),
+                style: const TextStyle(fontSize: 20),
                 textAlign: TextAlign.center,
               ),
             ],
