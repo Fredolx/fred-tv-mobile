@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
-import 'package:open_tv/models/source.dart';
+import 'package:open_tv/home.dart';
+import 'package:open_tv/models/filters.dart';
+import 'package:open_tv/models/home_manager.dart';
 import 'package:open_tv/models/source_type.dart';
 import 'package:open_tv/models/steps.dart';
+import 'package:open_tv/models/view_type.dart';
 
 class Setup extends StatefulWidget {
   final bool showAppBar;
@@ -20,13 +23,35 @@ class _SetupState extends State<Setup> {
   SourceType selectedSourceType = SourceType.xtream;
   bool isForward = true;
   bool formValid = false;
-  final _formKey = GlobalKey<FormBuilderState>();
+  String? name;
+  String? url;
+  String? username;
+  String? password;
+  final FocusNode _firstFieldFocus = FocusNode();
   final formPages = {Steps.name, Steps.url, Steps.username, Steps.password};
+  final _formKeys = {
+    Steps.name: GlobalKey<FormBuilderState>(),
+    Steps.url: GlobalKey<FormBuilderState>(),
+    Steps.username: GlobalKey<FormBuilderState>(),
+    Steps.password: GlobalKey<FormBuilderState>(),
+  };
+  final formValues = {
+    Steps.name: "",
+    Steps.url: "",
+    Steps.username: "",
+    Steps.password: ""
+  };
 
   void finish() {
     setState(() {
       step = Steps.finish;
     });
+  }
+
+  @override
+  void dispose() {
+    _firstFieldFocus.dispose();
+    super.dispose();
   }
 
   Future<bool> selectFile() async {
@@ -37,27 +62,53 @@ class _SetupState extends State<Setup> {
 
   void prevStep() {
     isForward = false;
+    if (formPages.contains(step)) {
+      formValues[step] =
+          _formKeys[step]?.currentState?.fields[step.name]?.value;
+    }
     setState(() {
       step = Steps.values[step.index - 1];
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {
+        formValid = _formKeys[step]!.currentState?.isValid == true;
+      });
     });
   }
 
   Future<void> handleNext() async {
     isForward = true;
+    if (formPages.contains(step)) {
+      formValues[step] =
+          _formKeys[step]?.currentState?.fields[step.name]?.value;
+    }
     if (step == Steps.sourceType && selectedSourceType == SourceType.m3u) {
       if (!await selectFile()) return;
       finish();
-      return;
-    }
-    if ((selectedSourceType == SourceType.m3uUrl && step == Steps.url) ||
+    } else if ((selectedSourceType == SourceType.m3uUrl && step == Steps.url) ||
         step == Steps.password) {
       finish();
-      return;
+    } else if (step == Steps.finish) {
+      navigateToHome();
+    } else {
+      setState(() {
+        step = Steps.values[step.index + 1];
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setState(() {
+          formValid = _formKeys[step]!.currentState?.isValid == true;
+        });
+      });
     }
-    setState(() {
-      step = Steps.values[step.index + 1];
-      formValid = false;
-    });
+  }
+
+  void navigateToHome() {
+    Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+            builder: (_) => Home(
+                home: HomeManager(filters: Filters(viewType: ViewType.all)))),
+        (route) => false);
   }
 
   @override
@@ -102,16 +153,7 @@ class _SetupState extends State<Setup> {
                       child: child,
                     );
                   },
-                  child: FormBuilder(
-                      onChanged: () {
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          setState(() {
-                            formValid = _formKey.currentState?.isValid == true;
-                          });
-                        });
-                      },
-                      key: _formKey,
-                      child: currentPage)),
+                  child: currentPage),
             ),
             Padding(
               padding: const EdgeInsets.all(24.0),
@@ -197,59 +239,110 @@ class _SetupState extends State<Setup> {
         );
       case Steps.name:
         return getPage("What should we name this source?", null, [
-          FormBuilderTextField(
-            autocorrect: false,
-            decoration: InputDecoration(
-                labelText: "Name",
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.label_outline)),
-            textInputAction: TextInputAction.next,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            validator: FormBuilderValidators.minLength(1),
-            name: 'name',
-          ),
+          FormBuilder(
+              onChanged: () {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  setState(() {
+                    formValid =
+                        _formKeys[Steps.name]!.currentState?.isValid == true;
+                  });
+                });
+              },
+              initialValue: {Steps.name.name: formValues[Steps.name]},
+              key: _formKeys[Steps.name],
+              child: FormBuilderTextField(
+                autocorrect: false,
+                focusNode: _firstFieldFocus,
+                decoration: InputDecoration(
+                    labelText: "Name",
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.label_outline)),
+                textInputAction: TextInputAction.next,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                validator: FormBuilderValidators.minLength(1),
+                name: 'name',
+              )),
         ]);
       case Steps.url:
         return getPage("What is your provider's URL?", null, [
-          FormBuilderTextField(
-            autocorrect: false,
-            decoration: InputDecoration(
-                labelText: "URL",
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.link)),
-            textInputAction: TextInputAction.next,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            validator: FormBuilderValidators.minLength(1),
-            name: 'url',
-          ),
+          FormBuilder(
+            onChanged: () {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                setState(() {
+                  formValid =
+                      _formKeys[Steps.url]!.currentState?.isValid == true;
+                });
+              });
+            },
+            initialValue: {Steps.url.name: formValues[Steps.url]},
+            key: _formKeys[Steps.url],
+            child: FormBuilderTextField(
+              autocorrect: false,
+              focusNode: _firstFieldFocus,
+              decoration: InputDecoration(
+                  labelText: "URL",
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.link)),
+              textInputAction: TextInputAction.next,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              validator: FormBuilderValidators.minLength(1),
+              name: 'url',
+            ),
+          )
         ]);
       case Steps.username:
         return getPage("What is your username?", null, [
-          FormBuilderTextField(
-            autocorrect: false,
-            decoration: InputDecoration(
-                labelText: "Username",
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.person)),
-            textInputAction: TextInputAction.next,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            validator: FormBuilderValidators.minLength(1),
-            name: 'username',
-          )
+          FormBuilder(
+              onChanged: () {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  setState(() {
+                    formValid =
+                        _formKeys[Steps.username]!.currentState?.isValid ==
+                            true;
+                  });
+                });
+              },
+              initialValue: {Steps.username.name: formValues[Steps.username]},
+              key: _formKeys[Steps.username],
+              child: FormBuilderTextField(
+                autocorrect: false,
+                focusNode: _firstFieldFocus,
+                decoration: InputDecoration(
+                    labelText: "Username",
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.person)),
+                textInputAction: TextInputAction.next,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                validator: FormBuilderValidators.minLength(1),
+                name: 'username',
+              ))
         ]);
       case Steps.password:
         return getPage("What is your password?", null, [
-          FormBuilderTextField(
-            autocorrect: false,
-            decoration: InputDecoration(
-                labelText: "Password",
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.password)),
-            textInputAction: TextInputAction.next,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            validator: FormBuilderValidators.minLength(1),
-            name: 'password',
-          ),
+          FormBuilder(
+            initialValue: {Steps.password.name: formValues[Steps.password]},
+            onChanged: () {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                setState(() {
+                  formValid =
+                      _formKeys[Steps.password]!.currentState?.isValid == true;
+                });
+              });
+            },
+            key: _formKeys[Steps.password],
+            child: FormBuilderTextField(
+              autocorrect: false,
+              focusNode: _firstFieldFocus,
+              decoration: InputDecoration(
+                  labelText: "Password",
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.password)),
+              textInputAction: TextInputAction.next,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              validator: FormBuilderValidators.minLength(1),
+              name: 'password',
+            ),
+          )
         ]);
       case Steps.finish:
         return getPage("Done!", "You're all set 🎉", null);
