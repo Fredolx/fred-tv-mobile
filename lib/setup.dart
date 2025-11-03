@@ -351,7 +351,7 @@ class _SetupState extends State<Setup> {
                   prefixIcon: Icon(Icons.link)),
               textInputAction: TextInputAction.next,
               autovalidateMode: AutovalidateMode.onUserInteraction,
-              validator: FormBuilderValidators.minLength(1),
+              validator: FormBuilderValidators.required(),
               name: 'url',
             ),
           )
@@ -379,7 +379,7 @@ class _SetupState extends State<Setup> {
                     prefixIcon: Icon(Icons.person)),
                 textInputAction: TextInputAction.next,
                 autovalidateMode: AutovalidateMode.onUserInteraction,
-                validator: FormBuilderValidators.minLength(1),
+                validator: FormBuilderValidators.required(),
                 name: 'username',
               ))
         ]);
@@ -405,7 +405,7 @@ class _SetupState extends State<Setup> {
                   prefixIcon: Icon(Icons.password)),
               textInputAction: TextInputAction.next,
               autovalidateMode: AutovalidateMode.onUserInteraction,
-              validator: FormBuilderValidators.minLength(1),
+              validator: FormBuilderValidators.required(),
               name: 'password',
             ),
           )
