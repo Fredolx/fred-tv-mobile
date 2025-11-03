@@ -3,12 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:loader_overlay/loader_overlay.dart';
+import 'package:open_tv/backend/sql.dart';
+import 'package:open_tv/backend/utils.dart';
+import 'package:open_tv/correction_modal.dart';
 import 'package:open_tv/home.dart';
 import 'package:open_tv/models/filters.dart';
 import 'package:open_tv/models/home_manager.dart';
+import 'package:open_tv/models/source.dart';
 import 'package:open_tv/models/source_type.dart';
 import 'package:open_tv/models/steps.dart';
 import 'package:open_tv/models/view_type.dart';
+import 'package:open_tv/error.dart';
 
 class Setup extends StatefulWidget {
   final bool showAppBar;
@@ -23,10 +29,6 @@ class _SetupState extends State<Setup> {
   SourceType selectedSourceType = SourceType.xtream;
   bool isForward = true;
   bool formValid = false;
-  String? name;
-  String? url;
-  String? username;
-  String? password;
   final FocusNode _firstFieldFocus = FocusNode();
   final formPages = {Steps.name, Steps.url, Steps.username, Steps.password};
   final _formKeys = {
@@ -42,10 +44,50 @@ class _SetupState extends State<Setup> {
     Steps.password: ""
   };
 
-  void finish() {
+  Set<String> existingSourceNames = {};
+
+  Future<void> finish() async {
+    var result = await Error.tryAsync(() async {
+      await Utils.processSource(
+        Source(
+          name: formValues[Steps.name]!,
+          sourceType: selectedSourceType,
+          url: selectedSourceType == SourceType.m3u
+              ? formValues[Steps.url]!
+              : await fixUrl(formValues[Steps.url]!),
+          username: selectedSourceType == SourceType.xtream
+              ? formValues[Steps.username]
+              : null,
+          password: selectedSourceType == SourceType.xtream
+              ? formValues[Steps.password]
+              : null,
+        ),
+      );
+    }, context, null, true, false);
+    if (!result.success) {
+      return;
+    }
     setState(() {
       step = Steps.finish;
     });
+  }
+
+  Future<String> fixUrl(String url) async {
+    var uri = Uri.parse(url);
+    if (uri.scheme.isEmpty) {
+      uri = Uri.parse("http://$uri");
+    }
+    if (uri.path == "/" || uri.path.isEmpty) {
+      if (await showXtreamCorrectionModal()) {
+        uri = uri.resolve("player_api.php");
+      }
+    }
+    return uri.toString();
+  }
+
+  Future showXtreamCorrectionModal() async {
+    return await showDialog(
+        context: context, builder: (context) => CorrectionModal());
   }
 
   @override
@@ -57,6 +99,7 @@ class _SetupState extends State<Setup> {
   Future<bool> selectFile() async {
     var path = (await FilePicker.platform.pickFiles())?.files.single.path;
     if (path == null) return false;
+    formValues[Steps.url] = path;
     return true;
   }
 
@@ -82,7 +125,15 @@ class _SetupState extends State<Setup> {
       formValues[step] =
           _formKeys[step]?.currentState?.fields[step.name]?.value;
     }
-    if (step == Steps.sourceType && selectedSourceType == SourceType.m3u) {
+    if (step == Steps.name) {
+      var sourceName = formValues[step]!;
+      if (await Sql.sourceNameExists(sourceName)) {
+        existingSourceNames.add(sourceName);
+        _formKeys[step]?.currentState?.validate();
+        return;
+      }
+    }
+    if (step == Steps.name && selectedSourceType == SourceType.m3u) {
       if (!await selectFile()) return;
       finish();
     } else if ((selectedSourceType == SourceType.m3uUrl && step == Steps.url) ||
@@ -96,6 +147,9 @@ class _SetupState extends State<Setup> {
       });
       WidgetsBinding.instance.addPostFrameCallback((_) {
         setState(() {
+          if (formValues[step]?.isNotEmpty == true) {
+            _formKeys[step]?.currentState?.validate();
+          }
           formValid = _formKeys[step]?.currentState?.isValid == true;
         });
       });
@@ -114,7 +168,8 @@ class _SetupState extends State<Setup> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
+        body: SafeArea(
+      child: LoaderOverlay(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -133,7 +188,6 @@ class _SetupState extends State<Setup> {
                     borderRadius: BorderRadius.circular(4),
                     child: LinearProgressIndicator(
                       value: value,
-                      backgroundColor: Colors.grey[850],
                       minHeight: 6,
                     ),
                   );
@@ -187,8 +241,7 @@ class _SetupState extends State<Setup> {
                           horizontal: 24, vertical: 16),
                     ),
                     child: Text(
-                      step == Steps.sourceType &&
-                              selectedSourceType == SourceType.m3u
+                      step == Steps.name && selectedSourceType == SourceType.m3u
                           ? "Select file"
                           : step == Steps.finish
                               ? "Finish"
@@ -204,7 +257,7 @@ class _SetupState extends State<Setup> {
           ],
         ),
       ),
-    );
+    ));
   }
 
   Widget get currentPage {
@@ -230,6 +283,7 @@ class _SetupState extends State<Setup> {
                 title: Text((SourceType.values[i]).label),
                 onTap: () {
                   setState(() {
+                    formValues[Steps.url] = "";
                     selectedSourceType = SourceType.values[i];
                   });
                 },
@@ -259,7 +313,19 @@ class _SetupState extends State<Setup> {
                     prefixIcon: Icon(Icons.label_outline)),
                 textInputAction: TextInputAction.next,
                 autovalidateMode: AutovalidateMode.onUserInteraction,
-                validator: FormBuilderValidators.minLength(1),
+                validator: FormBuilderValidators.compose([
+                  FormBuilderValidators.required(),
+                  (value) {
+                    var trimmed = value?.trim();
+                    if (trimmed == null || trimmed.isEmpty) {
+                      return null;
+                    }
+                    if (existingSourceNames.contains(trimmed)) {
+                      return "Name already exists";
+                    }
+                    return null;
+                  }
+                ]),
                 name: 'name',
               )),
         ]);
