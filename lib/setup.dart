@@ -124,6 +124,7 @@ class _SetupState extends State<Setup> {
         formValid = _formKeys[step]?.currentState?.isValid == true;
       });
     });
+    if (formPages.contains(step)) focusNodes[step]?.requestFocus();
   }
 
   Future<void> handleNext() async {
@@ -177,7 +178,9 @@ class _SetupState extends State<Setup> {
   Widget build(BuildContext context) {
     return PopScope(
         canPop: step == Steps.welcome,
-        onPopInvokedWithResult: (didPop, result) => prevStep(),
+        onPopInvokedWithResult: (didPop, result) {
+          if (!didPop) prevStep();
+        },
         child: Scaffold(
             appBar: widget.showAppBar
                 ? AppBar(title: Text("Adding a new source"))
