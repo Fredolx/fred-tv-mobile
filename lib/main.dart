@@ -33,6 +33,19 @@ class MyApp extends StatelessWidget {
                 surface: Colors.black,
                 brightness: Brightness.dark,
                 surfaceContainer: Color.fromARGB(255, 29, 36, 41)),
+            filledButtonTheme: FilledButtonThemeData(style: ButtonStyle(
+              side: WidgetStateProperty.resolveWith(
+                (states) {
+                  if (states.contains(WidgetState.focused)) {
+                    return const BorderSide(
+                      color: Colors.yellow, // yellow border
+                      width: 4,
+                    );
+                  }
+                  return BorderSide.none;
+                },
+              ),
+            )),
             useMaterial3: true),
         themeMode: ThemeMode.dark,
         debugShowCheckedModeBanner: false,
