@@ -182,9 +182,7 @@ class _SetupState extends State<Setup> {
           if (!didPop) prevStep();
         },
         child: Scaffold(
-            appBar: widget.showAppBar
-                ? AppBar(title: Text("Adding a new source"))
-                : null,
+            appBar: widget.showAppBar ? AppBar() : null,
             body: SafeArea(
               child: LoaderOverlay(
                 child: Column(
@@ -286,7 +284,9 @@ class _SetupState extends State<Setup> {
     switch (step) {
       case Steps.welcome:
         return getPage(
-            "Welcome to Fred TV", "Let's set up your first source", null);
+            "Welcome to Fred TV",
+            "Let's set up your ${widget.showAppBar ? "new" : "first"} source",
+            null);
       case Steps.sourceType:
         return getPage(
           "What is your provider type?",
