@@ -1,4 +1,3 @@
-import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:open_tv/backend/settings_service.dart';
 import 'package:open_tv/backend/sql.dart';
@@ -22,34 +21,31 @@ class MyApp extends StatelessWidget {
   final bool skipSetup;
   final Settings settings;
   const MyApp({super.key, required this.skipSetup, required this.settings});
-  static const fallbackSeed = Colors.blue;
+
   @override
   Widget build(BuildContext context) {
-    return DynamicColorBuilder(builder: (lightDynamic, darkDynamic) {
-      final lightColorScheme = lightDynamic ??
-          ColorScheme.fromSeed(
-              seedColor: fallbackSeed, brightness: Brightness.light);
-      final darkColorScheme = darkDynamic ??
-          ColorScheme.fromSeed(
-              seedColor: fallbackSeed, brightness: Brightness.dark);
-      return MaterialApp(
-          title: 'Fred TV',
-          theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
-          darkTheme: ThemeData(
-            useMaterial3: true,
-            colorScheme: darkColorScheme,
-          ),
-          themeMode: ThemeMode.system,
-          debugShowCheckedModeBanner: false,
-          home: skipSetup
-              ? Home(
-                  firstLaunch: true,
-                  refresh: settings.refreshOnStart,
-                  home: HomeManager(
-                      filters: Filters(
-                    viewType: settings.defaultView,
-                  )))
-              : const Setup());
-    });
+    return MaterialApp(
+        title: 'Fred TV',
+        theme: ThemeData(
+          useMaterial3: true,
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+          brightness: Brightness.light,
+        ),
+        darkTheme: ThemeData(
+          useMaterial3: true,
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+          brightness: Brightness.dark,
+        ),
+        themeMode: ThemeMode.system,
+        debugShowCheckedModeBanner: false,
+        home: skipSetup
+            ? Home(
+                firstLaunch: true,
+                refresh: settings.refreshOnStart,
+                home: HomeManager(
+                    filters: Filters(
+                  viewType: settings.defaultView,
+                )))
+            : const Setup());
   }
 }
