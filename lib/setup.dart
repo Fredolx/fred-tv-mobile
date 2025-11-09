@@ -29,7 +29,6 @@ class _SetupState extends State<Setup> {
   SourceType selectedSourceType = SourceType.xtream;
   bool isForward = true;
   bool formValid = false;
-  final FocusNode _firstFieldFocus = FocusNode();
   final formPages = {Steps.name, Steps.url, Steps.username, Steps.password};
   final _formKeys = {
     Steps.name: GlobalKey<FormBuilderState>(),
@@ -167,97 +166,108 @@ class _SetupState extends State<Setup> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: SafeArea(
-      child: LoaderOverlay(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16),
-              child: TweenAnimationBuilder<double>(
-                tween: Tween<double>(
-                  begin: 0,
-                  end: (step.index + 1) / Steps.values.length,
-                ),
-                duration: const Duration(milliseconds: 400),
-                curve: Curves.easeInOut,
-                builder: (context, value, child) {
-                  return ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: LinearProgressIndicator(
-                      value: value,
-                      minHeight: 6,
-                    ),
-                  );
-                },
-              ),
-            ),
-            Expanded(
-              child: PageTransitionSwitcher(
-                  duration: const Duration(milliseconds: 400),
-                  reverse: !isForward,
-                  transitionBuilder:
-                      (child, primaryAnimation, secondaryAnimation) {
-                    return SharedAxisTransition(
-                      animation: primaryAnimation,
-                      secondaryAnimation: secondaryAnimation,
-                      transitionType: SharedAxisTransitionType.horizontal,
-                      child: child,
-                    );
-                  },
-                  child: currentPage),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  AnimatedOpacity(
-                    opacity:
-                        step != Steps.welcome && step != Steps.finish ? 1 : 0,
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                    child: IgnorePointer(
-                      ignoring: step == Steps.welcome || step == Steps.finish,
-                      child: FilledButton.tonal(
-                        onPressed: prevStep,
-                        style: FilledButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 16),
-                        ),
-                        child:
-                            const Text("Back", style: TextStyle(fontSize: 18)),
-                      ),
-                    ),
-                  ),
-                  FilledButton(
-                    onPressed: !formPages.contains(step) || formValid
-                        ? handleNext
-                        : null,
-                    style: FilledButton.styleFrom(
+    return PopScope(
+        canPop: step == Steps.welcome,
+        onPopInvokedWithResult: (didPop, result) => prevStep(),
+        child: Scaffold(
+            appBar: widget.showAppBar
+                ? AppBar(title: Text("Adding a new source"))
+                : null,
+            body: SafeArea(
+              child: LoaderOverlay(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 16),
-                    ),
-                    child: Text(
-                      step == Steps.name && selectedSourceType == SourceType.m3u
-                          ? "Select file"
-                          : step == Steps.finish
-                              ? "Finish"
-                              : "Next",
-                      style: const TextStyle(
-                        fontSize: 18,
+                          horizontal: 24.0, vertical: 16),
+                      child: TweenAnimationBuilder<double>(
+                        tween: Tween<double>(
+                          begin: 0,
+                          end: (step.index + 1) / Steps.values.length,
+                        ),
+                        duration: const Duration(milliseconds: 400),
+                        curve: Curves.easeInOut,
+                        builder: (context, value, child) {
+                          return ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: LinearProgressIndicator(
+                              value: value,
+                              minHeight: 6,
+                            ),
+                          );
+                        },
                       ),
                     ),
-                  ),
-                ],
+                    Expanded(
+                      child: PageTransitionSwitcher(
+                          duration: const Duration(milliseconds: 400),
+                          reverse: !isForward,
+                          transitionBuilder:
+                              (child, primaryAnimation, secondaryAnimation) {
+                            return SharedAxisTransition(
+                              animation: primaryAnimation,
+                              secondaryAnimation: secondaryAnimation,
+                              transitionType:
+                                  SharedAxisTransitionType.horizontal,
+                              child: child,
+                            );
+                          },
+                          child: currentPage),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          AnimatedOpacity(
+                            opacity:
+                                step != Steps.welcome && step != Steps.finish
+                                    ? 1
+                                    : 0,
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                            child: IgnorePointer(
+                              ignoring:
+                                  step == Steps.welcome || step == Steps.finish,
+                              child: FilledButton.tonal(
+                                onPressed: prevStep,
+                                style: FilledButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 24, vertical: 16),
+                                ),
+                                child: const Text("Back",
+                                    style: TextStyle(fontSize: 18)),
+                              ),
+                            ),
+                          ),
+                          FilledButton(
+                            onPressed: !formPages.contains(step) || formValid
+                                ? handleNext
+                                : null,
+                            style: FilledButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 24, vertical: 16),
+                            ),
+                            child: Text(
+                              step == Steps.name &&
+                                      selectedSourceType == SourceType.m3u
+                                  ? "Select file"
+                                  : step == Steps.finish
+                                      ? "Finish"
+                                      : "Next",
+                              style: const TextStyle(
+                                fontSize: 18,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
-      ),
-    ));
+            )));
   }
 
   Widget get currentPage {
