@@ -29,6 +29,12 @@ class _SetupState extends State<Setup> {
   SourceType selectedSourceType = SourceType.xtream;
   bool isForward = true;
   bool formValid = false;
+  final Map<Steps, FocusNode> focusNodes = {
+    Steps.name: FocusNode(),
+    Steps.url: FocusNode(),
+    Steps.username: FocusNode(),
+    Steps.password: FocusNode(),
+  };
   final formPages = {Steps.name, Steps.url, Steps.username, Steps.password};
   final _formKeys = {
     Steps.name: GlobalKey<FormBuilderState>(),
@@ -91,7 +97,9 @@ class _SetupState extends State<Setup> {
 
   @override
   void dispose() {
-    _firstFieldFocus.dispose();
+    for (var focus in focusNodes.values) {
+      focus.dispose();
+    }
     super.dispose();
   }
 
@@ -151,6 +159,7 @@ class _SetupState extends State<Setup> {
           }
           formValid = _formKeys[step]?.currentState?.isValid == true;
         });
+        if (formPages.contains(step)) focusNodes[step]?.requestFocus();
       });
     }
   }
@@ -316,7 +325,7 @@ class _SetupState extends State<Setup> {
               key: _formKeys[Steps.name],
               child: FormBuilderTextField(
                 autocorrect: false,
-                focusNode: _firstFieldFocus,
+                focusNode: focusNodes[Steps.name],
                 decoration: InputDecoration(
                     labelText: "Name",
                     border: OutlineInputBorder(),
@@ -354,7 +363,7 @@ class _SetupState extends State<Setup> {
             key: _formKeys[Steps.url],
             child: FormBuilderTextField(
               autocorrect: false,
-              focusNode: _firstFieldFocus,
+              focusNode: focusNodes[Steps.url],
               decoration: InputDecoration(
                   labelText: "URL",
                   border: OutlineInputBorder(),
@@ -382,7 +391,7 @@ class _SetupState extends State<Setup> {
               key: _formKeys[Steps.username],
               child: FormBuilderTextField(
                 autocorrect: false,
-                focusNode: _firstFieldFocus,
+                focusNode: focusNodes[Steps.username],
                 decoration: InputDecoration(
                     labelText: "Username",
                     border: OutlineInputBorder(),
@@ -408,7 +417,7 @@ class _SetupState extends State<Setup> {
             key: _formKeys[Steps.password],
             child: FormBuilderTextField(
               autocorrect: false,
-              focusNode: _firstFieldFocus,
+              focusNode: focusNodes[Steps.password],
               decoration: InputDecoration(
                   labelText: "Password",
                   border: OutlineInputBorder(),
