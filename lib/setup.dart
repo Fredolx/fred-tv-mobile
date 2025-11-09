@@ -1,6 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:loader_overlay/loader_overlay.dart';
@@ -48,7 +49,7 @@ class _SetupState extends State<Setup> {
     Steps.username: "",
     Steps.password: ""
   };
-
+  final nextButtonFocusNode = FocusNode();
   Set<String> existingSourceNames = {};
 
   Future<void> finish() async {
@@ -96,10 +97,17 @@ class _SetupState extends State<Setup> {
   }
 
   @override
+  void initState() {
+    nextButtonFocusNode.requestFocus();
+    super.initState();
+  }
+
+  @override
   void dispose() {
     for (var focus in focusNodes.values) {
       focus.dispose();
     }
+    nextButtonFocusNode.dispose();
     super.dispose();
   }
 
@@ -123,8 +131,11 @@ class _SetupState extends State<Setup> {
       setState(() {
         formValid = _formKeys[step]?.currentState?.isValid == true;
       });
+      if (formPages.contains(step)) focusNodes[step]?.requestFocus();
+      if (step == Steps.welcome) {
+        nextButtonFocusNode.requestFocus();
+      }
     });
-    if (formPages.contains(step)) focusNodes[step]?.requestFocus();
   }
 
   Future<void> handleNext() async {
@@ -227,52 +238,61 @@ class _SetupState extends State<Setup> {
                     ),
                     Padding(
                       padding: const EdgeInsets.all(24.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          AnimatedOpacity(
-                            opacity:
-                                step != Steps.welcome && step != Steps.finish
+                      child: FocusTraversalGroup(
+                          policy: OrderedTraversalPolicy(),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              AnimatedOpacity(
+                                opacity: step != Steps.welcome &&
+                                        step != Steps.finish
                                     ? 1
                                     : 0,
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeInOut,
-                            child: IgnorePointer(
-                              ignoring:
-                                  step == Steps.welcome || step == Steps.finish,
-                              child: FilledButton.tonal(
-                                onPressed: prevStep,
-                                style: FilledButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 24, vertical: 16),
-                                ),
-                                child: const Text("Back",
-                                    style: TextStyle(fontSize: 18)),
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeInOut,
+                                child: IgnorePointer(
+                                    ignoring: step == Steps.welcome ||
+                                        step == Steps.finish,
+                                    child: FocusTraversalOrder(
+                                      order: NumericFocusOrder(2.0),
+                                      child: FilledButton.tonal(
+                                        onPressed: prevStep,
+                                        style: FilledButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 24, vertical: 16),
+                                        ),
+                                        child: const Text("Back",
+                                            style: TextStyle(fontSize: 18)),
+                                      ),
+                                    )),
                               ),
-                            ),
-                          ),
-                          FilledButton(
-                            onPressed: !formPages.contains(step) || formValid
-                                ? handleNext
-                                : null,
-                            style: FilledButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 24, vertical: 16),
-                            ),
-                            child: Text(
-                              step == Steps.name &&
-                                      selectedSourceType == SourceType.m3u
-                                  ? "Select file"
-                                  : step == Steps.finish
-                                      ? "Finish"
-                                      : "Next",
-                              style: const TextStyle(
-                                fontSize: 18,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                              FocusTraversalOrder(
+                                  order: NumericFocusOrder(1.0),
+                                  child: FilledButton(
+                                    focusNode: nextButtonFocusNode,
+                                    onPressed:
+                                        !formPages.contains(step) || formValid
+                                            ? handleNext
+                                            : null,
+                                    style: FilledButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 24, vertical: 16),
+                                    ),
+                                    child: Text(
+                                      step == Steps.name &&
+                                              selectedSourceType ==
+                                                  SourceType.m3u
+                                          ? "Select file"
+                                          : step == Steps.finish
+                                              ? "Finish"
+                                              : "Next",
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                      ),
+                                    ),
+                                  )),
+                            ],
+                          )),
                     ),
                   ],
                 ),
@@ -292,7 +312,8 @@ class _SetupState extends State<Setup> {
           "What is your provider type?",
           null,
           List.generate(SourceType.values.length, (i) {
-            return Card(
+            final isLast = i == SourceType.values.length - 1;
+            final card = Card(
               color: selectedSourceType.index == i
                   ? Theme.of(context).colorScheme.primaryContainer
                   : Theme.of(context).cardTheme.color,
@@ -311,6 +332,21 @@ class _SetupState extends State<Setup> {
                 },
               ),
             );
+            if (isLast) {
+              return Focus(
+                canRequestFocus: false,
+                onKeyEvent: (node, event) {
+                  if (event is KeyDownEvent &&
+                      event.logicalKey == LogicalKeyboardKey.arrowDown) {
+                    nextButtonFocusNode.requestFocus();
+                    return KeyEventResult.handled;
+                  }
+                  return KeyEventResult.ignored;
+                },
+                child: card,
+              );
+            }
+            return card;
           }),
         );
       case Steps.name:
