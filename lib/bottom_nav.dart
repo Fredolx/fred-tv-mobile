@@ -8,12 +8,16 @@ class BottomNav extends StatefulWidget {
   final ViewType startingView;
   final bool blockSettings;
   final bool useRail;
+  final bool showSearch;
+  final VoidCallback? onSearch;
   const BottomNav({
     super.key,
     required this.updateViewMode,
     this.startingView = ViewType.all,
     this.blockSettings = false,
     this.useRail = false,
+    this.showSearch = false,
+    this.onSearch,
   });
 
   @override
@@ -60,6 +64,9 @@ class _BottomNavState extends State<BottomNav> {
   @override
   Widget build(BuildContext context) {
     if (widget.useRail) {
+      final includeSearch = widget.showSearch && widget.onSearch != null;
+      final selectedIndex =
+          includeSearch ? _selectedIndex + 1 : _selectedIndex;
       return Container(
           decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surfaceBright,
@@ -68,27 +75,39 @@ class _BottomNavState extends State<BottomNav> {
                       color: Theme.of(context).colorScheme.surfaceBright,
                       width: 1))),
           child: NavigationRail(
-            selectedIndex: _selectedIndex,
-            onDestinationSelected: onBarTapped,
+            selectedIndex: selectedIndex,
+            onDestinationSelected: (index) {
+              if (includeSearch && index == 0) {
+                widget.onSearch!();
+                return;
+              }
+              final adjustedIndex = includeSearch ? index - 1 : index;
+              onBarTapped(adjustedIndex);
+            },
             labelType: NavigationRailLabelType.all,
-            destinations: const <NavigationRailDestination>[
-              NavigationRailDestination(
+            destinations: <NavigationRailDestination>[
+              if (includeSearch)
+                const NavigationRailDestination(
+                  icon: Icon(Icons.search),
+                  label: Text('Search'),
+                ),
+              const NavigationRailDestination(
                 icon: Icon(Icons.list),
                 label: Text('All'),
               ),
-              NavigationRailDestination(
+              const NavigationRailDestination(
                 icon: Icon(Icons.dashboard),
                 label: Text('Categories'),
               ),
-              NavigationRailDestination(
+              const NavigationRailDestination(
                 icon: Icon(Icons.star),
                 label: Text('Favorites'),
               ),
-              NavigationRailDestination(
+              const NavigationRailDestination(
                 icon: Icon(Icons.history),
                 label: Text('History'),
               ),
-              NavigationRailDestination(
+              const NavigationRailDestination(
                 icon: Icon(Icons.settings),
                 label: Text('Settings'),
               ),

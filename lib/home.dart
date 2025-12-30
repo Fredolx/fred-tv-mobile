@@ -299,6 +299,8 @@ class _HomeState extends State<Home> {
                               blockSettings: blockSettings,
                               updateViewMode: updateViewMode,
                               useRail: true,
+                              showSearch: true,
+                              onSearch: toggleSearch,
                             ),
                             Expanded(child: content),
                           ])
@@ -310,13 +312,15 @@ class _HomeState extends State<Home> {
                     blockSettings: blockSettings,
                     updateViewMode: updateViewMode,
                   ),
-            floatingActionButton: Visibility(
-              visible: !searchMode,
-              child: FloatingActionButton(
-                onPressed: toggleSearch,
-                tooltip: 'Search',
-                child: const Icon(Icons.search),
-              ),
-            )));
+            floatingActionButton: useSideNav
+                ? null
+                : Visibility(
+                    visible: !searchMode,
+                    child: FloatingActionButton(
+                      onPressed: toggleSearch,
+                      tooltip: 'Search',
+                      child: const Icon(Icons.search),
+                    ),
+                  )));
   }
 }
