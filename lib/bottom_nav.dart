@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:open_tv/models/view_type.dart';
 import 'package:open_tv/settings_view.dart';
@@ -6,11 +7,17 @@ class BottomNav extends StatefulWidget {
   final Function(ViewType) updateViewMode;
   final ViewType startingView;
   final bool blockSettings;
+  final bool useRail;
+  final bool showSearch;
+  final VoidCallback? onSearch;
   const BottomNav({
     super.key,
     required this.updateViewMode,
     this.startingView = ViewType.all,
     this.blockSettings = false,
+    this.useRail = false,
+    this.showSearch = false,
+    this.onSearch,
   });
 
   @override
@@ -56,6 +63,57 @@ class _BottomNavState extends State<BottomNav> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.useRail) {
+      final includeSearch = widget.showSearch && widget.onSearch != null;
+      final selectedIndex =
+          includeSearch ? _selectedIndex + 1 : _selectedIndex;
+      return Container(
+          decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceBright,
+              border: Border(
+                  right: BorderSide(
+                      color: Theme.of(context).colorScheme.surfaceBright,
+                      width: 1))),
+          child: NavigationRail(
+            selectedIndex: selectedIndex,
+            onDestinationSelected: (index) {
+              if (includeSearch && index == 0) {
+                widget.onSearch!();
+                return;
+              }
+              final adjustedIndex = includeSearch ? index - 1 : index;
+              onBarTapped(adjustedIndex);
+            },
+            labelType: NavigationRailLabelType.all,
+            destinations: <NavigationRailDestination>[
+              if (includeSearch)
+                const NavigationRailDestination(
+                  icon: Icon(Icons.search),
+                  label: Text('Search'),
+                ),
+              const NavigationRailDestination(
+                icon: Icon(Icons.list),
+                label: Text('All'),
+              ),
+              const NavigationRailDestination(
+                icon: Icon(Icons.dashboard),
+                label: Text('Categories'),
+              ),
+              const NavigationRailDestination(
+                icon: Icon(Icons.star),
+                label: Text('Favorites'),
+              ),
+              const NavigationRailDestination(
+                icon: Icon(Icons.history),
+                label: Text('History'),
+              ),
+              const NavigationRailDestination(
+                icon: Icon(Icons.settings),
+                label: Text('Settings'),
+              ),
+            ],
+          ));
+    }
     return Container(
         decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surfaceBright,
@@ -90,4 +148,16 @@ class _BottomNavState extends State<BottomNav> {
           type: BottomNavigationBarType.fixed,
         ));
   }
+}
+
+bool shouldUseSideNav(BuildContext context) {
+  final media = MediaQuery.of(context);
+  final navigationMode =
+      MediaQuery.maybeNavigationModeOf(context) ?? NavigationMode.traditional;
+  final isLargeLandscape =
+      media.size.width >= 900 && media.size.width > media.size.height;
+  final isAndroidLike =
+      !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+  return isLargeLandscape &&
+      (navigationMode == NavigationMode.directional || isAndroidLike);
 }
