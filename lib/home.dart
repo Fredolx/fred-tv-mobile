@@ -194,6 +194,87 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    final useSideNav = shouldUseSideNav(context);
+    final content = Column(children: [
+      AnimatedSize(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          child: searchMode
+              ? Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .surfaceContainer, // Background color
+                  child: Row(
+                    children: [
+                      Expanded(
+                          child: TextField(
+                        controller: searchController,
+                        focusNode: _focusNode,
+                        onChanged: (query) {
+                          _debounce?.cancel();
+                          _debounce =
+                              Timer(const Duration(milliseconds: 500), () {
+                            widget.home.filters.query = query;
+                            load(false);
+                          });
+                        },
+                        decoration: InputDecoration(
+                          hintText: "Search...",
+                          prefixIcon: const Icon(Icons.search),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide.none,
+                          ),
+                          suffixIcon: IconButton(
+                              onPressed: () {
+                                widget.home.filters.useKeywords =
+                                    !widget.home.filters.useKeywords;
+                                load(false);
+                              },
+                              icon: Icon(widget.home.filters.useKeywords
+                                  ? Icons.label
+                                  : Icons.label_outline)),
+                          filled: true, // Light background for contrast
+                          contentPadding:
+                              const EdgeInsets.symmetric(vertical: 0),
+                        ),
+                      )),
+                      const SizedBox(width: 10),
+                      SizedBox(
+                          width: 40,
+                          child: IconButton(
+                              onPressed: toggleSearch,
+                              icon: const Icon(
+                                Icons.close,
+                              )))
+                    ],
+                  ),
+                )
+              : const SizedBox.shrink()),
+      Expanded(
+          child: GridView.builder(
+        shrinkWrap: true,
+        controller: _scrollController,
+        padding: const EdgeInsets.fromLTRB(16, 15, 16, 5),
+        itemCount: channels.length,
+        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+          maxCrossAxisExtent: 315,
+          mainAxisExtent: 120,
+          mainAxisSpacing: 16,
+          crossAxisSpacing: 16,
+        ),
+        itemBuilder: (context, index) {
+          final channel = channels[index];
+          return ChannelTile(
+            channel: channel,
+            parentContext: context,
+            setNode: setNode,
+          );
+        },
+      )),
+    ]);
     return PopScope(
         canPop: canPop(),
         onPopInvokedWithResult: (didPop, result) {
@@ -211,91 +292,24 @@ class _HomeState extends State<Home> {
                 : null,
             body: Loading(
                 child: SafeArea(
-                    child: Column(children: [
-              AnimatedSize(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                  child: searchMode
-                      ? Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 8),
-                          color: Theme.of(context)
-                              .colorScheme
-                              .surfaceContainer, // Background color
-                          child: Row(
-                            children: [
-                              Expanded(
-                                  child: TextField(
-                                controller: searchController,
-                                focusNode: _focusNode,
-                                onChanged: (query) {
-                                  _debounce?.cancel();
-                                  _debounce = Timer(
-                                      const Duration(milliseconds: 500), () {
-                                    widget.home.filters.query = query;
-                                    load(false);
-                                  });
-                                },
-                                decoration: InputDecoration(
-                                  hintText: "Search...",
-                                  prefixIcon: const Icon(Icons.search),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  suffixIcon: IconButton(
-                                      onPressed: () {
-                                        widget.home.filters.useKeywords =
-                                            !widget.home.filters.useKeywords;
-                                        load(false);
-                                      },
-                                      icon: Icon(widget.home.filters.useKeywords
-                                          ? Icons.label
-                                          : Icons.label_outline)),
-                                  filled: true, // Light background for contrast
-                                  contentPadding:
-                                      const EdgeInsets.symmetric(vertical: 0),
-                                ),
-                              )),
-                              const SizedBox(width: 10),
-                              SizedBox(
-                                  width: 40,
-                                  child: IconButton(
-                                      onPressed: toggleSearch,
-                                      icon: const Icon(
-                                        Icons.close,
-                                      )))
-                            ],
-                          ),
-                        )
-                      : const SizedBox.shrink()),
-              Expanded(
-                  child: GridView.builder(
-                shrinkWrap: true,
-                controller: _scrollController,
-                padding: const EdgeInsets.fromLTRB(16, 15, 16, 5),
-                itemCount: channels.length,
-                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: 315,
-                  mainAxisExtent: 120,
-                  mainAxisSpacing: 16,
-                  crossAxisSpacing: 16,
-                ),
-                itemBuilder: (context, index) {
-                  final channel = channels[index];
-                  return ChannelTile(
-                    channel: channel,
-                    parentContext: context,
-                    setNode: setNode,
-                  );
-                },
-              )),
-            ]))),
-            bottomNavigationBar: BottomNav(
-              startingView: getStartingView(),
-              blockSettings: blockSettings,
-              updateViewMode: updateViewMode,
-            ),
+                    child: useSideNav
+                        ? Row(children: [
+                            BottomNav(
+                              startingView: getStartingView(),
+                              blockSettings: blockSettings,
+                              updateViewMode: updateViewMode,
+                              useRail: true,
+                            ),
+                            Expanded(child: content),
+                          ])
+                        : content)),
+            bottomNavigationBar: useSideNav
+                ? null
+                : BottomNav(
+                    startingView: getStartingView(),
+                    blockSettings: blockSettings,
+                    updateViewMode: updateViewMode,
+                  ),
             floatingActionButton: Visibility(
               visible: !searchMode,
               child: FloatingActionButton(
