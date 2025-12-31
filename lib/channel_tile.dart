@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:open_tv/backend/sql.dart';
 import 'package:open_tv/backend/xtream.dart';
 import 'package:open_tv/memory.dart';
@@ -26,9 +29,24 @@ class ChannelTile extends StatefulWidget {
 
 class _ChannelTileState extends State<ChannelTile> {
   final FocusNode _focusNode = FocusNode();
+  static final Set<LogicalKeyboardKey> _favoriteKeys =
+      <LogicalKeyboardKey>{
+        LogicalKeyboardKey.contextMenu,
+        LogicalKeyboardKey.info,
+        LogicalKeyboardKey.keyF,
+        LogicalKeyboardKey.favoriteClear0,
+        LogicalKeyboardKey.favoriteClear1,
+        LogicalKeyboardKey.favoriteClear2,
+        LogicalKeyboardKey.favoriteClear3,
+        LogicalKeyboardKey.favoriteRecall0,
+        LogicalKeyboardKey.favoriteRecall1,
+        LogicalKeyboardKey.favoriteRecall2,
+        LogicalKeyboardKey.favoriteRecall3,
+      };
   @override
   void initState() {
     super.initState();
+    _focusNode.onKey = _handleKey;
     _focusNode.addListener(() {
       setState(() {});
     });
@@ -38,6 +56,17 @@ class _ChannelTileState extends State<ChannelTile> {
   void dispose() {
     _focusNode.dispose();
     super.dispose();
+  }
+
+  KeyEventResult _handleKey(FocusNode node, RawKeyEvent event) {
+    if (event is! RawKeyDownEvent) {
+      return KeyEventResult.ignored;
+    }
+    if (_favoriteKeys.contains(event.logicalKey)) {
+      unawaited(favorite());
+      return KeyEventResult.handled;
+    }
+    return KeyEventResult.ignored;
   }
 
   Future<void> favorite() async {
