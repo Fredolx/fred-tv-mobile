@@ -97,6 +97,11 @@ class _SettingsState extends State<SettingsView> {
         () async => await Sql.setSourceEnabled(!source.enabled, source.id!),
         context);
     await reloadSources();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text("Source ${!source.enabled ? "enabled" : "disabled"}"),
+      duration: const Duration(milliseconds: 500),
+    ));
   }
 
   Widget getSource(Source source) {
