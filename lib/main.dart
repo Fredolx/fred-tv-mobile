@@ -27,14 +27,27 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
         title: 'Fred TV',
         theme: ThemeData(
-          useMaterial3: true, // Enables Material You
-          brightness: Brightness.light,
-        ),
-        darkTheme: ThemeData(
-          useMaterial3: true,
-          brightness: Brightness.dark,
-        ),
-        themeMode: ThemeMode.system,
+            brightness: Brightness.dark,
+            colorScheme: ColorScheme.fromSeed(
+                seedColor: Colors.blue,
+                surface: Colors.black,
+                brightness: Brightness.dark,
+                surfaceContainer: Color.fromARGB(255, 29, 36, 41)),
+            filledButtonTheme: FilledButtonThemeData(style: ButtonStyle(
+              side: WidgetStateProperty.resolveWith(
+                (states) {
+                  if (states.contains(WidgetState.focused)) {
+                    return const BorderSide(
+                      color: Colors.yellow, // yellow border
+                      width: 4,
+                    );
+                  }
+                  return BorderSide.none;
+                },
+              ),
+            )),
+            useMaterial3: true),
+        themeMode: ThemeMode.dark,
         debugShowCheckedModeBanner: false,
         home: skipSetup
             ? Home(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:open_tv/models/view_type.dart';
 import 'package:open_tv/settings_view.dart';
 
@@ -6,12 +7,15 @@ class BottomNav extends StatefulWidget {
   final Function(ViewType) updateViewMode;
   final ViewType startingView;
   final bool blockSettings;
-  const BottomNav({
-    super.key,
-    required this.updateViewMode,
-    this.startingView = ViewType.all,
-    this.blockSettings = false,
-  });
+  final bool autofocus;
+  final FocusNode? navFocusNode;
+  const BottomNav(
+      {super.key,
+      required this.updateViewMode,
+      this.startingView = ViewType.all,
+      this.blockSettings = false,
+      this.autofocus = false,
+      this.navFocusNode});
 
   @override
   State<BottomNav> createState() => _BottomNavState();
@@ -19,13 +23,40 @@ class BottomNav extends StatefulWidget {
 
 class _BottomNavState extends State<BottomNav> {
   int _selectedIndex = 0;
+  final FocusScopeNode _navScopeNode = FocusScopeNode();
+  bool _justAutofocused = false;
 
   @override
   void initState() {
     super.initState();
+    _navScopeNode.onKeyEvent = (node, event) {
+      if (event is KeyDownEvent &&
+          event.logicalKey == LogicalKeyboardKey.arrowUp) {
+        FocusScope.of(context).focusInDirection(TraversalDirection.up);
+        return KeyEventResult.handled;
+      }
+      return KeyEventResult.ignored;
+    };
     setState(() {
       _selectedIndex = widget.startingView.index;
     });
+    if (widget.autofocus) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        // We are programmatically restoring focus.
+        // Mark this flag so onFocusChange knows to ignore the entry logic.
+        _justAutofocused = true;
+        final nodes = _navScopeNode.traversalDescendants.toList();
+        if (_selectedIndex < nodes.length) {
+          nodes[_selectedIndex].requestFocus();
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _navScopeNode.dispose();
+    super.dispose();
   }
 
   void onBarTapped(int index) {
@@ -63,31 +94,46 @@ class _BottomNavState extends State<BottomNav> {
                 top: BorderSide(
                     color: Theme.of(context).colorScheme.surfaceBright,
                     width: 1))),
-        child: BottomNavigationBar(
-          showUnselectedLabels: false,
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.list),
-              label: 'All',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.dashboard),
-              label: 'Categories',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.star),
-              label: 'Favorites',
-            ),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.history), label: "History"),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.settings),
-              label: 'Settings',
-            ),
-          ],
-          currentIndex: _selectedIndex,
-          onTap: onBarTapped,
-          type: BottomNavigationBarType.fixed,
-        ));
+        child: Focus(
+            focusNode: widget.navFocusNode,
+            onFocusChange: (hasFocus) {
+              if (hasFocus) {
+                if (_justAutofocused) {
+                  _justAutofocused = false;
+                  return;
+                }
+                _navScopeNode.requestFocus();
+                final first = _navScopeNode.traversalDescendants.firstOrNull;
+                first?.requestFocus();
+              }
+            },
+            child: FocusScope(
+                node: _navScopeNode,
+                child: FocusTraversalGroup(
+                    policy: WidgetOrderTraversalPolicy(),
+                    child: NavigationBar(
+                      destinations: const [
+                        NavigationDestination(
+                          icon: Icon(Icons.list),
+                          label: 'All',
+                        ),
+                        NavigationDestination(
+                          icon: Icon(Icons.dashboard),
+                          label: 'Categories',
+                        ),
+                        NavigationDestination(
+                          icon: Icon(Icons.star),
+                          label: 'Favorites',
+                        ),
+                        NavigationDestination(
+                            icon: Icon(Icons.history), label: "History"),
+                        NavigationDestination(
+                          icon: Icon(Icons.settings),
+                          label: 'Settings',
+                        ),
+                      ],
+                      selectedIndex: _selectedIndex,
+                      onDestinationSelected: onBarTapped,
+                    )))));
   }
 }
