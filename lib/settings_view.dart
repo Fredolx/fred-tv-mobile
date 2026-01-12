@@ -97,6 +97,11 @@ class _SettingsState extends State<SettingsView> {
         () async => await Sql.setSourceEnabled(!source.enabled, source.id!),
         context);
     await reloadSources();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text("Source ${!source.enabled ? "enabled" : "disabled"}"),
+      duration: const Duration(milliseconds: 500),
+    ));
   }
 
   Widget getSource(Source source) {
@@ -111,7 +116,7 @@ class _SettingsState extends State<SettingsView> {
           onLongPress: () => toggleSource(source),
           contentPadding: const EdgeInsets.only(left: 20),
           title: Text(source.name),
-          subtitle: Text(getSourceTypeString(source.sourceType)),
+          subtitle: Text(source.sourceType.label),
           trailing: Row(
             mainAxisSize:
                 MainAxisSize.min, // Ensures the row takes up minimal space

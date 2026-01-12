@@ -25,6 +25,7 @@ class _PlayerState extends State<Player> {
   late final GlobalKey<VideoState> key = GlobalKey<VideoState>();
   bool exiting = false;
   bool fill = false;
+  List<StreamSubscription> subscriptions = [];
 
   @override
   void initState() {
@@ -34,25 +35,63 @@ class _PlayerState extends State<Player> {
   }
 
   Future<void> initAsync() async {
-    final headers = await Sql.getChannelHeaders(widget.channel.id!);
+    player.setPlaylistMode(mk.PlaylistMode.none);
     final seconds = widget.channel.mediaType == MediaType.movie
         ? await Sql.getPosition(widget.channel.id!)
         : null;
-    await player.open(mk.Media(widget.channel.url!,
-        start: seconds != null ? Duration(seconds: seconds) : null,
-        httpHeaders: headers != null
-            ? {
-                if (headers.referrer != null) "Referer": headers.referrer!,
-                if (headers.httpOrigin != null) "Origin": headers.httpOrigin!,
-                if (headers.userAgent != null) "User-Agent": headers.userAgent!,
-              }
-            : null));
-    await key.currentState?.enterFullscreen();
-    player.setPlaylistMode(mk.PlaylistMode.single);
+    await _startPlayback(seconds != null ? Duration(seconds: seconds) : null);
+
+    void onDisconnect() async {
+      if (!mounted || exiting) return;
+      if (widget.channel.mediaType == MediaType.livestream) {
+        debugPrint("Live stream dropped/error. Attempting to reconnect...");
+        await Future.delayed(const Duration(seconds: 1));
+        if (!mounted || exiting) return;
+        await _startPlayback(null);
+      }
+    }
+
+    subscriptions.add(player.stream.completed.listen((completed) {
+      if (completed) onDisconnect();
+    }));
+
+    subscriptions.add(player.stream.error.listen((error) async {
+      debugPrint("Stream error: $error");
+      await Future.delayed(const Duration(seconds: 2));
+      if (!player.state.playing) {
+        onDisconnect();
+      }
+    }));
+  }
+
+  Future<void> _startPlayback(Duration? startPosition) async {
+    while (true) {
+      if (!mounted || exiting) return;
+      try {
+        final headers = await Sql.getChannelHeaders(widget.channel.id!);
+        await player.open(mk.Media(widget.channel.url!,
+            start: startPosition,
+            httpHeaders: headers != null
+                ? {
+                    if (headers.referrer != null) "Referer": headers.referrer!,
+                    if (headers.httpOrigin != null)
+                      "Origin": headers.httpOrigin!,
+                    if (headers.userAgent != null)
+                      "User-Agent": headers.userAgent!,
+                  }
+                : null));
+        await key.currentState?.enterFullscreen();
+        return;
+      } catch (e) {
+        debugPrint("Playback failed: $e. Retrying in 2s...");
+        await Future.delayed(const Duration(seconds: 2));
+      }
+    }
   }
 
   @override
   void dispose() {
+    for (final s in subscriptions) s.cancel();
     player.dispose();
     super.dispose();
   }

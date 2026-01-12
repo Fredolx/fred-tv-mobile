@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:open_tv/backend/sql.dart';
 import 'package:open_tv/backend/xtream.dart';
 import 'package:open_tv/memory.dart';
@@ -14,11 +15,13 @@ class ChannelTile extends StatefulWidget {
   final Channel channel;
   final BuildContext parentContext;
   final Function(Node node) setNode;
+  final VoidCallback? onFocusNavbar;
   const ChannelTile(
       {super.key,
       required this.channel,
       required this.setNode,
-      required this.parentContext});
+      required this.parentContext,
+      this.onFocusNavbar});
 
   @override
   State<ChannelTile> createState() => _ChannelTileState();
@@ -29,6 +32,16 @@ class _ChannelTileState extends State<ChannelTile> {
   @override
   void initState() {
     super.initState();
+    _focusNode.onKeyEvent = (node, event) {
+      if (event is KeyDownEvent &&
+          event.logicalKey == LogicalKeyboardKey.arrowRight) {
+        if (!FocusScope.of(context).focusInDirection(TraversalDirection.right)) {
+          widget.onFocusNavbar?.call();
+        }
+        return KeyEventResult.handled;
+      }
+      return KeyEventResult.ignored;
+    };
     _focusNode.addListener(() {
       setState(() {});
     });

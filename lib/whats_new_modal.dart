@@ -37,7 +37,11 @@ class WhatsNewModal extends StatelessWidget {
                     '''
 Hi! Thanks for supporting Fred TV. Here's everything new:
 
-- Changed name from Open TV to Fred TV due to trademark dispute, sorry!
+- Improved playback. It should not loop anymore on livestreams
+- Improved UI
+- Remade the setup experience
+- Added Android TV support
+- More to come!
 
 If you like Fred TV, please consider donating (Even a dollar helps tremendously), reporting issues on the github and sharing it with your friends.
 ''',
