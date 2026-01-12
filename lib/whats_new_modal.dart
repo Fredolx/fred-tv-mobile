@@ -37,7 +37,7 @@ class WhatsNewModal extends StatelessWidget {
                     '''
 Hi! Thanks for supporting Fred TV. Here's everything new:
 
-- Improved playback. It should not loop anymore on livestreams.
+- Improved playback. It should not loop anymore on livestreams
 - Improved UI
 - Remade the setup experience
 - Added Android TV support
