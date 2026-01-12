@@ -232,9 +232,16 @@ class _HomeState extends State<Home> {
                           ? Container(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 10, vertical: 8),
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .surfaceContainer, // Background color
+                              decoration: BoxDecoration(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .surfaceContainer, // Background color
+                                  border: Border(
+                                      bottom: BorderSide(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .surfaceBright,
+                                          width: 1))),
                               child: Row(
                                 children: [
                                   Expanded(
