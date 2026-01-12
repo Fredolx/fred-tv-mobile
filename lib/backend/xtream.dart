@@ -48,6 +48,8 @@ Future<void> getXtream(Source source, bool wipe) async {
     } catch (e) {
       failCount++;
     }
+  } else {
+    failCount++;
   }
   if (results[2] != null && results[3] != null) {
     try {
@@ -60,7 +62,10 @@ Future<void> getXtream(Source source, bool wipe) async {
     } catch (e) {
       failCount++;
     }
+  } else {
+    failCount++;
   }
+
   if (results[4] != null && results[5] != null) {
     try {
       processXtream(
@@ -72,7 +77,10 @@ Future<void> getXtream(Source source, bool wipe) async {
     } catch (e) {
       failCount++;
     }
+  } else {
+    failCount++;
   }
+
   if (failCount > 1) {
     throw Exception("Failed to fetch source");
   }
