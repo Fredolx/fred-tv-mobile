@@ -74,7 +74,7 @@ Future<void> getXtream(Source source, bool wipe) async {
     }
   }
   if (failCount > 1) {
-    return;
+    throw Exception("Failed to fetch source");
   }
   statements.add(Sql.updateGroups());
   if (preserve != null) {

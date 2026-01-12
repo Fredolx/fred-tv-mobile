@@ -55,9 +55,12 @@ class _PlayerState extends State<Player> {
       if (completed) onDisconnect();
     }));
 
-    subscriptions.add(player.stream.error.listen((error) {
+    subscriptions.add(player.stream.error.listen((error) async {
       debugPrint("Stream error: $error");
-      onDisconnect();
+      await Future.delayed(const Duration(seconds: 2));
+      if (!player.state.playing) {
+        onDisconnect();
+      }
     }));
   }
 
