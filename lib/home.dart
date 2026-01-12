@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:open_tv/backend/settings_service.dart';
 import 'package:open_tv/backend/sql.dart';
 import 'package:open_tv/backend/utils.dart';
@@ -20,11 +21,13 @@ import 'package:open_tv/whats_new_modal.dart';
 class Home extends StatefulWidget {
   final HomeManager home;
   final bool refresh;
-  final firstLaunch;
+  final bool firstLaunch;
+  final bool autofocusBottomNav;
   const Home(
       {super.key,
       required this.home,
       this.refresh = false,
+      this.autofocusBottomNav = false,
       this.firstLaunch = false});
   @override
   State<Home> createState() => _HomeState();
@@ -42,6 +45,7 @@ class _HomeState extends State<Home> {
   bool isLoading = false;
   bool blockSettings = false;
   int? previousScroll;
+  final FocusNode _bottomNavFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -123,6 +127,7 @@ class _HomeState extends State<Home> {
   @override
   void dispose() {
     _focusNode.dispose();
+    _bottomNavFocusNode.dispose();
     _scrollController.dispose();
     _debounce?.cancel();
     super.dispose();
@@ -167,6 +172,7 @@ class _HomeState extends State<Home> {
     Navigator.of(context).pushAndRemoveUntil(
         NoPushAnimationMaterialPageRoute(
             builder: (context) => Home(
+                autofocusBottomNav: true,
                 home: HomeManager(
                     filters: Filters(
                         viewType: type,
@@ -194,115 +200,131 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-        canPop: canPop(),
-        onPopInvokedWithResult: (didPop, result) {
-          handleBack();
+    return CallbackShortcuts(
+        bindings: {
+          const SingleActivator(LogicalKeyboardKey.contextMenu): () {
+            debugPrint("test");
+            _bottomNavFocusNode.requestFocus();
+          }
         },
-        child: Scaffold(
-            appBar: widget.home.node != null
-                ? AppBar(
-                    title: Text(widget.home.node.toString()),
-                    leading: IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                  )
-                : null,
-            body: Loading(
-                child: SafeArea(
-                    child: Column(children: [
-              AnimatedSize(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                  child: searchMode
-                      ? Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 8),
-                          color: Theme.of(context)
-                              .colorScheme
-                              .surfaceContainer, // Background color
-                          child: Row(
-                            children: [
-                              Expanded(
-                                  child: TextField(
-                                controller: searchController,
-                                focusNode: _focusNode,
-                                onChanged: (query) {
-                                  _debounce?.cancel();
-                                  _debounce = Timer(
-                                      const Duration(milliseconds: 500), () {
-                                    widget.home.filters.query = query;
-                                    load(false);
-                                  });
-                                },
-                                decoration: InputDecoration(
-                                  hintText: "Search...",
-                                  prefixIcon: const Icon(Icons.search),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  suffixIcon: IconButton(
-                                      onPressed: () {
-                                        widget.home.filters.useKeywords =
-                                            !widget.home.filters.useKeywords;
+        child: PopScope(
+            canPop: canPop(),
+            onPopInvokedWithResult: (didPop, result) {
+              handleBack();
+            },
+            child: Scaffold(
+                appBar: widget.home.node != null
+                    ? AppBar(
+                        title: Text(widget.home.node.toString()),
+                        leading: IconButton(
+                          icon: const Icon(Icons.arrow_back),
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
+                      )
+                    : null,
+                body: Loading(
+                    child: SafeArea(
+                        child: Column(children: [
+                  AnimatedSize(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                      child: searchMode
+                          ? Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 8),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .surfaceContainer, // Background color
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                      child: TextField(
+                                    controller: searchController,
+                                    focusNode: _focusNode,
+                                    onChanged: (query) {
+                                      _debounce?.cancel();
+                                      _debounce = Timer(
+                                          const Duration(milliseconds: 500),
+                                          () {
+                                        widget.home.filters.query = query;
                                         load(false);
-                                      },
-                                      icon: Icon(widget.home.filters.useKeywords
-                                          ? Icons.label
-                                          : Icons.label_outline)),
-                                  filled: true, // Light background for contrast
-                                  contentPadding:
-                                      const EdgeInsets.symmetric(vertical: 0),
-                                ),
-                              )),
-                              const SizedBox(width: 10),
-                              SizedBox(
-                                  width: 40,
-                                  child: IconButton(
-                                      onPressed: toggleSearch,
-                                      icon: const Icon(
-                                        Icons.close,
-                                      )))
-                            ],
-                          ),
-                        )
-                      : const SizedBox.shrink()),
-              Expanded(
-                  child: GridView.builder(
-                shrinkWrap: true,
-                controller: _scrollController,
-                padding: const EdgeInsets.fromLTRB(16, 15, 16, 5),
-                itemCount: channels.length,
-                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: 315,
-                  mainAxisExtent: 120,
-                  mainAxisSpacing: 16,
-                  crossAxisSpacing: 16,
+                                      });
+                                    },
+                                    decoration: InputDecoration(
+                                      hintText: "Search...",
+                                      prefixIcon: const Icon(Icons.search),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                      suffixIcon: IconButton(
+                                          onPressed: () {
+                                            widget.home.filters.useKeywords =
+                                                !widget
+                                                    .home.filters.useKeywords;
+                                            load(false);
+                                          },
+                                          icon: Icon(
+                                              widget.home.filters.useKeywords
+                                                  ? Icons.label
+                                                  : Icons.label_outline)),
+                                      filled:
+                                          true, // Light background for contrast
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                              vertical: 0),
+                                    ),
+                                  )),
+                                  const SizedBox(width: 10),
+                                  SizedBox(
+                                      width: 40,
+                                      child: IconButton(
+                                          onPressed: toggleSearch,
+                                          icon: const Icon(
+                                            Icons.close,
+                                          )))
+                                ],
+                              ),
+                            )
+                          : const SizedBox.shrink()),
+                  Expanded(
+                      child: GridView.builder(
+                    shrinkWrap: true,
+                    controller: _scrollController,
+                    padding: const EdgeInsets.fromLTRB(16, 15, 16, 5),
+                    itemCount: channels.length,
+                    gridDelegate:
+                        const SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: 315,
+                      mainAxisExtent: 120,
+                      mainAxisSpacing: 16,
+                      crossAxisSpacing: 16,
+                    ),
+                    itemBuilder: (context, index) {
+                      final channel = channels[index];
+                      return ChannelTile(
+                        channel: channel,
+                        parentContext: context,
+                        setNode: setNode,
+                        onFocusNavbar: () => _bottomNavFocusNode.requestFocus(),
+                      );
+                    },
+                  )),
+                ]))),
+                bottomNavigationBar: BottomNav(
+                  startingView: getStartingView(),
+                  blockSettings: blockSettings,
+                  updateViewMode: updateViewMode,
+                  navFocusNode: _bottomNavFocusNode,
+                  autofocus: widget.autofocusBottomNav,
                 ),
-                itemBuilder: (context, index) {
-                  final channel = channels[index];
-                  return ChannelTile(
-                    channel: channel,
-                    parentContext: context,
-                    setNode: setNode,
-                  );
-                },
-              )),
-            ]))),
-            bottomNavigationBar: BottomNav(
-              startingView: getStartingView(),
-              blockSettings: blockSettings,
-              updateViewMode: updateViewMode,
-            ),
-            floatingActionButton: Visibility(
-              visible: !searchMode,
-              child: FloatingActionButton(
-                onPressed: toggleSearch,
-                tooltip: 'Search',
-                child: const Icon(Icons.search),
-              ),
-            )));
+                floatingActionButton: Visibility(
+                  visible: !searchMode,
+                  child: FloatingActionButton(
+                    onPressed: toggleSearch,
+                    tooltip: 'Search',
+                    child: const Icon(Icons.search),
+                  ),
+                ))));
   }
 }
