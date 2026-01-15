@@ -97,10 +97,11 @@ class _ChannelTileState extends State<ChannelTile> {
   @override
   Widget build(BuildContext context) {
     return Card(
-        elevation: _focusNode.hasFocus ? 8.0 : 4.0,
+        elevation: _focusNode.hasFocus ? 8.0 : 2.0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(12),
         ),
+        clipBehavior: Clip.antiAlias,
         color: widget.channel.favorite
             ? Theme.of(context).colorScheme.surfaceContainerHighest
             : Theme.of(context).colorScheme.surfaceContainer,
@@ -108,46 +109,51 @@ class _ChannelTileState extends State<ChannelTile> {
           focusNode: _focusNode,
           onLongPress: favorite,
           onTap: () async => await play(),
-          borderRadius: BorderRadius.circular(10),
-          child: Padding(
-              padding: const EdgeInsets.all(5),
-              child: Row(
-                children: [
-                  Expanded(
-                      flex: 3,
-                      child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: widget.channel.image != null
-                              ? CachedNetworkImage(
-                                  width: 1000,
-                                  fit: BoxFit.contain,
-                                  errorWidget: (_, __, ___) =>
-                                      Image.asset("assets/icon.png"),
-                                  imageUrl: widget.channel.image!,
-                                )
-                              : Image.asset(
-                                  "assets/icon.png",
-                                  fit: BoxFit.contain,
-                                ))),
-                  const Expanded(flex: 1, child: SizedBox()),
-                  Expanded(
-                      flex: 8,
-                      child: LayoutBuilder(builder: (context, constraints) {
-                        final style = Theme.of(context).textTheme.bodyMedium!;
-                        final fontSize = MediaQuery.of(context)
-                            .textScaler
-                            .scale(style.fontSize!);
-                        final lineHeight = style.height! * fontSize;
-                        final maxLines =
-                            (constraints.maxHeight / lineHeight).floor();
-                        return Text(
-                          widget.channel.name,
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: maxLines,
-                        );
-                      }))
-                ],
-              )),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              AspectRatio(
+                aspectRatio: 1,
+                child: Container(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Center(
+                    child: widget.channel.image != null
+                        ? CachedNetworkImage(
+                            imageUrl: widget.channel.image!,
+                            fit: BoxFit.contain,
+                            errorWidget: (_, __, ___) => const Icon(
+                                  Icons.tv,
+                                  size: 30,
+                                  color: Colors.grey,
+                                ),
+                          )
+                        : const Icon(
+                            Icons.tv,
+                            size: 30,
+                            color: Colors.grey,
+                          ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                  child: Center(
+                    child: Text(
+                      widget.channel.name,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ));
   }
 }

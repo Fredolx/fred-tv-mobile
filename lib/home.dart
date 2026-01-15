@@ -295,28 +295,32 @@ class _HomeState extends State<Home> {
                             )
                           : const SizedBox.shrink()),
                   Expanded(
-                      child: GridView.builder(
-                    shrinkWrap: true,
-                    controller: _scrollController,
-                    padding: const EdgeInsets.fromLTRB(16, 15, 16, 5),
-                    itemCount: channels.length,
-                    gridDelegate:
-                        const SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: 315,
-                      mainAxisExtent: 120,
-                      mainAxisSpacing: 16,
-                      crossAxisSpacing: 16,
-                    ),
-                    itemBuilder: (context, index) {
-                      final channel = channels[index];
-                      return ChannelTile(
-                        channel: channel,
-                        parentContext: context,
-                        setNode: setNode,
-                        onFocusNavbar: () => _bottomNavFocusNode.requestFocus(),
-                      );
-                    },
-                  )),
+                      child: LayoutBuilder(builder: (context, constraints) {
+                    final int crossAxisCount =
+                        (constraints.maxWidth / 250).floor().clamp(1, 5);
+                    return GridView.builder(
+                      shrinkWrap: true,
+                      controller: _scrollController,
+                      padding: const EdgeInsets.fromLTRB(16, 15, 16, 5),
+                      itemCount: channels.length,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: crossAxisCount,
+                        childAspectRatio: 3.0,
+                        mainAxisSpacing: 16,
+                        crossAxisSpacing: 8,
+                      ),
+                      itemBuilder: (context, index) {
+                        final channel = channels[index];
+                        return ChannelTile(
+                          channel: channel,
+                          parentContext: context,
+                          setNode: setNode,
+                          onFocusNavbar: () =>
+                              _bottomNavFocusNode.requestFocus(),
+                        );
+                      },
+                    );
+                  })),
                 ]))),
                 bottomNavigationBar: BottomNav(
                   startingView: getStartingView(),
