@@ -5,22 +5,30 @@ import 'package:open_tv/home.dart';
 import 'package:open_tv/models/filters.dart';
 import 'package:open_tv/models/home_manager.dart';
 import 'package:open_tv/models/settings.dart';
+import 'package:open_tv/backend/utils.dart';
 import 'package:open_tv/setup.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final hasSources = await Sql.hasSources();
   final settings = await SettingsService.getSettings();
+  final hasTouchScreen = await Utils.hasTouchScreen();
   runApp(MyApp(
     skipSetup: hasSources,
     settings: settings,
+    hasTouchScreen: hasTouchScreen,
   ));
 }
 
 class MyApp extends StatelessWidget {
   final bool skipSetup;
   final Settings settings;
-  const MyApp({super.key, required this.skipSetup, required this.settings});
+  final bool hasTouchScreen;
+  const MyApp(
+      {super.key,
+      required this.skipSetup,
+      required this.settings,
+      required this.hasTouchScreen});
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +44,7 @@ class MyApp extends StatelessWidget {
             filledButtonTheme: FilledButtonThemeData(style: ButtonStyle(
               side: WidgetStateProperty.resolveWith(
                 (states) {
-                  if (states.contains(WidgetState.focused)) {
+                  if (states.contains(WidgetState.focused) && !hasTouchScreen) {
                     return const BorderSide(
                       color: Colors.yellow, // yellow border
                       width: 4,
