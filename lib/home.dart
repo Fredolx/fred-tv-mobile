@@ -296,16 +296,24 @@ class _HomeState extends State<Home> {
                           : const SizedBox.shrink()),
                   Expanded(
                       child: LayoutBuilder(builder: (context, constraints) {
+                    const double maxContentWidth = 1600;
+                    final double constrainedWidth =
+                        constraints.maxWidth > maxContentWidth
+                            ? maxContentWidth
+                            : constraints.maxWidth;
+                    final double extraPadding =
+                        (constraints.maxWidth - constrainedWidth) / 2;
                     final int crossAxisCount =
-                        (constraints.maxWidth / 250).floor().clamp(1, 5);
+                        (constrainedWidth / 290).floor().clamp(1, 4);
                     return GridView.builder(
                       shrinkWrap: true,
                       controller: _scrollController,
-                      padding: const EdgeInsets.fromLTRB(16, 15, 16, 5),
+                      padding: EdgeInsets.fromLTRB(
+                          16 + extraPadding, 15, 16 + extraPadding, 5),
                       itemCount: channels.length,
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: crossAxisCount,
-                        childAspectRatio: 3.0,
+                        mainAxisExtent: 90,
                         mainAxisSpacing: 16,
                         crossAxisSpacing: 8,
                       ),

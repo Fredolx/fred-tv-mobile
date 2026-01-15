@@ -137,11 +137,12 @@ class _ChannelTileState extends State<ChannelTile> {
               ),
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                  child: Center(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
                     child: Text(
                       widget.channel.name,
-                      textAlign: TextAlign.center,
+                      textAlign: TextAlign.left,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -152,6 +153,17 @@ class _ChannelTileState extends State<ChannelTile> {
                   ),
                 ),
               ),
+              if (widget.channel.favorite)
+                const Padding(
+                  padding: EdgeInsets.only(right: 16.0),
+                  child: Center(
+                    child: Icon(
+                      Icons.star,
+                      size: 18,
+                      color: Colors.amber,
+                    ),
+                  ),
+                ),
             ],
           ),
         ));
