@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:open_tv/backend/m3u.dart';
 import 'package:open_tv/backend/sql.dart';
 import 'package:open_tv/backend/xtream.dart';
@@ -46,5 +47,14 @@ class Utils {
     for (var source in sources) {
       await refreshSource(source);
     }
+  }
+
+  static Future<bool> hasTouchScreen() async {
+    if (Platform.isAndroid) {
+      final androidInfo = await DeviceInfoPlugin().androidInfo;
+      return androidInfo.systemFeatures
+          .contains('android.hardware.touchscreen');
+    }
+    return true;
   }
 }
