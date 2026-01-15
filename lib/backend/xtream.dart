@@ -20,7 +20,7 @@ const String liveStreamExtension = "ts";
 
 Future<void> getXtream(Source source, bool wipe) async {
   List<Future<void> Function(SqliteWriteContext, Map<String, String>)>
-      statements = [];
+  statements = [];
   List<ChannelPreserve>? preserve;
   statements.add(Sql.getOrCreateSourceByName(source));
   if (wipe) {
@@ -40,11 +40,12 @@ Future<void> getXtream(Source source, bool wipe) async {
   if (results[0] != null && results[1] != null) {
     try {
       processXtream(
-          statements,
-          processJsonList(results[0], XtreamStream.fromJson),
-          processJsonList(results[1], XtreamCategory.fromJson),
-          source,
-          MediaType.livestream);
+        statements,
+        processJsonList(results[0], XtreamStream.fromJson),
+        processJsonList(results[1], XtreamCategory.fromJson),
+        source,
+        MediaType.livestream,
+      );
     } catch (e) {
       failCount++;
     }
@@ -54,11 +55,12 @@ Future<void> getXtream(Source source, bool wipe) async {
   if (results[2] != null && results[3] != null) {
     try {
       processXtream(
-          statements,
-          processJsonList(results[2], XtreamStream.fromJson),
-          processJsonList(results[3], XtreamCategory.fromJson),
-          source,
-          MediaType.movie);
+        statements,
+        processJsonList(results[2], XtreamStream.fromJson),
+        processJsonList(results[3], XtreamCategory.fromJson),
+        source,
+        MediaType.movie,
+      );
     } catch (e) {
       failCount++;
     }
@@ -69,11 +71,12 @@ Future<void> getXtream(Source source, bool wipe) async {
   if (results[4] != null && results[5] != null) {
     try {
       processXtream(
-          statements,
-          processJsonList(results[4], XtreamStream.fromJson),
-          processJsonList(results[5], XtreamCategory.fromJson),
-          source,
-          MediaType.serie);
+        statements,
+        processJsonList(results[4], XtreamStream.fromJson),
+        processJsonList(results[5], XtreamCategory.fromJson),
+        source,
+        MediaType.serie,
+      );
     } catch (e) {
       failCount++;
     }
@@ -92,14 +95,19 @@ Future<void> getXtream(Source source, bool wipe) async {
 }
 
 List<T> processJsonList<T>(
-    List<dynamic> jsonList, T Function(Map<String, dynamic>) fromJson) {
+  List<dynamic> jsonList,
+  T Function(Map<String, dynamic>) fromJson,
+) {
   return jsonList
       .map((json) => fromJson(json as Map<String, dynamic>))
       .toList();
 }
 
-Future<dynamic> getXtreamHttpData(String action, Source source,
-    [Map<String, String>? extraQueryParams]) async {
+Future<dynamic> getXtreamHttpData(
+  String action,
+  Source source, [
+  Map<String, String>? extraQueryParams,
+]) async {
   try {
     var url = buildXtreamUrl(source, action, extraQueryParams);
     final response = await http.get(url);
@@ -112,16 +120,26 @@ Future<dynamic> getXtreamHttpData(String action, Source source,
 }
 
 void processXtream(
-    List<Future<void> Function(SqliteWriteContext, Map<String, String>)>
-        statements,
-    List<XtreamStream> streams,
-    List<XtreamCategory> cats,
-    Source source,
-    MediaType mediaType) {
-  Map<String, String> catsMap =
-      Map.fromEntries(cats.map((x) => MapEntry(x.categoryId, x.categoryName)));
+  List<Future<void> Function(SqliteWriteContext, Map<String, String>)>
+  statements,
+  List<XtreamStream> streams,
+  List<XtreamCategory> cats,
+  Source source,
+  MediaType mediaType,
+) {
+  Map<String, String> catsMap = Map.fromEntries(
+    cats.map(
+      (x) => MapEntry(x.categoryId ?? "", x.categoryName ?? "Unknown Category"),
+    ),
+  );
   for (var live in streams) {
-    var cname = catsMap[live.categoryId];
+    if (live.name == null || live.name!.trim().isEmpty) continue;
+    if (mediaType == MediaType.serie) {
+      if (live.seriesId == null || live.seriesId!.isEmpty) continue;
+    } else {
+      if (live.streamId == null || live.streamId!.isEmpty) continue;
+    }
+    var cname = catsMap[live.categoryId ?? ""];
     try {
       var channel = xtreamToChannel(live, source, mediaType, cname);
       statements.add(Sql.insertChannel(channel));
@@ -129,24 +147,37 @@ void processXtream(
   }
 }
 
-Channel xtreamToChannel(XtreamStream stream, Source source,
-    MediaType streamType, String? categoryName) {
+Channel xtreamToChannel(
+  XtreamStream stream,
+  Source source,
+  MediaType streamType,
+  String? categoryName,
+) {
   return Channel(
-      name: stream.name!,
-      mediaType: streamType,
-      sourceId: -1,
-      favorite: false,
-      group: categoryName,
-      image: stream.streamIcon?.trim() ?? stream.cover?.trim(),
-      url: streamType == MediaType.serie
-          ? stream.seriesId.toString()
-          : getUrl(stream.streamId?.trim(), source, streamType,
-              stream.containerExtension),
-      streamId: int.tryParse(stream.streamId ?? "") ?? -1);
+    name: stream.name!.trim(),
+    mediaType: streamType,
+    sourceId: -1,
+    favorite: false,
+    group: categoryName,
+    image: stream.streamIcon?.trim() ?? stream.cover?.trim(),
+    url: streamType == MediaType.serie
+        ? (stream.seriesId ?? "").toString()
+        : getUrl(
+            stream.streamId?.trim(),
+            source,
+            streamType,
+            stream.containerExtension,
+          ),
+    streamId: int.tryParse(stream.streamId ?? "") ?? -1,
+  );
 }
 
 String getUrl(
-    String? streamId, Source source, MediaType streamType, String? extension) {
+  String? streamId,
+  Source source,
+  MediaType streamType,
+  String? extension,
+) {
   return "${source.urlOrigin}/${getXtreamMediaTypeStr(streamType)}/${source.username}/${source.password}/$streamId.${extension ?? liveStreamExtension}";
 }
 
@@ -163,8 +194,11 @@ String getXtreamMediaTypeStr(MediaType type) {
   }
 }
 
-Uri buildXtreamUrl(Source source, String action,
-    [Map<String, String>? extraQueryParams]) {
+Uri buildXtreamUrl(
+  Source source,
+  String action, [
+  Map<String, String>? extraQueryParams,
+]) {
   var params = {
     'username': source.username,
     'password': source.password,
@@ -179,24 +213,33 @@ Uri buildXtreamUrl(Source source, String action,
 
 Future<void> getEpisodes(Channel channel) async {
   List<Future<void> Function(SqliteWriteContext, Map<String, String>)>
-      statements = [];
+  statements = [];
   var seriesId = int.parse(channel.url!);
   var source = await Sql.getSourceFromId(channel.sourceId);
   source.urlOrigin = Uri.parse(source.url!).origin;
-  var episodes = XtreamSeries.fromJson(await getXtreamHttpData(
-          getSeriesInfo, source, {'series_id': seriesId.toString()}))
-      .episodes;
+  var episodes = XtreamSeries.fromJson(
+    await getXtreamHttpData(getSeriesInfo, source, {
+      'series_id': seriesId.toString(),
+    }),
+  ).episodes;
   episodes.sort((a, b) {
-    int seasonComparison = a.season.compareTo(b.season);
+    int seasonA = int.tryParse(a.season ?? "") ?? 0;
+    int seasonB = int.tryParse(b.season ?? "") ?? 0;
+    int seasonComparison = seasonA.compareTo(seasonB);
     if (seasonComparison != 0) {
       return seasonComparison;
     }
-    return a.episodeNum.compareTo(b.episodeNum);
+    int epA = int.tryParse(a.episodeNum ?? "") ?? 0;
+    int epB = int.tryParse(b.episodeNum ?? "") ?? 0;
+    return epA.compareTo(epB);
   });
   for (var episode in episodes) {
+    if (episode.title == null || episode.title!.trim().isEmpty) continue;
+    if (episode.id == null || episode.id!.isEmpty) continue;
     try {
-      statements
-          .add(Sql.insertChannel(episodeToChannel(episode, source, seriesId)));
+      statements.add(
+        Sql.insertChannel(episodeToChannel(episode, source, seriesId)),
+      );
     } catch (_) {}
   }
   await Sql.commitWrite(statements);
@@ -204,12 +247,17 @@ Future<void> getEpisodes(Channel channel) async {
 
 Channel episodeToChannel(XtreamEpisode episode, Source source, int seriesId) {
   return Channel(
-      image: episode.info?.movieImage,
-      mediaType: MediaType.movie,
-      name: episode.title.trim(),
-      sourceId: source.id!,
-      favorite: false,
-      url: getUrl(
-          episode.id, source, MediaType.serie, episode.containerExtension),
-      seriesId: seriesId);
+    image: episode.info?.movieImage,
+    mediaType: MediaType.movie,
+    name: episode.title!.trim(),
+    sourceId: source.id!,
+    favorite: false,
+    url: getUrl(
+      episode.id,
+      source,
+      MediaType.serie,
+      episode.containerExtension,
+    ),
+    seriesId: seriesId,
+  );
 }

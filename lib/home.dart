@@ -295,28 +295,40 @@ class _HomeState extends State<Home> {
                             )
                           : const SizedBox.shrink()),
                   Expanded(
-                      child: GridView.builder(
-                    shrinkWrap: true,
-                    controller: _scrollController,
-                    padding: const EdgeInsets.fromLTRB(16, 15, 16, 5),
-                    itemCount: channels.length,
-                    gridDelegate:
-                        const SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: 315,
-                      mainAxisExtent: 120,
-                      mainAxisSpacing: 16,
-                      crossAxisSpacing: 16,
-                    ),
-                    itemBuilder: (context, index) {
-                      final channel = channels[index];
-                      return ChannelTile(
-                        channel: channel,
-                        parentContext: context,
-                        setNode: setNode,
-                        onFocusNavbar: () => _bottomNavFocusNode.requestFocus(),
-                      );
-                    },
-                  )),
+                      child: LayoutBuilder(builder: (context, constraints) {
+                    const double maxContentWidth = 1600;
+                    final double constrainedWidth =
+                        constraints.maxWidth > maxContentWidth
+                            ? maxContentWidth
+                            : constraints.maxWidth;
+                    final double extraPadding =
+                        (constraints.maxWidth - constrainedWidth) / 2;
+                    final int crossAxisCount =
+                        (constrainedWidth / 290).floor().clamp(1, 4);
+                    return GridView.builder(
+                      shrinkWrap: true,
+                      controller: _scrollController,
+                      padding: EdgeInsets.fromLTRB(
+                          16 + extraPadding, 15, 16 + extraPadding, 5),
+                      itemCount: channels.length,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: crossAxisCount,
+                        mainAxisExtent: 90,
+                        mainAxisSpacing: 16,
+                        crossAxisSpacing: 8,
+                      ),
+                      itemBuilder: (context, index) {
+                        final channel = channels[index];
+                        return ChannelTile(
+                          channel: channel,
+                          parentContext: context,
+                          setNode: setNode,
+                          onFocusNavbar: () =>
+                              _bottomNavFocusNode.requestFocus(),
+                        );
+                      },
+                    );
+                  })),
                 ]))),
                 bottomNavigationBar: BottomNav(
                   startingView: getStartingView(),
