@@ -12,7 +12,7 @@ import 'package:sqlite_async/sqlite_async.dart';
 import 'package:http/http.dart' as http;
 
 final nameRegex = RegExp(r'tvg-name="([^"]*)"');
-final nameRegexAlt = RegExp(r'^(.*),([^,\n\r\t]*)$');
+final nameRegexAlt = RegExp(r',([^,\n\r\t]*)$');
 final idRegex = RegExp(r'tvg-id="([^"]*)"');
 final logoRegex = RegExp(r'tvg-logo="([^"]*)"');
 final groupRegex = RegExp(r'group-title="([^"]*)"');
@@ -23,12 +23,11 @@ final httpUserAgentRegex = RegExp(r'http-user-agent=(.+)');
 Future<void> processM3U(Source source, bool wipe, [String? path]) async {
   path ??= source.url;
   List<ChannelPreserve>? preserve;
-  var file = File(path!)
-      .openRead()
-      .transform(utf8.decoder)
-      .transform(const LineSplitter());
+  var file = File(
+    path!,
+  ).openRead().transform(utf8.decoder).transform(const LineSplitter());
   List<Future<void> Function(SqliteWriteContext, Map<String, String>)>
-      statements = [];
+  statements = [];
   statements.add(Sql.getOrCreateSourceByName(source));
   if (wipe) {
     preserve = await Sql.getChannelsPreserve(source.id!);
@@ -41,9 +40,15 @@ Future<void> processM3U(Source source, bool wipe, [String? path]) async {
   await for (var line in file) {
     final lineUpper = line.toUpperCase();
     if (lineUpper.startsWith("#EXTINF")) {
-      if (channelLine != null) {
-        commitChannel(channelLine, lastLine!, httpHeadersSet ? headers : null,
-            statements);
+      if (channelLine != null &&
+          lastLine != null &&
+          lastLine.trim().isNotEmpty) {
+        commitChannel(
+          channelLine,
+          lastLine,
+          httpHeadersSet ? headers : null,
+          statements,
+        );
       }
       channelLine = line;
       lastLine = null;
@@ -55,10 +60,14 @@ Future<void> processM3U(Source source, bool wipe, [String? path]) async {
         httpHeadersSet = true;
       }
     } else {
-      lastLine = line;
+      if (line.trim().isNotEmpty) {
+        lastLine = line;
+      }
     }
   }
-  commitChannel(channelLine!, lastLine!, headers, statements);
+  if (channelLine != null && lastLine != null && lastLine.trim().isNotEmpty) {
+    commitChannel(channelLine, lastLine, headers, statements);
+  }
   statements.add(Sql.updateGroups());
   if (preserve != null) {
     statements.add(Sql.restorePreserve(preserve));
@@ -67,11 +76,12 @@ Future<void> processM3U(Source source, bool wipe, [String? path]) async {
 }
 
 void commitChannel(
-    String l1,
-    String last,
-    ChannelHttpHeaders? headers,
-    List<Future<void> Function(SqliteWriteContext, Map<String, String>)>
-        statements) {
+  String l1,
+  String last,
+  ChannelHttpHeaders? headers,
+  List<Future<void> Function(SqliteWriteContext, Map<String, String>)>
+  statements,
+) {
   var channel = getChannelFromLines(l1, last);
   if (channel == null) return;
   statements.add(Sql.insertChannel(channel));
@@ -88,29 +98,37 @@ MediaType getMediaType(String url) {
 }
 
 Channel? getChannelFromLines(String l1, String last) {
+  var url = last.trim();
+  if (url.isEmpty) return null;
+
   var name = getName(l1)?.trim();
-  if (name == null) return null;
+  if (name == null || name.isEmpty) return null;
+
   return Channel(
-      name: name,
-      group: groupRegex.firstMatch(l1)?[1]?.trim(),
-      image: logoRegex.firstMatch(l1)?[1]?.trim(),
-      favorite: false,
-      mediaType: getMediaType(last),
-      sourceId: -1,
-      url: last);
+    name: name,
+    group: groupRegex.firstMatch(l1)?[1]?.trim(),
+    image: logoRegex.firstMatch(l1)?[1]?.trim(),
+    favorite: false,
+    mediaType: getMediaType(url),
+    sourceId: -1,
+    url: url,
+  );
 }
 
 String? getName(String l1) {
   var name = nameRegex.firstMatch(l1)?[1];
-  name ??= nameRegexAlt.firstMatch(l1)?[2];
-  name ??= idRegex.firstMatch(l1)?[1];
-  return name;
+  if (name != null && name.trim().isNotEmpty) return name;
+
+  name = nameRegexAlt.firstMatch(l1)?[1];
+  if (name != null && name.trim().isNotEmpty) return name;
+
+  name = idRegex.firstMatch(l1)?[1];
+  if (name != null && name.trim().isNotEmpty) return name;
+
+  return null;
 }
 
-bool setChannelHeaders(
-  String headerLine,
-  ChannelHttpHeaders headers,
-) {
+bool setChannelHeaders(String headerLine, ChannelHttpHeaders headers) {
   final userAgent = httpUserAgentRegex.firstMatch(headerLine)?[1];
   if (userAgent != null) {
     headers.userAgent = userAgent;
