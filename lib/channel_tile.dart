@@ -16,12 +16,13 @@ class ChannelTile extends StatefulWidget {
   final BuildContext parentContext;
   final Function(Node node) setNode;
   final VoidCallback? onFocusNavbar;
-  const ChannelTile(
-      {super.key,
-      required this.channel,
-      required this.setNode,
-      required this.parentContext,
-      this.onFocusNavbar});
+  const ChannelTile({
+    super.key,
+    required this.channel,
+    required this.setNode,
+    required this.parentContext,
+    this.onFocusNavbar,
+  });
 
   @override
   State<ChannelTile> createState() => _ChannelTileState();
@@ -35,7 +36,9 @@ class _ChannelTileState extends State<ChannelTile> {
     _focusNode.onKeyEvent = (node, event) {
       if (event is KeyDownEvent &&
           event.logicalKey == LogicalKeyboardKey.arrowRight) {
-        if (!FocusScope.of(context).focusInDirection(TraversalDirection.right)) {
+        if (!FocusScope.of(
+          context,
+        ).focusInDirection(TraversalDirection.right)) {
           widget.onFocusNavbar?.call();
         }
         return KeyEventResult.handled;
@@ -60,10 +63,12 @@ class _ChannelTileState extends State<ChannelTile> {
       setState(() {
         widget.channel.favorite = !widget.channel.favorite;
       });
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Added to favorites"),
-        duration: Duration(milliseconds: 500),
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Added to favorites"),
+          duration: Duration(milliseconds: 500),
+        ),
+      );
     }, context);
   }
 
@@ -72,100 +77,96 @@ class _ChannelTileState extends State<ChannelTile> {
         widget.channel.mediaType == MediaType.serie) {
       if (widget.channel.mediaType == MediaType.serie &&
           !refreshedSeries.contains(widget.channel.id)) {
-        await Error.tryAsync(() async {
-          await getEpisodes(widget.channel);
-          refreshedSeries.add(widget.channel.id!);
-        }, widget.parentContext, null, true, false);
+        await Error.tryAsync(
+          () async {
+            await getEpisodes(widget.channel);
+            refreshedSeries.add(widget.channel.id!);
+          },
+          widget.parentContext,
+          null,
+          true,
+          false,
+        );
       }
-      widget.setNode(Node(
+      widget.setNode(
+        Node(
           id: widget.channel.mediaType == MediaType.group
               ? widget.channel.id!
               : int.parse(widget.channel.url!),
           name: widget.channel.name,
-          type: fromMediaType(widget.channel.mediaType)));
+          type: fromMediaType(widget.channel.mediaType),
+        ),
+      );
     } else {
       Sql.addToHistory(widget.channel.id!);
       Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (_) => Player(
-                    channel: widget.channel,
-                  )));
+        context,
+        MaterialPageRoute(builder: (_) => Player(channel: widget.channel)),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Card(
-        elevation: _focusNode.hasFocus ? 8.0 : 2.0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        clipBehavior: Clip.antiAlias,
-        color: widget.channel.favorite
-            ? Theme.of(context).colorScheme.surfaceContainerHighest
-            : Theme.of(context).colorScheme.surfaceContainer,
-        child: InkWell(
-          focusNode: _focusNode,
-          onLongPress: favorite,
-          onTap: () async => await play(),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              AspectRatio(
-                aspectRatio: 1,
-                child: Container(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Center(
-                    child: widget.channel.image != null
-                        ? CachedNetworkImage(
-                            imageUrl: widget.channel.image!,
-                            fit: BoxFit.contain,
-                            errorWidget: (_, __, ___) => const Icon(
-                                  Icons.tv,
-                                  size: 30,
-                                  color: Colors.grey,
-                                ),
-                          )
-                        : const Icon(
+      elevation: _focusNode.hasFocus ? 8.0 : 2.0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      clipBehavior: Clip.antiAlias,
+      color: Theme.of(context).colorScheme.surfaceContainer,
+      child: InkWell(
+        focusNode: _focusNode,
+        onLongPress: favorite,
+        onTap: () async => await play(),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AspectRatio(
+              aspectRatio: 1,
+              child: Container(
+                padding: const EdgeInsets.all(8.0),
+                child: Center(
+                  child: widget.channel.image != null
+                      ? CachedNetworkImage(
+                          imageUrl: widget.channel.image!,
+                          fit: BoxFit.contain,
+                          errorWidget: (_, __, ___) => const Icon(
                             Icons.tv,
                             size: 30,
                             color: Colors.grey,
                           ),
-                  ),
+                        )
+                      : const Icon(Icons.tv, size: 30, color: Colors.grey),
                 ),
               ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      widget.channel.name,
-                      textAlign: TextAlign.left,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 13,
-                          ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    widget.channel.name,
+                    textAlign: TextAlign.left,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
                     ),
                   ),
                 ),
               ),
-              if (widget.channel.favorite)
-                const Padding(
-                  padding: EdgeInsets.only(right: 16.0),
-                  child: Center(
-                    child: Icon(
-                      Icons.star,
-                      size: 18,
-                      color: Colors.amber,
-                    ),
-                  ),
+            ),
+            if (widget.channel.favorite)
+              const Padding(
+                padding: EdgeInsets.only(right: 16.0),
+                child: Center(
+                  child: Icon(Icons.star, size: 18, color: Colors.amber),
                 ),
-            ],
-          ),
-        ));
+              ),
+          ],
+        ),
+      ),
+    );
   }
 }
