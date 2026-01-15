@@ -20,12 +20,12 @@ class XtreamStream {
   factory XtreamStream.fromJson(Map<String, dynamic> json) {
     return XtreamStream(
       streamId: json['stream_id']?.toString(),
-      name: json['name'],
+      name: json['name']?.toString(),
       categoryId: json['category_id']?.toString(),
-      streamIcon: json['stream_icon'],
+      streamIcon: json['stream_icon']?.toString(),
       seriesId: json['series_id']?.toString(),
-      cover: json['cover'],
-      containerExtension: json['container_extension'],
+      cover: json['cover']?.toString(),
+      containerExtension: json['container_extension']?.toString(),
     );
   }
 }
@@ -37,41 +37,49 @@ class XtreamSeries {
 
   factory XtreamSeries.fromJson(Map<String, dynamic> json) {
     List<XtreamEpisode> episodesList = [];
-    json["episodes"].forEach((season, episodesListForSeason) {
-      episodesList.addAll((episodesListForSeason as List)
-          .map((episodeJson) => XtreamEpisode.fromJson(episodeJson)));
-    });
+    if (json["episodes"] is Map) {
+      json["episodes"].forEach((season, episodesListForSeason) {
+        if (episodesListForSeason is List) {
+          episodesList.addAll(
+            episodesListForSeason.map(
+              (episodeJson) => XtreamEpisode.fromJson(episodeJson),
+            ),
+          );
+        }
+      });
+    }
     return XtreamSeries(episodes: episodesList);
   }
 }
 
 class XtreamEpisode {
-  final String id;
-  final String title;
-  final String containerExtension;
-  final String episodeNum;
-  final String season;
+  final String? id;
+  final String? title;
+  final String? containerExtension;
+  final String? episodeNum;
+  final String? season;
   final XtreamEpisodeInfo? info;
 
   XtreamEpisode({
-    required this.id,
-    required this.title,
-    required this.containerExtension,
-    required this.episodeNum,
-    required this.season,
-    required this.info,
+    this.id,
+    this.title,
+    this.containerExtension,
+    this.episodeNum,
+    this.season,
+    this.info,
   });
 
   factory XtreamEpisode.fromJson(Map<String, dynamic> json) {
     return XtreamEpisode(
-        id: json['id'].toString(),
-        title: json['title'],
-        containerExtension: json['container_extension'],
-        episodeNum: json['episode_num'].toString(),
-        season: json['season'].toString(),
-        info: (json['info'] is Map)
-            ? XtreamEpisodeInfo.fromJson(json['info'])
-            : null);
+      id: json['id']?.toString(),
+      title: json['title']?.toString(),
+      containerExtension: json['container_extension']?.toString(),
+      episodeNum: json['episode_num']?.toString(),
+      season: json['season']?.toString(),
+      info: (json['info'] is Map)
+          ? XtreamEpisodeInfo.fromJson(json['info'])
+          : null,
+    );
   }
 }
 
@@ -81,25 +89,20 @@ class XtreamEpisodeInfo {
   XtreamEpisodeInfo({this.movieImage});
 
   factory XtreamEpisodeInfo.fromJson(Map<String, dynamic> json) {
-    return XtreamEpisodeInfo(
-      movieImage: json['movie_image'],
-    );
+    return XtreamEpisodeInfo(movieImage: json['movie_image']?.toString());
   }
 }
 
 class XtreamCategory {
-  final String categoryId;
-  final String categoryName;
+  final String? categoryId;
+  final String? categoryName;
 
-  XtreamCategory({
-    required this.categoryId,
-    required this.categoryName,
-  });
+  XtreamCategory({this.categoryId, this.categoryName});
 
   factory XtreamCategory.fromJson(Map<String, dynamic> json) {
     return XtreamCategory(
-      categoryId: json['category_id'].toString(),
-      categoryName: json['category_name'],
+      categoryId: json['category_id']?.toString(),
+      categoryName: json['category_name']?.toString(),
     );
   }
 }
@@ -110,36 +113,38 @@ class XtreamEPG {
   XtreamEPG({required this.epgListings});
 
   factory XtreamEPG.fromJson(Map<String, dynamic> json) {
-    return XtreamEPG(
-      epgListings: (json['epg_listings'] as List)
+    var listings = <XtreamEPGItem>[];
+    if (json['epg_listings'] is List) {
+      listings = (json['epg_listings'] as List)
           .map((e) => XtreamEPGItem.fromJson(e))
-          .toList(),
-    );
+          .toList();
+    }
+    return XtreamEPG(epgListings: listings);
   }
 }
 
 class XtreamEPGItem {
-  final String id;
-  final String title;
-  final String description;
-  final String startTimestamp;
-  final String stopTimestamp;
+  final String? id;
+  final String? title;
+  final String? description;
+  final String? startTimestamp;
+  final String? stopTimestamp;
 
   XtreamEPGItem({
-    required this.id,
-    required this.title,
-    required this.description,
-    required this.startTimestamp,
-    required this.stopTimestamp,
+    this.id,
+    this.title,
+    this.description,
+    this.startTimestamp,
+    this.stopTimestamp,
   });
 
   factory XtreamEPGItem.fromJson(Map<String, dynamic> json) {
     return XtreamEPGItem(
-      id: json['id'].toString(),
-      title: json['title'],
-      description: json['description'],
-      startTimestamp: json['start_timestamp'],
-      stopTimestamp: json['stop_timestamp'],
+      id: json['id']?.toString(),
+      title: json['title']?.toString(),
+      description: json['description']?.toString(),
+      startTimestamp: json['start_timestamp']?.toString(),
+      stopTimestamp: json['stop_timestamp']?.toString(),
     );
   }
 }
