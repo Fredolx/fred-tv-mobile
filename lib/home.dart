@@ -2,9 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:open_tv/backend/settings_service.dart';
-import 'package:open_tv/backend/sql.dart';
-import 'package:open_tv/backend/utils.dart';
 import 'package:open_tv/bottom_nav.dart';
 import 'package:open_tv/channel_tile.dart';
 import 'package:open_tv/loading.dart';
@@ -23,12 +20,13 @@ class Home extends StatefulWidget {
   final bool refresh;
   final bool firstLaunch;
   final bool autofocusBottomNav;
-  const Home(
-      {super.key,
-      required this.home,
-      this.refresh = false,
-      this.autofocusBottomNav = false,
-      this.firstLaunch = false});
+  const Home({
+    super.key,
+    required this.home,
+    this.refresh = false,
+    this.autofocusBottomNav = false,
+    this.firstLaunch = false,
+  });
   @override
   State<Home> createState() => _HomeState();
 }
@@ -60,8 +58,8 @@ class _HomeState extends State<Home> {
       widget.home.filters.sourceIds = sources.map((x) => x.id).toList();
     }
     if (widget.home.filters.mediaTypes == null) {
-      widget.home.filters.mediaTypes =
-          (await SettingsService.getSettings()).getMediaTypes();
+      widget.home.filters.mediaTypes = (await SettingsService.getSettings())
+          .getMediaTypes();
     }
     await load();
     final String? version = await SettingsService.shouldShowWhatsNew();
@@ -69,12 +67,17 @@ class _HomeState extends State<Home> {
       await showWhatsNew(version);
     }
     if (widget.refresh) {
-      Error.tryAsyncNoLoading(() async {
-        setState(() {
-          blockSettings = true;
-        });
-        await Utils.refreshAllSources();
-      }, context, true, "Refreshed all sources");
+      Error.tryAsyncNoLoading(
+        () async {
+          setState(() {
+            blockSettings = true;
+          });
+          await Utils.refreshAllSources();
+        },
+        context,
+        true,
+        "Refreshed all sources",
+      );
       setState(() {
         blockSettings = false;
       });
@@ -83,8 +86,9 @@ class _HomeState extends State<Home> {
 
   Future<void> showWhatsNew(String version) async {
     showDialog(
-        context: context,
-        builder: (context) => WhatsNewModal(version: version));
+      context: context,
+      builder: (context) => WhatsNewModal(version: version),
+    );
   }
 
   void toggleSearch() {
@@ -93,7 +97,8 @@ class _HomeState extends State<Home> {
     });
     if (searchMode) {
       WidgetsBinding.instance.addPostFrameCallback(
-          (_) => FocusScope.of(context).requestFocus(_focusNode));
+        (_) => FocusScope.of(context).requestFocus(_focusNode),
+      );
     } else {
       FocusScope.of(context).unfocus();
       widget.home.filters.query = null;
@@ -170,92 +175,107 @@ class _HomeState extends State<Home> {
 
   void updateViewMode(ViewType type) {
     Navigator.of(context).pushAndRemoveUntil(
-        NoPushAnimationMaterialPageRoute(
-            builder: (context) => Home(
-                autofocusBottomNav: true,
-                home: HomeManager(
-                    filters: Filters(
-                        viewType: type,
-                        mediaTypes: widget.home.filters.mediaTypes,
-                        sourceIds: widget.home.filters.sourceIds)))),
-        (route) => false);
+      NoPushAnimationMaterialPageRoute(
+        builder: (context) => Home(
+          autofocusBottomNav: true,
+          home: HomeManager(
+            filters: Filters(
+              viewType: type,
+              mediaTypes: widget.home.filters.mediaTypes,
+              sourceIds: widget.home.filters.sourceIds,
+            ),
+          ),
+        ),
+      ),
+      (route) => false,
+    );
   }
 
   void setNode(Node node) {
     final home = HomeManager(
-        node: node,
-        filters: Filters(
-            viewType: ViewType.all,
-            mediaTypes: widget.home.filters.mediaTypes,
-            sourceIds: widget.home.filters.sourceIds));
+      node: node,
+      filters: Filters(
+        viewType: ViewType.all,
+        mediaTypes: widget.home.filters.mediaTypes,
+        sourceIds: widget.home.filters.sourceIds,
+      ),
+    );
     if (widget.home.filters.groupId != null) {
       home.filters.groupId = widget.home.filters.groupId;
     } else if (node.type == NodeType.category) {
       home.filters.groupId = node.id;
     }
     if (node.type == NodeType.series) home.filters.seriesId = node.id;
-    Navigator.of(context).push(NoPushAnimationMaterialPageRoute(
-        builder: (context) => Home(home: home)));
+    Navigator.of(context).push(
+      NoPushAnimationMaterialPageRoute(builder: (context) => Home(home: home)),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return CallbackShortcuts(
-        bindings: {
-          const SingleActivator(LogicalKeyboardKey.contextMenu): () {
-            debugPrint("test");
-            _bottomNavFocusNode.requestFocus();
-          }
+      bindings: {
+        const SingleActivator(LogicalKeyboardKey.contextMenu): () {
+          debugPrint("test");
+          _bottomNavFocusNode.requestFocus();
         },
-        child: PopScope(
-            canPop: canPop(),
-            onPopInvokedWithResult: (didPop, result) {
-              handleBack();
-            },
-            child: Scaffold(
-                appBar: widget.home.node != null
-                    ? AppBar(
-                        title: Text(widget.home.node.toString()),
-                        leading: IconButton(
-                          icon: const Icon(Icons.arrow_back),
-                          onPressed: () => Navigator.of(context).pop(),
-                        ),
-                      )
-                    : null,
-                body: Loading(
-                    child: SafeArea(
-                        child: Column(children: [
+      },
+      child: PopScope(
+        canPop: canPop(),
+        onPopInvokedWithResult: (didPop, result) {
+          handleBack();
+        },
+        child: Scaffold(
+          appBar: widget.home.node != null
+              ? AppBar(
+                  title: Text(widget.home.node.toString()),
+                  leading: IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                )
+              : null,
+          body: Loading(
+            child: SafeArea(
+              child: Column(
+                children: [
                   AnimatedSize(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                      child: searchMode
-                          ? Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 8),
-                              decoration: BoxDecoration(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .surfaceContainer, // Background color
-                                  border: Border(
-                                      bottom: BorderSide(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .surfaceBright,
-                                          width: 1))),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                      child: TextField(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                    child: searchMode
+                        ? Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .surfaceContainer, // Background color
+                              border: Border(
+                                bottom: BorderSide(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.surfaceBright,
+                                  width: 1,
+                                ),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: TextField(
                                     controller: searchController,
                                     focusNode: _focusNode,
                                     onChanged: (query) {
                                       _debounce?.cancel();
                                       _debounce = Timer(
-                                          const Duration(milliseconds: 500),
-                                          () {
-                                        widget.home.filters.query = query;
-                                        load(false);
-                                      });
+                                        const Duration(milliseconds: 500),
+                                        () {
+                                          widget.home.filters.query = query;
+                                          load(false);
+                                        },
+                                      );
                                     },
                                     decoration: InputDecoration(
                                       hintText: "Search...",
@@ -265,85 +285,104 @@ class _HomeState extends State<Home> {
                                         borderSide: BorderSide.none,
                                       ),
                                       suffixIcon: IconButton(
-                                          onPressed: () {
-                                            widget.home.filters.useKeywords =
-                                                !widget
-                                                    .home.filters.useKeywords;
-                                            load(false);
-                                          },
-                                          icon: Icon(
-                                              widget.home.filters.useKeywords
-                                                  ? Icons.label
-                                                  : Icons.label_outline)),
+                                        onPressed: () {
+                                          widget.home.filters.useKeywords =
+                                              !widget.home.filters.useKeywords;
+                                          load(false);
+                                        },
+                                        icon: Icon(
+                                          widget.home.filters.useKeywords
+                                              ? Icons.label
+                                              : Icons.label_outline,
+                                        ),
+                                      ),
                                       filled:
                                           true, // Light background for contrast
                                       contentPadding:
                                           const EdgeInsets.symmetric(
-                                              vertical: 0),
+                                            vertical: 0,
+                                          ),
                                     ),
-                                  )),
-                                  const SizedBox(width: 10),
-                                  SizedBox(
-                                      width: 40,
-                                      child: IconButton(
-                                          onPressed: toggleSearch,
-                                          icon: const Icon(
-                                            Icons.close,
-                                          )))
-                                ],
-                              ),
-                            )
-                          : const SizedBox.shrink()),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                SizedBox(
+                                  width: 40,
+                                  child: IconButton(
+                                    onPressed: toggleSearch,
+                                    icon: const Icon(Icons.close),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : const SizedBox.shrink(),
+                  ),
                   Expanded(
-                      child: LayoutBuilder(builder: (context, constraints) {
-                    const double maxContentWidth = 1600;
-                    final double constrainedWidth =
-                        constraints.maxWidth > maxContentWidth
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        const double maxContentWidth = 1600;
+                        final double constrainedWidth =
+                            constraints.maxWidth > maxContentWidth
                             ? maxContentWidth
                             : constraints.maxWidth;
-                    final double extraPadding =
-                        (constraints.maxWidth - constrainedWidth) / 2;
-                    final int crossAxisCount =
-                        (constrainedWidth / 290).floor().clamp(1, 4);
-                    return GridView.builder(
-                      shrinkWrap: true,
-                      controller: _scrollController,
-                      padding: EdgeInsets.fromLTRB(
-                          16 + extraPadding, 15, 16 + extraPadding, 5),
-                      itemCount: channels.length,
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: crossAxisCount,
-                        mainAxisExtent: 90,
-                        mainAxisSpacing: 16,
-                        crossAxisSpacing: 8,
-                      ),
-                      itemBuilder: (context, index) {
-                        final channel = channels[index];
-                        return ChannelTile(
-                          channel: channel,
-                          parentContext: context,
-                          setNode: setNode,
-                          onFocusNavbar: () =>
-                              _bottomNavFocusNode.requestFocus(),
+                        final double extraPadding =
+                            (constraints.maxWidth - constrainedWidth) / 2;
+                        final int crossAxisCount = (constrainedWidth / 290)
+                            .floor()
+                            .clamp(1, 4);
+                        return GridView.builder(
+                          shrinkWrap: true,
+                          controller: _scrollController,
+                          padding: EdgeInsets.fromLTRB(
+                            16 + extraPadding,
+                            15,
+                            16 + extraPadding,
+                            5,
+                          ),
+                          itemCount: channels.length,
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: crossAxisCount,
+                                mainAxisExtent: 90,
+                                mainAxisSpacing: 16,
+                                crossAxisSpacing: 8,
+                              ),
+                          itemBuilder: (context, index) {
+                            final channel = channels[index];
+                            return ChannelTile(
+                              channel: channel,
+                              parentContext: context,
+                              setNode: setNode,
+                              onFocusNavbar: () =>
+                                  _bottomNavFocusNode.requestFocus(),
+                            );
+                          },
                         );
                       },
-                    );
-                  })),
-                ]))),
-                bottomNavigationBar: BottomNav(
-                  startingView: getStartingView(),
-                  blockSettings: blockSettings,
-                  updateViewMode: updateViewMode,
-                  navFocusNode: _bottomNavFocusNode,
-                  autofocus: widget.autofocusBottomNav,
-                ),
-                floatingActionButton: Visibility(
-                  visible: !searchMode,
-                  child: FloatingActionButton(
-                    onPressed: toggleSearch,
-                    tooltip: 'Search',
-                    child: const Icon(Icons.search),
+                    ),
                   ),
-                ))));
+                ],
+              ),
+            ),
+          ),
+          bottomNavigationBar: BottomNav(
+            startingView: getStartingView(),
+            blockSettings: blockSettings,
+            updateViewMode: updateViewMode,
+            navFocusNode: _bottomNavFocusNode,
+            autofocus: widget.autofocusBottomNav,
+          ),
+          floatingActionButton: Visibility(
+            visible: !searchMode,
+            child: FloatingActionButton(
+              onPressed: toggleSearch,
+              tooltip: 'Search',
+              child: const Icon(Icons.search),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

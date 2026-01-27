@@ -49,6 +49,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.2"
+  build_cli_annotations:
+    dependency: transitive
+    description:
+      name: build_cli_annotations
+      sha256: e563c2e01de8974566a1998410d3f6f03521788160a02503b0b1f1a46c7b3d95
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.1"
   cached_network_image:
     dependency: "direct main"
     description:
@@ -235,6 +243,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.33"
+  flutter_rust_bridge:
+    dependency: "direct main"
+    description:
+      name: flutter_rust_bridge
+      sha256: "37ef40bc6f863652e865f0b2563ea07f0d3c58d8efad803cc01933a4b2ee067e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.11.1"
   flutter_spinkit:
     dependency: "direct main"
     description:
@@ -453,14 +469,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.17.0"
-  mutex:
-    dependency: transitive
-    description:
-      name: mutex
-      sha256: "8827da25de792088eb33e572115a5eb0d61d61a3c01acbc8bcbe76ed78f1a1f2"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.1.0"
   native_toolchain_c:
     dependency: transitive
     description:
@@ -674,14 +682,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.4.0"
-  sqlite3:
-    dependency: transitive
-    description:
-      name: sqlite3
-      sha256: "3145bd74dcdb4fd6f5c6dda4d4e4490a8087d7f286a14dee5d37087290f0f8a2"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.9.4"
   sqlite3_flutter_libs:
     dependency: "direct main"
     description:
@@ -690,22 +690,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.5.41"
-  sqlite3_web:
-    dependency: transitive
-    description:
-      name: sqlite3_web
-      sha256: "3973adf9ee74e485d5552319e1903129f4ed999fe675aa0b4b5d35d112b2aa1c"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.4.1"
-  sqlite_async:
-    dependency: "direct main"
-    description:
-      name: sqlite_async
-      sha256: ba3acc93e20a810ce6bde7ba1a3356ca5b162d34906f186374398106f1458f52
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.13.0"
   stack_trace:
     dependency: transitive
     description:
