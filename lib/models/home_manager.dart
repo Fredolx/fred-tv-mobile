@@ -1,6 +1,7 @@
-import 'package:open_tv/models/filters.dart';
 import 'package:open_tv/models/node.dart';
-import 'package:open_tv/models/view_type.dart';
+import 'package:open_tv/src/rust/api/sort_type.dart';
+import 'package:open_tv/src/rust/api/types.dart';
+import 'package:open_tv/src/rust/api/view_type.dart';
 
 class HomeManager {
   final Filters filters;
@@ -12,6 +13,8 @@ class HomeManager {
         viewType: ViewType.all,
         page: 1,
         useKeywords: false,
+        sourceIds: <int>[],
+        sort: SortType.provider,
       ),
       node: null,
     );

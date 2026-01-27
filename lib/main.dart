@@ -1,70 +1,82 @@
 import 'package:flutter/material.dart';
-import 'package:open_tv/backend/settings_service.dart';
-import 'package:open_tv/backend/sql.dart';
-import 'package:open_tv/home.dart';
-import 'package:open_tv/models/filters.dart';
-import 'package:open_tv/models/home_manager.dart';
-import 'package:open_tv/models/settings.dart';
 import 'package:open_tv/backend/utils.dart';
+import 'package:open_tv/home.dart';
+import 'package:open_tv/models/home_manager.dart';
 import 'package:open_tv/setup.dart';
+import 'package:open_tv/src/rust/api/api.dart';
+import 'package:open_tv/src/rust/api/types.dart';
+import 'package:open_tv/src/rust/frb_generated.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final hasSources = await Sql.hasSources();
-  final settings = await SettingsService.getSettings();
+  await RustLib.init();
+  final _hasSources = await hasSources();
+  final settings = await getSettings();
   final hasTouchScreen = await Utils.hasTouchScreen();
-  runApp(MyApp(
-    skipSetup: hasSources,
-    settings: settings,
-    hasTouchScreen: hasTouchScreen,
-  ));
+  runApp(
+    MyApp(
+      skipSetup: _hasSources,
+      settings: settings,
+      hasTouchScreen: hasTouchScreen,
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
   final bool skipSetup;
   final Settings settings;
   final bool hasTouchScreen;
-  const MyApp(
-      {super.key,
-      required this.skipSetup,
-      required this.settings,
-      required this.hasTouchScreen});
+  const MyApp({
+    super.key,
+    required this.skipSetup,
+    required this.settings,
+    required this.hasTouchScreen,
+  });
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Fred TV',
-        theme: ThemeData(
-            brightness: Brightness.dark,
-            colorScheme: ColorScheme.fromSeed(
-                seedColor: Colors.blue,
-                surface: Colors.black,
-                brightness: Brightness.dark,
-                surfaceContainer: Color.fromARGB(255, 29, 36, 41)),
-            filledButtonTheme: FilledButtonThemeData(style: ButtonStyle(
-              side: WidgetStateProperty.resolveWith(
-                (states) {
-                  if (states.contains(WidgetState.focused) && !hasTouchScreen) {
-                    return const BorderSide(
-                      color: Colors.yellow, // yellow border
-                      width: 4,
-                    );
-                  }
-                  return BorderSide.none;
-                },
-              ),
-            )),
-            useMaterial3: true),
-        themeMode: ThemeMode.dark,
-        debugShowCheckedModeBanner: false,
-        home: skipSetup
-            ? Home(
-                firstLaunch: true,
-                refresh: settings.refreshOnStart,
-                home: HomeManager(
-                    filters: Filters(
+      title: 'Fred TV',
+      theme: ThemeData(
+        brightness: Brightness.dark,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.blue,
+          surface: Colors.black,
+          brightness: Brightness.dark,
+          surfaceContainer: Color.fromARGB(255, 29, 36, 41),
+        ),
+        filledButtonTheme: FilledButtonThemeData(
+          style: ButtonStyle(
+            side: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.focused) && !hasTouchScreen) {
+                return const BorderSide(
+                  color: Colors.yellow, // yellow border
+                  width: 4,
+                );
+              }
+              return BorderSide.none;
+            }),
+          ),
+        ),
+        useMaterial3: true,
+      ),
+      themeMode: ThemeMode.dark,
+      debugShowCheckedModeBanner: false,
+      home: skipSetup
+          ? Home(
+              firstLaunch: true,
+              refresh: settings.refreshOnStart ?? false,
+              home: HomeManager(
+                filters: Filters(
                   viewType: settings.defaultView,
-                )))
-            : const Setup());
+                  sourceIds: null,
+                  page: null,
+                  useKeywords: null,
+                  sort: null,
+                ),
+              ),
+            )
+          : const Setup(),
+    );
   }
 }
