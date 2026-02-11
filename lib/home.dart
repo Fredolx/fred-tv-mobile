@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:open_tv/backend/settings_service.dart';
 import 'package:open_tv/backend/sql.dart';
 import 'package:open_tv/backend/utils.dart';
@@ -322,13 +321,11 @@ class _HomeState extends State<Home> {
         autofocus: widget.autofocusBottomNav,
       ),
       floatingActionButton: IgnorePointer(
-        ignoring: !scrolledDeepEnough, // Disable clicks when hidden
+        ignoring: !scrolledDeepEnough,
         child: AnimatedOpacity(
-          opacity: scrolledDeepEnough
-              ? 1.0
-              : 0.0, // 1.0 is visible, 0.0 is transparent
-          duration: const Duration(milliseconds: 300), // How fast the fade is
-          curve: Curves.easeInOut, // Makes the animation feel smoother
+          opacity: scrolledDeepEnough ? 1.0 : 0.0,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
           child: FloatingActionButton(
             onPressed: scrollToTop,
             shape: const CircleBorder(),
