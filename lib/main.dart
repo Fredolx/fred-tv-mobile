@@ -63,7 +63,9 @@ class MyApp extends StatelessWidget {
       ),
       themeMode: ThemeMode.dark,
       debugShowCheckedModeBanner: false,
-      home: skipSetup
+      home: hasTouchScreen
+          ? TvHome()
+          : skipSetup
           ? Home(
               firstLaunch: true,
               refresh: settings.refreshOnStart,
