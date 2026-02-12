@@ -111,7 +111,6 @@ class _ChannelTileState extends State<ChannelTile> {
     return Card(
       elevation: _focusNode.hasFocus ? 8.0 : 2.0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      clipBehavior: Clip.antiAlias,
       color: Theme.of(context).colorScheme.surfaceContainer,
       child: InkWell(
         focusNode: _focusNode,
@@ -128,6 +127,8 @@ class _ChannelTileState extends State<ChannelTile> {
                   child: widget.channel.image != null
                       ? CachedNetworkImage(
                           imageUrl: widget.channel.image!,
+                          memCacheHeight: 300,
+                          memCacheWidth: 300,
                           fit: BoxFit.contain,
                           errorWidget: (_, __, ___) => const Icon(
                             Icons.tv,
