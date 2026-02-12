@@ -21,13 +21,13 @@ class Home extends StatefulWidget {
   final HomeManager home;
   final bool refresh;
   final bool firstLaunch;
-  final bool autofocusBottomNav;
+  final bool hasTouchScreen;
   const Home({
     super.key,
     required this.home,
     this.refresh = false,
-    this.autofocusBottomNav = false,
     this.firstLaunch = false,
+    this.hasTouchScreen = true,
   });
   @override
   State<Home> createState() => _HomeState();
@@ -38,13 +38,11 @@ class _HomeState extends State<Home> {
   bool reachedMax = false;
   final int pageSize = 36;
   List<Channel> channels = [];
-  final FocusNode _focusNode = FocusNode();
   TextEditingController searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   bool isLoading = false;
   bool blockSettings = false;
   int? previousScroll;
-  final FocusNode _bottomNavFocusNode = FocusNode();
   bool scrolledDeepEnough = false;
 
   @override
@@ -124,8 +122,6 @@ class _HomeState extends State<Home> {
 
   @override
   void dispose() {
-    _focusNode.dispose();
-    _bottomNavFocusNode.dispose();
     _scrollController.dispose();
     _debounce?.cancel();
     super.dispose();
@@ -168,7 +164,6 @@ class _HomeState extends State<Home> {
     Navigator.of(context).pushAndRemoveUntil(
       NoPushAnimationMaterialPageRoute(
         builder: (context) => Home(
-          autofocusBottomNav: true,
           home: HomeManager(
             filters: Filters(
               viewType: type,
@@ -237,11 +232,9 @@ class _HomeState extends State<Home> {
                       padding: const EdgeInsets.symmetric(vertical: 16.0),
                       child: Center(
                         child: FractionallySizedBox(
-                          widthFactor:
-                              0.9, // This ensures it always takes up exactly 90% of the width
+                          widthFactor: 0.9,
                           child: TextField(
                             controller: searchController,
-                            focusNode: _focusNode,
                             onChanged: (query) {
                               _debounce?.cancel();
                               _debounce = Timer(
@@ -295,8 +288,6 @@ class _HomeState extends State<Home> {
                           channel: channel,
                           parentContext: context,
                           setNode: setNode,
-                          onFocusNavbar: () =>
-                              _bottomNavFocusNode.requestFocus(),
                         );
                       }, childCount: channels.length),
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -313,13 +304,13 @@ class _HomeState extends State<Home> {
           ),
         ),
       ),
-      bottomNavigationBar: BottomNav(
-        startingView: getStartingView(),
-        blockSettings: blockSettings,
-        updateViewMode: updateViewMode,
-        navFocusNode: _bottomNavFocusNode,
-        autofocus: widget.autofocusBottomNav,
-      ),
+      bottomNavigationBar: widget.hasTouchScreen
+          ? BottomNav(
+              startingView: getStartingView(),
+              blockSettings: blockSettings,
+              updateViewMode: updateViewMode,
+            )
+          : null,
       floatingActionButton: IgnorePointer(
         ignoring: !scrolledDeepEnough,
         child: AnimatedOpacity(
