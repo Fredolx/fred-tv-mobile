@@ -28,7 +28,6 @@ class _MenuTileState extends State<MenuTile> {
     final double scale = isActive ? 1.1 : 1.0;
     final Color borderColor = isActive ? Colors.white : Colors.transparent;
     final double shadowOpacity = isActive ? 0.5 : 0.2;
-    final double shadowBlur = isActive ? 12.0 : 4.0;
 
     return Padding(
       padding: const EdgeInsets.all(10.0),
@@ -45,8 +44,7 @@ class _MenuTileState extends State<MenuTile> {
           border: Border.all(color: borderColor, width: 4),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(shadowOpacity),
-              blurRadius: shadowBlur,
+              color: Colors.black.withValues(alpha: shadowOpacity),
               offset: const Offset(0, 8),
             ),
           ],
