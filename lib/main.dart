@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:open_tv/backend/settings_service.dart';
 import 'package:open_tv/backend/sql.dart';
 import 'package:open_tv/home.dart';
@@ -27,6 +28,9 @@ class MyApp extends StatelessWidget {
   final bool skipSetup;
   final Settings settings;
   final bool hasTouchScreen;
+  static final GlobalKey<NavigatorState> navigatorKey =
+      GlobalKey<NavigatorState>();
+
   const MyApp({
     super.key,
     required this.skipSetup,
@@ -38,6 +42,20 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Fred TV',
+      navigatorKey: navigatorKey,
+      builder: (context, child) {
+        return CallbackShortcuts(
+          bindings: {
+            const SingleActivator(LogicalKeyboardKey.escape): () {
+              navigatorKey.currentState?.maybePop();
+            },
+            const SingleActivator(LogicalKeyboardKey.backspace): () {
+              navigatorKey.currentState?.maybePop();
+            },
+          },
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
       theme: ThemeData(
         brightness: Brightness.dark,
         colorScheme: ColorScheme.fromSeed(
