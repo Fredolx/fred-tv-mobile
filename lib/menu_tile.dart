@@ -5,6 +5,7 @@ class MenuTile extends StatefulWidget {
   final String label;
   final LinearGradient color;
   final VoidCallback onTap;
+  final bool autofocus;
 
   const MenuTile({
     super.key,
@@ -12,6 +13,7 @@ class MenuTile extends StatefulWidget {
     required this.label,
     required this.color,
     required this.onTap,
+    this.autofocus = false,
   });
 
   @override
@@ -52,6 +54,7 @@ class _MenuTileState extends State<MenuTile> {
         child: Material(
           color: Colors.transparent,
           child: InkWell(
+            autofocus: widget.autofocus,
             onTap: widget.onTap,
             onFocusChange: (value) => setState(() => _isFocused = value),
             onHover: (value) => setState(() => _isHovered = value),

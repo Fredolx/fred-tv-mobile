@@ -20,7 +20,9 @@ import 'package:open_tv/setup.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SettingsView extends StatefulWidget {
-  const SettingsView({super.key});
+  final bool hasTouchScreen;
+
+  const SettingsView({super.key, this.hasTouchScreen = false});
 
   @override
   State<SettingsView> createState() => _SettingsState();
@@ -360,10 +362,12 @@ class _SettingsState extends State<SettingsView> {
           ),
         ),
       ),
-      bottomNavigationBar: BottomNav(
-        updateViewMode: updateView,
-        startingView: ViewType.settings,
-      ),
+      bottomNavigationBar: widget.hasTouchScreen
+          ? BottomNav(
+              updateViewMode: updateView,
+              startingView: ViewType.settings,
+            )
+          : null,
     );
   }
 }
