@@ -59,6 +59,7 @@ class _TvHomeState extends State<TvHome> {
   List<Widget> getMediaTypeSelectNested() {
     return [
       MenuTile(
+        autofocus: true,
         icon: Icons.list,
         label: "All",
         color: const LinearGradient(
@@ -124,6 +125,7 @@ class _TvHomeState extends State<TvHome> {
   List<Widget> getHome() {
     return [
       MenuTile(
+        autofocus: true,
         icon: Icons.tv,
         label: "Channels",
         color: LinearGradient(
@@ -171,7 +173,7 @@ class _TvHomeState extends State<TvHome> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        onTap: () => navigateHome(Filters(viewType: ViewType.settings)),
+        onTap: () => navSettings(),
       ),
     ];
   }
