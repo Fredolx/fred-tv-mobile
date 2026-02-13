@@ -213,17 +213,8 @@ class _HomeState extends State<Home> {
         child: SafeArea(
           child: LayoutBuilder(
             builder: (context, constraints) {
-              const double maxContentWidth = 1600;
-              final double constrainedWidth =
-                  constraints.maxWidth > maxContentWidth
-                  ? maxContentWidth
-                  : constraints.maxWidth;
-              final double extraPadding =
-                  (constraints.maxWidth - constrainedWidth) / 2;
-              final int crossAxisCount = (constrainedWidth / 290).floor().clamp(
-                1,
-                4,
-              );
+              final double width = constraints.maxWidth;
+              final int crossAxisCount = (width / 290).floor().clamp(1, 3);
               return CustomScrollView(
                 controller: _scrollController,
                 slivers: [
@@ -234,6 +225,13 @@ class _HomeState extends State<Home> {
                         child: FractionallySizedBox(
                           widthFactor: 0.9,
                           child: TextField(
+                            style: TextStyle(
+                              fontSize:
+                                  Theme.of(
+                                    context,
+                                  ).textTheme.headlineLarge?.fontSize ??
+                                  40,
+                            ),
                             controller: searchController,
                             onChanged: (query) {
                               _debounce?.cancel();
@@ -247,12 +245,33 @@ class _HomeState extends State<Home> {
                             },
                             decoration: InputDecoration(
                               hintText: "Search...",
-                              prefixIcon: const Icon(Icons.search),
+                              hintStyle: TextStyle(
+                                fontSize:
+                                    Theme.of(
+                                      context,
+                                    ).textTheme.headlineLarge?.fontSize ??
+                                    40,
+                              ),
+                              prefixIcon: Icon(
+                                Icons.search,
+                                size:
+                                    (Theme.of(
+                                          context,
+                                        ).textTheme.headlineLarge?.fontSize ??
+                                        40) *
+                                    1.5,
+                              ),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide.none,
                               ),
                               suffixIcon: IconButton(
+                                iconSize:
+                                    (Theme.of(
+                                          context,
+                                        ).textTheme.headlineLarge?.fontSize ??
+                                        40) *
+                                    1.5,
                                 onPressed: () {
                                   widget.home.filters.useKeywords =
                                       !widget.home.filters.useKeywords;
@@ -265,9 +284,6 @@ class _HomeState extends State<Home> {
                                 ),
                               ),
                               filled: true,
-                              contentPadding: const EdgeInsets.symmetric(
-                                vertical: 0,
-                              ),
                             ),
                           ),
                         ),
@@ -275,12 +291,7 @@ class _HomeState extends State<Home> {
                     ),
                   ),
                   SliverPadding(
-                    padding: EdgeInsets.fromLTRB(
-                      16 + extraPadding,
-                      5,
-                      16 + extraPadding,
-                      5,
-                    ),
+                    padding: EdgeInsets.fromLTRB(50, 5, 50, 5),
                     sliver: SliverGrid(
                       delegate: SliverChildBuilderDelegate((context, index) {
                         final channel = channels[index];
@@ -292,7 +303,7 @@ class _HomeState extends State<Home> {
                       }, childCount: channels.length),
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: crossAxisCount,
-                        mainAxisExtent: 90,
+                        mainAxisExtent: 120,
                         mainAxisSpacing: 16,
                         crossAxisSpacing: 8,
                       ),

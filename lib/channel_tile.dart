@@ -130,13 +130,21 @@ class _ChannelTileState extends State<ChannelTile> {
                           memCacheHeight: 300,
                           memCacheWidth: 300,
                           fit: BoxFit.contain,
-                          errorWidget: (_, __, ___) => const Icon(
+                          errorWidget: (_, __, ___) => Icon(
                             Icons.tv,
-                            size: 30,
+                            size: Theme.of(
+                              context,
+                            ).textTheme.headlineLarge?.fontSize,
                             color: Colors.grey,
                           ),
                         )
-                      : const Icon(Icons.tv, size: 30, color: Colors.grey),
+                      : Icon(
+                          Icons.tv,
+                          size: Theme.of(
+                            context,
+                          ).textTheme.headlineLarge?.fontSize,
+                          color: Colors.grey,
+                        ),
                 ),
               ),
             ),
@@ -150,19 +158,25 @@ class _ChannelTileState extends State<ChannelTile> {
                     textAlign: TextAlign.left,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    style: TextStyle(
+                      fontSize:
+                          Theme.of(context).textTheme.titleLarge?.fontSize ??
+                          22,
                       fontWeight: FontWeight.w600,
-                      fontSize: 13,
                     ),
                   ),
                 ),
               ),
             ),
             if (widget.channel.favorite)
-              const Padding(
+              Padding(
                 padding: EdgeInsets.only(right: 16.0),
                 child: Center(
-                  child: Icon(Icons.star, size: 18, color: Colors.amber),
+                  child: Icon(
+                    Icons.star,
+                    size: Theme.of(context).textTheme.headlineMedium?.fontSize,
+                    color: Colors.amber,
+                  ),
                 ),
               ),
           ],
