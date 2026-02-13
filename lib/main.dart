@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:open_tv/backend/settings_service.dart';
 import 'package:open_tv/backend/sql.dart';
 import 'package:open_tv/home.dart';
+import 'package:open_tv/models/custom_shortcut.dart';
 import 'package:open_tv/models/filters.dart';
 import 'package:open_tv/models/home_manager.dart';
 import 'package:open_tv/models/settings.dart';
@@ -38,6 +39,12 @@ class MyApp extends StatelessWidget {
     required this.hasTouchScreen,
   });
 
+  bool get _isEditingText {
+    final focus = FocusManager.instance.primaryFocus;
+    return focus?.context?.findAncestorWidgetOfExactType<EditableText>() !=
+        null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -46,10 +53,16 @@ class MyApp extends StatelessWidget {
       builder: (context, child) {
         return CallbackShortcuts(
           bindings: {
-            const SingleActivator(LogicalKeyboardKey.escape): () {
+            CustomShortcut(
+              const SingleActivator(LogicalKeyboardKey.escape),
+            ): () {
+              if (_isEditingText) return;
               navigatorKey.currentState?.maybePop();
             },
-            const SingleActivator(LogicalKeyboardKey.backspace): () {
+            CustomShortcut(
+              const SingleActivator(LogicalKeyboardKey.backspace),
+            ): () {
+              if (_isEditingText) return;
               navigatorKey.currentState?.maybePop();
             },
           },
