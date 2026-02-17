@@ -214,7 +214,7 @@ class _HomeState extends State<Home> {
           child: LayoutBuilder(
             builder: (context, constraints) {
               final double width = constraints.maxWidth;
-              final int crossAxisCount = (width / 290).floor().clamp(1, 3);
+              final int crossAxisCount = (width / 350).floor().clamp(1, 3);
               return CustomScrollView(
                 controller: _scrollController,
                 slivers: [
@@ -223,13 +223,13 @@ class _HomeState extends State<Home> {
                       padding: const EdgeInsets.symmetric(vertical: 16.0),
                       child: Center(
                         child: FractionallySizedBox(
-                          widthFactor: 0.9,
+                          widthFactor: 0.95,
                           child: TextField(
                             style: TextStyle(
                               fontSize:
                                   Theme.of(
                                     context,
-                                  ).textTheme.headlineLarge?.fontSize ??
+                                  ).textTheme.titleMedium?.fontSize ??
                                   40,
                             ),
                             controller: searchController,
@@ -249,7 +249,7 @@ class _HomeState extends State<Home> {
                                 fontSize:
                                     Theme.of(
                                       context,
-                                    ).textTheme.headlineLarge?.fontSize ??
+                                    ).textTheme.titleMedium?.fontSize ??
                                     40,
                               ),
                               prefixIcon: Icon(
@@ -257,7 +257,7 @@ class _HomeState extends State<Home> {
                                 size:
                                     (Theme.of(
                                           context,
-                                        ).textTheme.headlineLarge?.fontSize ??
+                                        ).textTheme.titleMedium?.fontSize ??
                                         40) *
                                     1.5,
                               ),
@@ -269,7 +269,7 @@ class _HomeState extends State<Home> {
                                 iconSize:
                                     (Theme.of(
                                           context,
-                                        ).textTheme.headlineLarge?.fontSize ??
+                                        ).textTheme.titleMedium?.fontSize ??
                                         40) *
                                     1.5,
                                 onPressed: () {
@@ -291,7 +291,7 @@ class _HomeState extends State<Home> {
                     ),
                   ),
                   SliverPadding(
-                    padding: EdgeInsets.fromLTRB(50, 5, 50, 5),
+                    padding: EdgeInsets.fromLTRB(10, 5, 10, 10),
                     sliver: SliverGrid(
                       delegate: SliverChildBuilderDelegate((context, index) {
                         final channel = channels[index];
@@ -303,9 +303,9 @@ class _HomeState extends State<Home> {
                       }, childCount: channels.length),
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: crossAxisCount,
-                        mainAxisExtent: 120,
-                        mainAxisSpacing: 16,
-                        crossAxisSpacing: 8,
+                        mainAxisExtent: 100,
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: 12,
                       ),
                     ),
                   ),

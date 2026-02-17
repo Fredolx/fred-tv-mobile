@@ -149,6 +149,7 @@ class _ChannelTileState extends State<ChannelTile> {
               ),
             ),
             Expanded(
+              flex: 3,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: Align(
@@ -160,7 +161,7 @@ class _ChannelTileState extends State<ChannelTile> {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize:
-                          Theme.of(context).textTheme.titleLarge?.fontSize ??
+                          Theme.of(context).textTheme.titleMedium?.fontSize ??
                           22,
                       fontWeight: FontWeight.w600,
                     ),
@@ -170,11 +171,11 @@ class _ChannelTileState extends State<ChannelTile> {
             ),
             if (widget.channel.favorite)
               Padding(
-                padding: EdgeInsets.only(right: 16.0),
+                padding: EdgeInsets.only(right: 8.0),
                 child: Center(
                   child: Icon(
                     Icons.star,
-                    size: Theme.of(context).textTheme.headlineMedium?.fontSize,
+                    size: Theme.of(context).textTheme.headlineSmall?.fontSize,
                     color: Colors.amber,
                   ),
                 ),
