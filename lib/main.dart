@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:open_tv/backend/settings_service.dart';
@@ -6,6 +8,7 @@ import 'package:open_tv/home.dart';
 import 'package:open_tv/models/custom_shortcut.dart';
 import 'package:open_tv/models/filters.dart';
 import 'package:open_tv/models/home_manager.dart';
+import 'package:open_tv/models/media_type.dart';
 import 'package:open_tv/models/settings.dart';
 import 'package:open_tv/backend/utils.dart';
 import 'package:open_tv/setup.dart';
@@ -94,7 +97,7 @@ class MyApp extends StatelessWidget {
       ),
       themeMode: ThemeMode.dark,
       debugShowCheckedModeBanner: false,
-      home: hasTouchScreen
+      home: !hasTouchScreen && (Platform.isAndroid || Platform.isIOS)
           ? TvHome()
           : skipSetup
           ? Home(
