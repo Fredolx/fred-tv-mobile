@@ -362,7 +362,7 @@ class _SettingsState extends State<SettingsView> {
           ),
         ),
       ),
-      bottomNavigationBar: widget.hasTouchScreen
+      bottomNavigationBar: !widget.hasTouchScreen
           ? BottomNav(
               updateViewMode: updateView,
               startingView: ViewType.settings,
