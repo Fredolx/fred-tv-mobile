@@ -101,7 +101,10 @@ class MyApp extends StatelessWidget {
       ),
       themeMode: ThemeMode.dark,
       debugShowCheckedModeBanner: false,
-      home: isTV || (!hasTouchScreen && (Platform.isAndroid || Platform.isIOS))
+      home:
+          settings.forceTVMode ||
+              isTV ||
+              (!hasTouchScreen && (Platform.isAndroid || Platform.isIOS))
           ? TvHome()
           : skipSetup
           ? Home(
