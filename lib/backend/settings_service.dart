@@ -11,6 +11,7 @@ const showLivestreams = "showLivestreams";
 const showMovies = "showMovies";
 const showSeries = "showSeries";
 const lastSeenVersion = "lastSeenVersion";
+const forceTvMode = "forceTVMode";
 
 class SettingsService {
   static Future<Settings> getSettings() async {
@@ -21,6 +22,7 @@ class SettingsService {
     var live = settingsMap[showLivestreams];
     var movies = settingsMap[showMovies];
     var series = settingsMap[showSeries];
+    var forceTV = settingsMap[forceTvMode];
     if (view != null) {
       settings.defaultView = ViewType.values[int.parse(view)];
     }
@@ -36,6 +38,9 @@ class SettingsService {
     if (series != null) {
       settings.showSeries = int.parse(series) == 1;
     }
+    if (forceTV != null) {
+      settings.forceTVMode = int.parse(forceTV) == 1;
+    }
     return settings;
   }
 
@@ -43,10 +48,11 @@ class SettingsService {
     HashMap<String, String> settingsMap = HashMap();
     settingsMap[defaultView] = settings.defaultView.index.toString();
     settingsMap[refreshOnStart] = (settings.refreshOnStart ? 1 : 0).toString();
-    settingsMap[showLivestreams] =
-        (settings.showLivestreams ? 1 : 0).toString();
+    settingsMap[showLivestreams] = (settings.showLivestreams ? 1 : 0)
+        .toString();
     settingsMap[showMovies] = (settings.showMovies ? 1 : 0).toString();
     settingsMap[showSeries] = (settings.showSeries ? 1 : 0).toString();
+    settingsMap[forceTvMode] = (settings.forceTVMode ? 1 : 0).toString();
     await Sql.updateSettings(settingsMap);
   }
 
