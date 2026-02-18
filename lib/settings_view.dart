@@ -20,9 +20,9 @@ import 'package:open_tv/setup.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SettingsView extends StatefulWidget {
-  final bool hasTouchScreen;
+  final bool showNavBar;
 
-  const SettingsView({super.key, this.hasTouchScreen = false});
+  const SettingsView({super.key, this.showNavBar = true});
 
   @override
   State<SettingsView> createState() => _SettingsState();
@@ -379,7 +379,7 @@ class _SettingsState extends State<SettingsView> {
           ),
         ),
       ),
-      bottomNavigationBar: !widget.hasTouchScreen
+      bottomNavigationBar: widget.showNavBar
           ? BottomNav(
               updateViewMode: updateView,
               startingView: ViewType.settings,

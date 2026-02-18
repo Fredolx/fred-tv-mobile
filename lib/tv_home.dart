@@ -35,9 +35,9 @@ class _TvHomeState extends State<TvHome> {
   }
 
   void navSettings() {
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (context) => SettingsView()));
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => SettingsView(showNavBar: false)),
+    );
   }
 
   @override
