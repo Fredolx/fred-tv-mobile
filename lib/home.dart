@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:open_tv/backend/settings_service.dart';
 import 'package:open_tv/backend/sql.dart';
 import 'package:open_tv/backend/utils.dart';
@@ -44,11 +45,21 @@ class _HomeState extends State<Home> {
   bool blockSettings = false;
   int? previousScroll;
   bool scrolledDeepEnough = false;
+  final FocusNode searchFocusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_scrollListener);
+    searchFocusNode.onKeyEvent = (node, event) {
+      if (event.logicalKey == LogicalKeyboardKey.arrowDown ||
+          event.logicalKey == LogicalKeyboardKey.escape) {
+        searchFocusNode.nextFocus();
+        return KeyEventResult.handled;
+      }
+      return KeyEventResult
+          .ignored; // Pass other keys (letters/numbers) through
+    };
     initializeAsync();
   }
 
@@ -124,6 +135,7 @@ class _HomeState extends State<Home> {
   void dispose() {
     _scrollController.dispose();
     _debounce?.cancel();
+    searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -199,140 +211,152 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: widget.home.node != null
-          ? AppBar(
-              title: Text(widget.home.node.toString()),
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            )
-          : null,
-      body: Loading(
-        child: SafeArea(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final double width = constraints.maxWidth;
-              final int crossAxisCount = (width / 350).floor().clamp(1, 3);
-              return CustomScrollView(
-                controller: _scrollController,
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16.0),
-                      child: Center(
-                        child: FractionallySizedBox(
-                          widthFactor: 0.95,
-                          child: TextField(
-                            style: TextStyle(
-                              fontSize:
-                                  Theme.of(
-                                    context,
-                                  ).textTheme.titleMedium?.fontSize ??
-                                  40,
-                            ),
-                            controller: searchController,
-                            onChanged: (query) {
-                              _debounce?.cancel();
-                              _debounce = Timer(
-                                const Duration(milliseconds: 500),
-                                () {
-                                  widget.home.filters.query = query;
-                                  load(false);
-                                },
-                              );
-                            },
-                            decoration: InputDecoration(
-                              hintText: "Search...",
-                              hintStyle: TextStyle(
+    return PopScope(
+      canPop: searchController.text.trim().isEmpty,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        setState(() {
+          widget.home.filters.query = null;
+          searchController.clear();
+          load();
+        });
+      },
+      child: Scaffold(
+        appBar: widget.home.node != null
+            ? AppBar(
+                title: Text(widget.home.node.toString()),
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              )
+            : null,
+        body: Loading(
+          child: SafeArea(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final double width = constraints.maxWidth;
+                final int crossAxisCount = (width / 350).floor().clamp(1, 3);
+                return CustomScrollView(
+                  controller: _scrollController,
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16.0),
+                        child: Center(
+                          child: FractionallySizedBox(
+                            widthFactor: 0.95,
+                            child: TextField(
+                              style: TextStyle(
                                 fontSize:
                                     Theme.of(
                                       context,
                                     ).textTheme.titleMedium?.fontSize ??
                                     40,
                               ),
-                              prefixIcon: Icon(
-                                Icons.search,
-                                size:
-                                    (Theme.of(
-                                          context,
-                                        ).textTheme.titleMedium?.fontSize ??
-                                        40) *
-                                    1.5,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide.none,
-                              ),
-                              suffixIcon: IconButton(
-                                iconSize:
-                                    (Theme.of(
-                                          context,
-                                        ).textTheme.titleMedium?.fontSize ??
-                                        40) *
-                                    1.5,
-                                onPressed: () {
-                                  widget.home.filters.useKeywords =
-                                      !widget.home.filters.useKeywords;
-                                  load(false);
-                                },
-                                icon: Icon(
-                                  widget.home.filters.useKeywords
-                                      ? Icons.label
-                                      : Icons.label_outline,
+                              controller: searchController,
+                              focusNode: searchFocusNode,
+                              onChanged: (query) {
+                                _debounce?.cancel();
+                                _debounce = Timer(
+                                  const Duration(milliseconds: 500),
+                                  () {
+                                    widget.home.filters.query = query;
+                                    load(false);
+                                  },
+                                );
+                              },
+                              decoration: InputDecoration(
+                                hintText: "Search...",
+                                hintStyle: TextStyle(
+                                  fontSize:
+                                      Theme.of(
+                                        context,
+                                      ).textTheme.titleMedium?.fontSize ??
+                                      40,
                                 ),
+                                prefixIcon: Icon(
+                                  Icons.search,
+                                  size:
+                                      (Theme.of(
+                                            context,
+                                          ).textTheme.titleMedium?.fontSize ??
+                                          40) *
+                                      1.5,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide.none,
+                                ),
+                                suffixIcon: IconButton(
+                                  iconSize:
+                                      (Theme.of(
+                                            context,
+                                          ).textTheme.titleMedium?.fontSize ??
+                                          40) *
+                                      1.5,
+                                  onPressed: () {
+                                    widget.home.filters.useKeywords =
+                                        !widget.home.filters.useKeywords;
+                                    load(false);
+                                  },
+                                  icon: Icon(
+                                    widget.home.filters.useKeywords
+                                        ? Icons.label
+                                        : Icons.label_outline,
+                                  ),
+                                ),
+                                filled: true,
                               ),
-                              filled: true,
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  SliverPadding(
-                    padding: EdgeInsets.fromLTRB(10, 5, 10, 10),
-                    sliver: SliverGrid(
-                      delegate: SliverChildBuilderDelegate((context, index) {
-                        final channel = channels[index];
-                        return ChannelTile(
-                          channel: channel,
-                          parentContext: context,
-                          setNode: setNode,
-                        );
-                      }, childCount: channels.length),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: crossAxisCount,
-                        mainAxisExtent: 100,
-                        mainAxisSpacing: 12,
-                        crossAxisSpacing: 12,
+                    SliverPadding(
+                      padding: EdgeInsets.fromLTRB(10, 5, 10, 10),
+                      sliver: SliverGrid(
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          final channel = channels[index];
+                          return ChannelTile(
+                            channel: channel,
+                            parentContext: context,
+                            setNode: setNode,
+                          );
+                        }, childCount: channels.length),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: crossAxisCount,
+                          mainAxisExtent: 100,
+                          mainAxisSpacing: 12,
+                          crossAxisSpacing: 12,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              );
-            },
+                  ],
+                );
+              },
+            ),
           ),
         ),
-      ),
-      bottomNavigationBar: widget.hasTouchScreen
-          ? BottomNav(
-              startingView: getStartingView(),
-              blockSettings: blockSettings,
-              updateViewMode: updateViewMode,
-            )
-          : null,
-      floatingActionButton: IgnorePointer(
-        ignoring: !scrolledDeepEnough,
-        child: AnimatedOpacity(
-          opacity: scrolledDeepEnough ? 1.0 : 0.0,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-          child: FloatingActionButton(
-            onPressed: scrollToTop,
-            shape: const CircleBorder(),
-            tooltip: 'Scroll to Top',
-            child: const Icon(Icons.arrow_upward),
+        bottomNavigationBar: widget.hasTouchScreen
+            ? BottomNav(
+                startingView: getStartingView(),
+                blockSettings: blockSettings,
+                updateViewMode: updateViewMode,
+              )
+            : null,
+        floatingActionButton: IgnorePointer(
+          ignoring: !scrolledDeepEnough,
+          child: AnimatedOpacity(
+            opacity: scrolledDeepEnough ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            child: FloatingActionButton(
+              onPressed: scrollToTop,
+              shape: const CircleBorder(),
+              tooltip: 'Scroll to Top',
+              child: const Icon(Icons.arrow_upward),
+            ),
           ),
         ),
       ),

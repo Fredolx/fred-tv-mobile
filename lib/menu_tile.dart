@@ -38,8 +38,8 @@ class _MenuTileState extends State<MenuTile> {
         curve: Curves.easeOut,
         transform: Matrix4.identity()..scale(scale),
         transformAlignment: Alignment.center,
-        width: 260,
-        height: 240,
+        width: 200,
+        height: 150,
         decoration: BoxDecoration(
           gradient: widget.color,
           borderRadius: BorderRadius.circular(20),
@@ -62,16 +62,7 @@ class _MenuTileState extends State<MenuTile> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  widget.icon,
-                  color: Colors.white,
-                  size:
-                      Theme.of(context).textTheme.headlineLarge?.fontSize !=
-                          null
-                      ? Theme.of(context).textTheme.headlineLarge!.fontSize! *
-                            2.5
-                      : 72,
-                ),
+                Icon(widget.icon, color: Colors.white, size: 50),
                 const SizedBox(height: 10),
                 Text(
                   widget.label,
@@ -79,7 +70,7 @@ class _MenuTileState extends State<MenuTile> {
                     color: Colors.white,
                     fontSize: Theme.of(
                       context,
-                    ).textTheme.headlineLarge?.fontSize,
+                    ).textTheme.headlineSmall?.fontSize,
                     fontWeight: FontWeight.w600,
                     shadows: [
                       Shadow(
