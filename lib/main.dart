@@ -6,9 +6,9 @@ import 'package:open_tv/backend/settings_service.dart';
 import 'package:open_tv/backend/sql.dart';
 import 'package:open_tv/home.dart';
 import 'package:open_tv/models/custom_shortcut.dart';
+import 'package:open_tv/models/device_detector.dart';
 import 'package:open_tv/models/filters.dart';
 import 'package:open_tv/models/home_manager.dart';
-import 'package:open_tv/models/media_type.dart';
 import 'package:open_tv/models/settings.dart';
 import 'package:open_tv/backend/utils.dart';
 import 'package:open_tv/setup.dart';
@@ -19,11 +19,13 @@ Future<void> main() async {
   final hasSources = await Sql.hasSources();
   final settings = await SettingsService.getSettings();
   final hasTouchScreen = await Utils.hasTouchScreen();
+  final isTV = await DeviceDetector.isTV();
   runApp(
     MyApp(
       skipSetup: hasSources,
       settings: settings,
       hasTouchScreen: hasTouchScreen,
+      isTV: isTV,
     ),
   );
 }
@@ -32,6 +34,7 @@ class MyApp extends StatelessWidget {
   final bool skipSetup;
   final Settings settings;
   final bool hasTouchScreen;
+  final bool isTV;
   static final GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>();
 
@@ -40,6 +43,7 @@ class MyApp extends StatelessWidget {
     required this.skipSetup,
     required this.settings,
     required this.hasTouchScreen,
+    required this.isTV,
   });
 
   bool get _isEditingText {
@@ -97,7 +101,7 @@ class MyApp extends StatelessWidget {
       ),
       themeMode: ThemeMode.dark,
       debugShowCheckedModeBanner: false,
-      home: !hasTouchScreen && (Platform.isAndroid || Platform.isIOS)
+      home: isTV || (!hasTouchScreen && (Platform.isAndroid || Platform.isIOS))
           ? TvHome()
           : skipSetup
           ? Home(
