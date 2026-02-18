@@ -8,18 +8,14 @@ class CustomShortcut extends ShortcutActivator {
 
   @override
   bool accepts(KeyEvent event, HardwareKeyboard state) {
-    // 1. Check if the key itself matches (e.g., is it Backspace?)
     if (!activator.accepts(event, state)) {
       return false;
     }
 
-    // 2. Check if we are currently editing text
     final focusContext = FocusManager.instance.primaryFocus?.context;
     if (focusContext != null) {
       final isEditing =
           focusContext.findAncestorWidgetOfExactType<EditableText>() != null;
-      // If we are editing, we REJECT the shortcut, allowing the
-      // key to continue to the text field naturally.
       if (isEditing) {
         return false;
       }
