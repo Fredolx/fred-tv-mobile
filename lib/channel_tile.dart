@@ -111,7 +111,6 @@ class _ChannelTileState extends State<ChannelTile> {
     return Card(
       elevation: _focusNode.hasFocus ? 8.0 : 2.0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      clipBehavior: Clip.antiAlias,
       color: Theme.of(context).colorScheme.surfaceContainer,
       child: InkWell(
         focusNode: _focusNode,
@@ -128,18 +127,21 @@ class _ChannelTileState extends State<ChannelTile> {
                   child: widget.channel.image != null
                       ? CachedNetworkImage(
                           imageUrl: widget.channel.image!,
+                          memCacheHeight: 300,
+                          memCacheWidth: 300,
                           fit: BoxFit.contain,
                           errorWidget: (_, __, ___) => const Icon(
                             Icons.tv,
-                            size: 30,
+                            size: 45,
                             color: Colors.grey,
                           ),
                         )
-                      : const Icon(Icons.tv, size: 30, color: Colors.grey),
+                      : const Icon(Icons.tv, size: 45, color: Colors.grey),
                 ),
               ),
             ),
             Expanded(
+              flex: 3,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: Align(
@@ -149,19 +151,21 @@ class _ChannelTileState extends State<ChannelTile> {
                     textAlign: TextAlign.left,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    style: TextStyle(
+                      fontSize: Theme.of(
+                        context,
+                      ).textTheme.titleMedium?.fontSize!,
                       fontWeight: FontWeight.w600,
-                      fontSize: 13,
                     ),
                   ),
                 ),
               ),
             ),
             if (widget.channel.favorite)
-              const Padding(
-                padding: EdgeInsets.only(right: 16.0),
+              Padding(
+                padding: EdgeInsets.only(right: 8.0),
                 child: Center(
-                  child: Icon(Icons.star, size: 18, color: Colors.amber),
+                  child: const Icon(Icons.star, size: 25, color: Colors.amber),
                 ),
               ),
           ],

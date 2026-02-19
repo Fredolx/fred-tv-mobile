@@ -20,7 +20,9 @@ import 'package:open_tv/setup.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SettingsView extends StatefulWidget {
-  const SettingsView({super.key});
+  final bool showNavBar;
+
+  const SettingsView({super.key, this.showNavBar = true});
 
   @override
   State<SettingsView> createState() => _SettingsState();
@@ -84,7 +86,7 @@ class _SettingsState extends State<SettingsView> {
           title: "Default view",
           data: ViewType.values
               .take(4)
-              .map((x) => IdData(id: x.index, data: x.name))
+              .map((x) => IdData(id: x.index, data: viewTypeToString(x)))
               .toList(),
           action: (view) {
             setState(() {
@@ -247,6 +249,23 @@ class _SettingsState extends State<SettingsView> {
                     onTap: () async => await _showDefaultViewDialog(context),
                   ),
                   ListTile(
+                    title: const Text("Force TV Mode"),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Switch(
+                          value: settings.forceTVMode,
+                          onChanged: (bool value) {
+                            setState(() {
+                              settings.forceTVMode = value;
+                            });
+                            updateSettings();
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  ListTile(
                     title: const Text("Refresh sources on start"),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -360,10 +379,12 @@ class _SettingsState extends State<SettingsView> {
           ),
         ),
       ),
-      bottomNavigationBar: BottomNav(
-        updateViewMode: updateView,
-        startingView: ViewType.settings,
-      ),
+      bottomNavigationBar: widget.showNavBar
+          ? BottomNav(
+              updateViewMode: updateView,
+              startingView: ViewType.settings,
+            )
+          : null,
     );
   }
 }
