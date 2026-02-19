@@ -10,11 +10,12 @@ use anyhow::{bail, Context, Result};
 use regex::{Captures, Regex};
 use rusqlite::Transaction;
 
-use crate::api::source_type::{self, SourceType};
 use crate::api::sql::set_channel_group_id;
-use crate::api::types::{Channel, ChannelHttpHeaders, ChannelPreserve, Source};
+use crate::api::types::{
+    Channel, ChannelHttpHeaders, ChannelPreserve, MediaType, Source, SourceType,
+};
 use crate::api::utils::get_user_agent_from_source;
-use crate::api::{log, media_type::MediaType, sql};
+use crate::api::{log, sql};
 
 static NAME_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r#"tvg-name="(?P<name>[^"]*)""#).unwrap());

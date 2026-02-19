@@ -1,6 +1,3 @@
-use crate::api::{
-    media_type::MediaType, sort_type::SortType, source_type::SourceType, view_type::ViewType,
-};
 use flutter_rust_bridge::frb;
 use serde::{Deserialize, Serialize};
 
@@ -83,6 +80,7 @@ pub struct Settings {
     pub enable_hwdec: Option<bool>,
     pub always_ask_save: Option<bool>,
     pub enable_gpu: Option<bool>,
+    pub force_tv_mode: Option<bool>,
 }
 
 #[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
@@ -171,4 +169,90 @@ pub struct ChannelPreserve {
     pub hidden: bool,
     #[serde(default)]
     pub is_group: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[repr(u8)]
+pub enum MediaType {
+    Livestream = 0,
+    Movie = 1,
+    Serie = 2,
+    Group = 3,
+    Season = 4,
+}
+
+impl From<u8> for MediaType {
+    fn from(value: u8) -> Self {
+        match value {
+            0 => MediaType::Livestream,
+            1 => MediaType::Movie,
+            2 => MediaType::Serie,
+            3 => MediaType::Group,
+            4 => MediaType::Season,
+            _ => MediaType::Livestream,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[repr(u8)]
+pub enum SourceType {
+    M3u = 0,
+    M3uLink = 1,
+    Xtream = 2,
+    Custom = 3,
+}
+
+impl From<u8> for SourceType {
+    fn from(value: u8) -> Self {
+        match value {
+            0 => SourceType::M3u,
+            1 => SourceType::M3uLink,
+            2 => SourceType::Xtream,
+            3 => SourceType::Custom,
+            _ => SourceType::M3u,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[repr(u8)]
+pub enum SortType {
+    AlphabeticalAsc = 0,
+    AlphabeticalDesc = 1,
+    Provider = 2,
+}
+
+impl From<u8> for SortType {
+    fn from(value: u8) -> Self {
+        match value {
+            0 => SortType::AlphabeticalAsc,
+            1 => SortType::AlphabeticalDesc,
+            2 => SortType::Provider,
+            _ => SortType::AlphabeticalAsc,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[repr(u8)]
+pub enum ViewType {
+    All = 0,
+    Favorites = 1,
+    Categories = 2,
+    History = 3,
+    Hidden = 4,
+}
+
+impl From<u8> for ViewType {
+    fn from(value: u8) -> Self {
+        match value {
+            0 => ViewType::All,
+            1 => ViewType::Favorites,
+            2 => ViewType::Categories,
+            3 => ViewType::History,
+            4 => ViewType::Hidden,
+            _ => ViewType::All, // Default fallback
+        }
+    }
 }

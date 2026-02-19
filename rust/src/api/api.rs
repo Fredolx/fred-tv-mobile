@@ -64,3 +64,8 @@ pub fn clear_history() -> Result<()> {
 pub fn has_sources() -> Result<bool> {
     sql::has_sources()
 }
+
+#[flutter_rust_bridge::frb(init)]
+pub fn init_app() {
+    flutter_rust_bridge::setup_default_user_utils();
+}

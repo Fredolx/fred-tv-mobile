@@ -37,7 +37,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.11.1";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1658903085;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1694464673;
 
 // Section: executor
 
@@ -461,7 +461,7 @@ fn wire__crate__api__api__has_sources_impl(
         },
     )
 }
-fn wire__crate__api__simple__init_app_impl(
+fn wire__crate__api__api__init_app_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
     rust_vec_len_: i32,
@@ -487,7 +487,7 @@ fn wire__crate__api__simple__init_app_impl(
             move |context| {
                 transform_result_sse::<_, ()>((move || {
                     let output_ok = Result::<_, ()>::Ok({
-                        crate::api::simple::init_app();
+                        crate::api::api::init_app();
                     })?;
                     Ok(output_ok)
                 })())
@@ -702,7 +702,7 @@ impl SseDecode for crate::api::types::Channel {
         let mut var_url = <Option<String>>::sse_decode(deserializer);
         let mut var_group = <Option<String>>::sse_decode(deserializer);
         let mut var_image = <Option<String>>::sse_decode(deserializer);
-        let mut var_mediaType = <crate::api::media_type::MediaType>::sse_decode(deserializer);
+        let mut var_mediaType = <crate::api::types::MediaType>::sse_decode(deserializer);
         let mut var_sourceId = <Option<i64>>::sse_decode(deserializer);
         let mut var_seriesId = <Option<u64>>::sse_decode(deserializer);
         let mut var_groupId = <Option<i64>>::sse_decode(deserializer);
@@ -758,13 +758,13 @@ impl SseDecode for crate::api::types::Filters {
         let mut var_query = <Option<String>>::sse_decode(deserializer);
         let mut var_sourceIds = <Vec<i64>>::sse_decode(deserializer);
         let mut var_mediaTypes =
-            <Option<Vec<crate::api::media_type::MediaType>>>::sse_decode(deserializer);
-        let mut var_viewType = <crate::api::view_type::ViewType>::sse_decode(deserializer);
+            <Option<Vec<crate::api::types::MediaType>>>::sse_decode(deserializer);
+        let mut var_viewType = <crate::api::types::ViewType>::sse_decode(deserializer);
         let mut var_page = <u8>::sse_decode(deserializer);
         let mut var_seriesId = <Option<i64>>::sse_decode(deserializer);
         let mut var_groupId = <Option<i64>>::sse_decode(deserializer);
         let mut var_useKeywords = <bool>::sse_decode(deserializer);
-        let mut var_sort = <crate::api::sort_type::SortType>::sse_decode(deserializer);
+        let mut var_sort = <crate::api::types::SortType>::sse_decode(deserializer);
         let mut var_season = <Option<i64>>::sse_decode(deserializer);
         return crate::api::types::Filters {
             query: var_query,
@@ -807,15 +807,13 @@ impl SseDecode for Vec<crate::api::types::Channel> {
     }
 }
 
-impl SseDecode for Vec<crate::api::media_type::MediaType> {
+impl SseDecode for Vec<crate::api::types::MediaType> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut len_ = <i32>::sse_decode(deserializer);
         let mut ans_ = vec![];
         for idx_ in 0..len_ {
-            ans_.push(<crate::api::media_type::MediaType>::sse_decode(
-                deserializer,
-            ));
+            ans_.push(<crate::api::types::MediaType>::sse_decode(deserializer));
         }
         return ans_;
     }
@@ -845,16 +843,16 @@ impl SseDecode for Vec<u8> {
     }
 }
 
-impl SseDecode for crate::api::media_type::MediaType {
+impl SseDecode for crate::api::types::MediaType {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut inner = <i32>::sse_decode(deserializer);
         return match inner {
-            0 => crate::api::media_type::MediaType::Livestream,
-            1 => crate::api::media_type::MediaType::Movie,
-            2 => crate::api::media_type::MediaType::Serie,
-            3 => crate::api::media_type::MediaType::Group,
-            4 => crate::api::media_type::MediaType::Season,
+            0 => crate::api::types::MediaType::Livestream,
+            1 => crate::api::types::MediaType::Movie,
+            2 => crate::api::types::MediaType::Serie,
+            3 => crate::api::types::MediaType::Group,
+            4 => crate::api::types::MediaType::Season,
             _ => unreachable!("Invalid variant for MediaType: {}", inner),
         };
     }
@@ -893,11 +891,11 @@ impl SseDecode for Option<i64> {
     }
 }
 
-impl SseDecode for Option<crate::api::sort_type::SortType> {
+impl SseDecode for Option<crate::api::types::SortType> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         if (<bool>::sse_decode(deserializer)) {
-            return Some(<crate::api::sort_type::SortType>::sse_decode(deserializer));
+            return Some(<crate::api::types::SortType>::sse_decode(deserializer));
         } else {
             return None;
         }
@@ -937,22 +935,22 @@ impl SseDecode for Option<u8> {
     }
 }
 
-impl SseDecode for Option<crate::api::view_type::ViewType> {
+impl SseDecode for Option<crate::api::types::ViewType> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         if (<bool>::sse_decode(deserializer)) {
-            return Some(<crate::api::view_type::ViewType>::sse_decode(deserializer));
+            return Some(<crate::api::types::ViewType>::sse_decode(deserializer));
         } else {
             return None;
         }
     }
 }
 
-impl SseDecode for Option<Vec<crate::api::media_type::MediaType>> {
+impl SseDecode for Option<Vec<crate::api::types::MediaType>> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         if (<bool>::sse_decode(deserializer)) {
-            return Some(<Vec<crate::api::media_type::MediaType>>::sse_decode(
+            return Some(<Vec<crate::api::types::MediaType>>::sse_decode(
                 deserializer,
             ));
         } else {
@@ -987,18 +985,17 @@ impl SseDecode for crate::api::types::Settings {
         let mut var_recordingPath = <Option<String>>::sse_decode(deserializer);
         let mut var_mpvParams = <Option<String>>::sse_decode(deserializer);
         let mut var_useStreamCaching = <Option<bool>>::sse_decode(deserializer);
-        let mut var_defaultView =
-            <Option<crate::api::view_type::ViewType>>::sse_decode(deserializer);
+        let mut var_defaultView = <Option<crate::api::types::ViewType>>::sse_decode(deserializer);
         let mut var_volume = <Option<u8>>::sse_decode(deserializer);
         let mut var_refreshOnStart = <Option<bool>>::sse_decode(deserializer);
         let mut var_restreamPort = <Option<u16>>::sse_decode(deserializer);
         let mut var_enableTrayIcon = <Option<bool>>::sse_decode(deserializer);
         let mut var_zoom = <Option<u16>>::sse_decode(deserializer);
-        let mut var_defaultSort =
-            <Option<crate::api::sort_type::SortType>>::sse_decode(deserializer);
+        let mut var_defaultSort = <Option<crate::api::types::SortType>>::sse_decode(deserializer);
         let mut var_enableHwdec = <Option<bool>>::sse_decode(deserializer);
         let mut var_alwaysAskSave = <Option<bool>>::sse_decode(deserializer);
         let mut var_enableGpu = <Option<bool>>::sse_decode(deserializer);
+        let mut var_forceTvMode = <Option<bool>>::sse_decode(deserializer);
         return crate::api::types::Settings {
             recording_path: var_recordingPath,
             mpv_params: var_mpvParams,
@@ -1013,18 +1010,19 @@ impl SseDecode for crate::api::types::Settings {
             enable_hwdec: var_enableHwdec,
             always_ask_save: var_alwaysAskSave,
             enable_gpu: var_enableGpu,
+            force_tv_mode: var_forceTvMode,
         };
     }
 }
 
-impl SseDecode for crate::api::sort_type::SortType {
+impl SseDecode for crate::api::types::SortType {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut inner = <i32>::sse_decode(deserializer);
         return match inner {
-            0 => crate::api::sort_type::SortType::AlphabeticalAsc,
-            1 => crate::api::sort_type::SortType::AlphabeticalDesc,
-            2 => crate::api::sort_type::SortType::Provider,
+            0 => crate::api::types::SortType::AlphabeticalAsc,
+            1 => crate::api::types::SortType::AlphabeticalDesc,
+            2 => crate::api::types::SortType::Provider,
             _ => unreachable!("Invalid variant for SortType: {}", inner),
         };
     }
@@ -1039,7 +1037,7 @@ impl SseDecode for crate::api::types::Source {
         let mut var_urlOrigin = <Option<String>>::sse_decode(deserializer);
         let mut var_username = <Option<String>>::sse_decode(deserializer);
         let mut var_password = <Option<String>>::sse_decode(deserializer);
-        let mut var_sourceType = <crate::api::source_type::SourceType>::sse_decode(deserializer);
+        let mut var_sourceType = <crate::api::types::SourceType>::sse_decode(deserializer);
         let mut var_useTvgId = <Option<bool>>::sse_decode(deserializer);
         let mut var_enabled = <bool>::sse_decode(deserializer);
         let mut var_userAgent = <Option<String>>::sse_decode(deserializer);
@@ -1064,15 +1062,15 @@ impl SseDecode for crate::api::types::Source {
     }
 }
 
-impl SseDecode for crate::api::source_type::SourceType {
+impl SseDecode for crate::api::types::SourceType {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut inner = <i32>::sse_decode(deserializer);
         return match inner {
-            0 => crate::api::source_type::SourceType::M3u,
-            1 => crate::api::source_type::SourceType::M3uLink,
-            2 => crate::api::source_type::SourceType::Xtream,
-            3 => crate::api::source_type::SourceType::Custom,
+            0 => crate::api::types::SourceType::M3u,
+            1 => crate::api::types::SourceType::M3uLink,
+            2 => crate::api::types::SourceType::Xtream,
+            3 => crate::api::types::SourceType::Custom,
             _ => unreachable!("Invalid variant for SourceType: {}", inner),
         };
     }
@@ -1104,16 +1102,16 @@ impl SseDecode for () {
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {}
 }
 
-impl SseDecode for crate::api::view_type::ViewType {
+impl SseDecode for crate::api::types::ViewType {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut inner = <i32>::sse_decode(deserializer);
         return match inner {
-            0 => crate::api::view_type::ViewType::All,
-            1 => crate::api::view_type::ViewType::Favorites,
-            2 => crate::api::view_type::ViewType::Categories,
-            3 => crate::api::view_type::ViewType::History,
-            4 => crate::api::view_type::ViewType::Hidden,
+            0 => crate::api::types::ViewType::All,
+            1 => crate::api::types::ViewType::Favorites,
+            2 => crate::api::types::ViewType::Categories,
+            3 => crate::api::types::ViewType::History,
+            4 => crate::api::types::ViewType::Hidden,
             _ => unreachable!("Invalid variant for ViewType: {}", inner),
         };
     }
@@ -1150,7 +1148,7 @@ fn pde_ffi_dispatcher_primary_impl(
         ),
         11 => wire__crate__api__api__get_xtream_impl(port, ptr, rust_vec_len, data_len),
         12 => wire__crate__api__api__has_sources_impl(port, ptr, rust_vec_len, data_len),
-        13 => wire__crate__api__simple__init_app_impl(port, ptr, rust_vec_len, data_len),
+        13 => wire__crate__api__api__init_app_impl(port, ptr, rust_vec_len, data_len),
         14 => wire__crate__api__api__refresh_all_impl(port, ptr, rust_vec_len, data_len),
         15 => wire__crate__api__api__refresh_source_impl(port, ptr, rust_vec_len, data_len),
         16 => wire__crate__api__api__search_impl(port, ptr, rust_vec_len, data_len),
@@ -1253,7 +1251,7 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::types::Filters> for crate::ap
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
-impl flutter_rust_bridge::IntoDart for crate::api::media_type::MediaType {
+impl flutter_rust_bridge::IntoDart for crate::api::types::MediaType {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         match self {
             Self::Livestream => 0.into_dart(),
@@ -1265,14 +1263,11 @@ impl flutter_rust_bridge::IntoDart for crate::api::media_type::MediaType {
         }
     }
 }
-impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
-    for crate::api::media_type::MediaType
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::api::types::MediaType {}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::types::MediaType>
+    for crate::api::types::MediaType
 {
-}
-impl flutter_rust_bridge::IntoIntoDart<crate::api::media_type::MediaType>
-    for crate::api::media_type::MediaType
-{
-    fn into_into_dart(self) -> crate::api::media_type::MediaType {
+    fn into_into_dart(self) -> crate::api::types::MediaType {
         self
     }
 }
@@ -1313,6 +1308,7 @@ impl flutter_rust_bridge::IntoDart for crate::api::types::Settings {
             self.enable_hwdec.into_into_dart().into_dart(),
             self.always_ask_save.into_into_dart().into_dart(),
             self.enable_gpu.into_into_dart().into_dart(),
+            self.force_tv_mode.into_into_dart().into_dart(),
         ]
         .into_dart()
     }
@@ -1326,7 +1322,7 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::types::Settings>
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
-impl flutter_rust_bridge::IntoDart for crate::api::sort_type::SortType {
+impl flutter_rust_bridge::IntoDart for crate::api::types::SortType {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         match self {
             Self::AlphabeticalAsc => 0.into_dart(),
@@ -1336,14 +1332,11 @@ impl flutter_rust_bridge::IntoDart for crate::api::sort_type::SortType {
         }
     }
 }
-impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
-    for crate::api::sort_type::SortType
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::api::types::SortType {}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::types::SortType>
+    for crate::api::types::SortType
 {
-}
-impl flutter_rust_bridge::IntoIntoDart<crate::api::sort_type::SortType>
-    for crate::api::sort_type::SortType
-{
-    fn into_into_dart(self) -> crate::api::sort_type::SortType {
+    fn into_into_dart(self) -> crate::api::types::SortType {
         self
     }
 }
@@ -1375,7 +1368,7 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::types::Source> for crate::api
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
-impl flutter_rust_bridge::IntoDart for crate::api::source_type::SourceType {
+impl flutter_rust_bridge::IntoDart for crate::api::types::SourceType {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         match self {
             Self::M3u => 0.into_dart(),
@@ -1386,19 +1379,16 @@ impl flutter_rust_bridge::IntoDart for crate::api::source_type::SourceType {
         }
     }
 }
-impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
-    for crate::api::source_type::SourceType
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::api::types::SourceType {}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::types::SourceType>
+    for crate::api::types::SourceType
 {
-}
-impl flutter_rust_bridge::IntoIntoDart<crate::api::source_type::SourceType>
-    for crate::api::source_type::SourceType
-{
-    fn into_into_dart(self) -> crate::api::source_type::SourceType {
+    fn into_into_dart(self) -> crate::api::types::SourceType {
         self
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
-impl flutter_rust_bridge::IntoDart for crate::api::view_type::ViewType {
+impl flutter_rust_bridge::IntoDart for crate::api::types::ViewType {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         match self {
             Self::All => 0.into_dart(),
@@ -1410,14 +1400,11 @@ impl flutter_rust_bridge::IntoDart for crate::api::view_type::ViewType {
         }
     }
 }
-impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
-    for crate::api::view_type::ViewType
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::api::types::ViewType {}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::types::ViewType>
+    for crate::api::types::ViewType
 {
-}
-impl flutter_rust_bridge::IntoIntoDart<crate::api::view_type::ViewType>
-    for crate::api::view_type::ViewType
-{
-    fn into_into_dart(self) -> crate::api::view_type::ViewType {
+    fn into_into_dart(self) -> crate::api::types::ViewType {
         self
     }
 }
@@ -1451,7 +1438,7 @@ impl SseEncode for crate::api::types::Channel {
         <Option<String>>::sse_encode(self.url, serializer);
         <Option<String>>::sse_encode(self.group, serializer);
         <Option<String>>::sse_encode(self.image, serializer);
-        <crate::api::media_type::MediaType>::sse_encode(self.media_type, serializer);
+        <crate::api::types::MediaType>::sse_encode(self.media_type, serializer);
         <Option<i64>>::sse_encode(self.source_id, serializer);
         <Option<u64>>::sse_encode(self.series_id, serializer);
         <Option<i64>>::sse_encode(self.group_id, serializer);
@@ -1481,13 +1468,13 @@ impl SseEncode for crate::api::types::Filters {
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <Option<String>>::sse_encode(self.query, serializer);
         <Vec<i64>>::sse_encode(self.source_ids, serializer);
-        <Option<Vec<crate::api::media_type::MediaType>>>::sse_encode(self.media_types, serializer);
-        <crate::api::view_type::ViewType>::sse_encode(self.view_type, serializer);
+        <Option<Vec<crate::api::types::MediaType>>>::sse_encode(self.media_types, serializer);
+        <crate::api::types::ViewType>::sse_encode(self.view_type, serializer);
         <u8>::sse_encode(self.page, serializer);
         <Option<i64>>::sse_encode(self.series_id, serializer);
         <Option<i64>>::sse_encode(self.group_id, serializer);
         <bool>::sse_encode(self.use_keywords, serializer);
-        <crate::api::sort_type::SortType>::sse_encode(self.sort, serializer);
+        <crate::api::types::SortType>::sse_encode(self.sort, serializer);
         <Option<i64>>::sse_encode(self.season, serializer);
     }
 }
@@ -1516,12 +1503,12 @@ impl SseEncode for Vec<crate::api::types::Channel> {
     }
 }
 
-impl SseEncode for Vec<crate::api::media_type::MediaType> {
+impl SseEncode for Vec<crate::api::types::MediaType> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <i32>::sse_encode(self.len() as _, serializer);
         for item in self {
-            <crate::api::media_type::MediaType>::sse_encode(item, serializer);
+            <crate::api::types::MediaType>::sse_encode(item, serializer);
         }
     }
 }
@@ -1546,16 +1533,16 @@ impl SseEncode for Vec<u8> {
     }
 }
 
-impl SseEncode for crate::api::media_type::MediaType {
+impl SseEncode for crate::api::types::MediaType {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <i32>::sse_encode(
             match self {
-                crate::api::media_type::MediaType::Livestream => 0,
-                crate::api::media_type::MediaType::Movie => 1,
-                crate::api::media_type::MediaType::Serie => 2,
-                crate::api::media_type::MediaType::Group => 3,
-                crate::api::media_type::MediaType::Season => 4,
+                crate::api::types::MediaType::Livestream => 0,
+                crate::api::types::MediaType::Movie => 1,
+                crate::api::types::MediaType::Serie => 2,
+                crate::api::types::MediaType::Group => 3,
+                crate::api::types::MediaType::Season => 4,
                 _ => {
                     unimplemented!("");
                 }
@@ -1595,12 +1582,12 @@ impl SseEncode for Option<i64> {
     }
 }
 
-impl SseEncode for Option<crate::api::sort_type::SortType> {
+impl SseEncode for Option<crate::api::types::SortType> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <bool>::sse_encode(self.is_some(), serializer);
         if let Some(value) = self {
-            <crate::api::sort_type::SortType>::sse_encode(value, serializer);
+            <crate::api::types::SortType>::sse_encode(value, serializer);
         }
     }
 }
@@ -1635,22 +1622,22 @@ impl SseEncode for Option<u8> {
     }
 }
 
-impl SseEncode for Option<crate::api::view_type::ViewType> {
+impl SseEncode for Option<crate::api::types::ViewType> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <bool>::sse_encode(self.is_some(), serializer);
         if let Some(value) = self {
-            <crate::api::view_type::ViewType>::sse_encode(value, serializer);
+            <crate::api::types::ViewType>::sse_encode(value, serializer);
         }
     }
 }
 
-impl SseEncode for Option<Vec<crate::api::media_type::MediaType>> {
+impl SseEncode for Option<Vec<crate::api::types::MediaType>> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <bool>::sse_encode(self.is_some(), serializer);
         if let Some(value) = self {
-            <Vec<crate::api::media_type::MediaType>>::sse_encode(value, serializer);
+            <Vec<crate::api::types::MediaType>>::sse_encode(value, serializer);
         }
     }
 }
@@ -1673,27 +1660,28 @@ impl SseEncode for crate::api::types::Settings {
         <Option<String>>::sse_encode(self.recording_path, serializer);
         <Option<String>>::sse_encode(self.mpv_params, serializer);
         <Option<bool>>::sse_encode(self.use_stream_caching, serializer);
-        <Option<crate::api::view_type::ViewType>>::sse_encode(self.default_view, serializer);
+        <Option<crate::api::types::ViewType>>::sse_encode(self.default_view, serializer);
         <Option<u8>>::sse_encode(self.volume, serializer);
         <Option<bool>>::sse_encode(self.refresh_on_start, serializer);
         <Option<u16>>::sse_encode(self.restream_port, serializer);
         <Option<bool>>::sse_encode(self.enable_tray_icon, serializer);
         <Option<u16>>::sse_encode(self.zoom, serializer);
-        <Option<crate::api::sort_type::SortType>>::sse_encode(self.default_sort, serializer);
+        <Option<crate::api::types::SortType>>::sse_encode(self.default_sort, serializer);
         <Option<bool>>::sse_encode(self.enable_hwdec, serializer);
         <Option<bool>>::sse_encode(self.always_ask_save, serializer);
         <Option<bool>>::sse_encode(self.enable_gpu, serializer);
+        <Option<bool>>::sse_encode(self.force_tv_mode, serializer);
     }
 }
 
-impl SseEncode for crate::api::sort_type::SortType {
+impl SseEncode for crate::api::types::SortType {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <i32>::sse_encode(
             match self {
-                crate::api::sort_type::SortType::AlphabeticalAsc => 0,
-                crate::api::sort_type::SortType::AlphabeticalDesc => 1,
-                crate::api::sort_type::SortType::Provider => 2,
+                crate::api::types::SortType::AlphabeticalAsc => 0,
+                crate::api::types::SortType::AlphabeticalDesc => 1,
+                crate::api::types::SortType::Provider => 2,
                 _ => {
                     unimplemented!("");
                 }
@@ -1712,7 +1700,7 @@ impl SseEncode for crate::api::types::Source {
         <Option<String>>::sse_encode(self.url_origin, serializer);
         <Option<String>>::sse_encode(self.username, serializer);
         <Option<String>>::sse_encode(self.password, serializer);
-        <crate::api::source_type::SourceType>::sse_encode(self.source_type, serializer);
+        <crate::api::types::SourceType>::sse_encode(self.source_type, serializer);
         <Option<bool>>::sse_encode(self.use_tvg_id, serializer);
         <bool>::sse_encode(self.enabled, serializer);
         <Option<String>>::sse_encode(self.user_agent, serializer);
@@ -1722,15 +1710,15 @@ impl SseEncode for crate::api::types::Source {
     }
 }
 
-impl SseEncode for crate::api::source_type::SourceType {
+impl SseEncode for crate::api::types::SourceType {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <i32>::sse_encode(
             match self {
-                crate::api::source_type::SourceType::M3u => 0,
-                crate::api::source_type::SourceType::M3uLink => 1,
-                crate::api::source_type::SourceType::Xtream => 2,
-                crate::api::source_type::SourceType::Custom => 3,
+                crate::api::types::SourceType::M3u => 0,
+                crate::api::types::SourceType::M3uLink => 1,
+                crate::api::types::SourceType::Xtream => 2,
+                crate::api::types::SourceType::Custom => 3,
                 _ => {
                     unimplemented!("");
                 }
@@ -1766,16 +1754,16 @@ impl SseEncode for () {
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {}
 }
 
-impl SseEncode for crate::api::view_type::ViewType {
+impl SseEncode for crate::api::types::ViewType {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <i32>::sse_encode(
             match self {
-                crate::api::view_type::ViewType::All => 0,
-                crate::api::view_type::ViewType::Favorites => 1,
-                crate::api::view_type::ViewType::Categories => 2,
-                crate::api::view_type::ViewType::History => 3,
-                crate::api::view_type::ViewType::Hidden => 4,
+                crate::api::types::ViewType::All => 0,
+                crate::api::types::ViewType::Favorites => 1,
+                crate::api::types::ViewType::Categories => 2,
+                crate::api::types::ViewType::History => 3,
+                crate::api::types::ViewType::Hidden => 4,
                 _ => {
                     unimplemented!("");
                 }

@@ -1,7 +1,6 @@
+import 'package:flutter_rust_bridge/flutter_rust_bridge.dart';
 import 'package:open_tv/models/node.dart';
-import 'package:open_tv/src/rust/api/sort_type.dart';
 import 'package:open_tv/src/rust/api/types.dart';
-import 'package:open_tv/src/rust/api/view_type.dart';
 
 class HomeManager {
   final Filters filters;
@@ -13,7 +12,7 @@ class HomeManager {
         viewType: ViewType.all,
         page: 1,
         useKeywords: false,
-        sourceIds: <int>[],
+        sourceIds: Int64List(0),
         sort: SortType.provider,
       ),
       node: null,

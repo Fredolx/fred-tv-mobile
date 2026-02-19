@@ -1,8 +1,8 @@
 use crate::api::log;
-use crate::api::media_type::MediaType;
 use crate::api::sql;
 use crate::api::sql::insert_season;
 use crate::api::types::Channel;
+use crate::api::types::MediaType;
 use crate::api::types::Season;
 use crate::api::types::{ChannelPreserve, Source};
 use crate::api::utils::get_user_agent_from_source;
