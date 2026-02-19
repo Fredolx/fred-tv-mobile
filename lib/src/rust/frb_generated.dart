@@ -4,11 +4,7 @@
 // ignore_for_file: unused_import, unused_element, unnecessary_import, duplicate_ignore, invalid_use_of_internal_member, annotate_overrides, non_constant_identifier_names, curly_braces_in_flow_control_structures, prefer_const_literals_to_create_immutables, unused_field
 
 import 'api/api.dart';
-import 'api/media_type.dart';
-import 'api/sort_type.dart';
-import 'api/source_type.dart';
 import 'api/types.dart';
-import 'api/view_type.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'frb_generated.dart';
@@ -60,7 +56,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 
   @override
   Future<void> executeRustInitializers() async {
-    await api.crateApiSimpleInitApp();
+    await api.crateApiApiInitApp();
   }
 
   @override
@@ -71,7 +67,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.11.1';
 
   @override
-  int get rustContentHash => -1658903085;
+  int get rustContentHash => -1694464673;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -106,7 +102,7 @@ abstract class RustLibApi extends BaseApi {
 
   Future<bool> crateApiApiHasSources();
 
-  Future<void> crateApiSimpleInitApp();
+  Future<void> crateApiApiInitApp();
 
   Future<void> crateApiApiRefreshAll();
 
@@ -466,7 +462,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "has_sources", argNames: []);
 
   @override
-  Future<void> crateApiSimpleInitApp() {
+  Future<void> crateApiApiInitApp() {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
@@ -482,14 +478,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeSuccessData: sse_decode_unit,
           decodeErrorData: null,
         ),
-        constMeta: kCrateApiSimpleInitAppConstMeta,
+        constMeta: kCrateApiApiInitAppConstMeta,
         argValues: [],
         apiImpl: this,
       ),
     );
   }
 
-  TaskConstMeta get kCrateApiSimpleInitAppConstMeta =>
+  TaskConstMeta get kCrateApiApiInitAppConstMeta =>
       const TaskConstMeta(debugName: "init_app", argNames: []);
 
   @override
@@ -891,8 +887,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   Settings dco_decode_settings(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 13)
-      throw Exception('unexpected arr length: expect 13 but see ${arr.length}');
+    if (arr.length != 14)
+      throw Exception('unexpected arr length: expect 14 but see ${arr.length}');
     return Settings(
       recordingPath: dco_decode_opt_String(arr[0]),
       mpvParams: dco_decode_opt_String(arr[1]),
@@ -907,6 +903,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       enableHwdec: dco_decode_opt_box_autoadd_bool(arr[10]),
       alwaysAskSave: dco_decode_opt_box_autoadd_bool(arr[11]),
       enableGpu: dco_decode_opt_box_autoadd_bool(arr[12]),
+      forceTvMode: dco_decode_opt_box_autoadd_bool(arr[13]),
     );
   }
 
@@ -1339,6 +1336,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var var_enableHwdec = sse_decode_opt_box_autoadd_bool(deserializer);
     var var_alwaysAskSave = sse_decode_opt_box_autoadd_bool(deserializer);
     var var_enableGpu = sse_decode_opt_box_autoadd_bool(deserializer);
+    var var_forceTvMode = sse_decode_opt_box_autoadd_bool(deserializer);
     return Settings(
       recordingPath: var_recordingPath,
       mpvParams: var_mpvParams,
@@ -1353,6 +1351,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       enableHwdec: var_enableHwdec,
       alwaysAskSave: var_alwaysAskSave,
       enableGpu: var_enableGpu,
+      forceTvMode: var_forceTvMode,
     );
   }
 
@@ -1769,6 +1768,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_opt_box_autoadd_bool(self.enableHwdec, serializer);
     sse_encode_opt_box_autoadd_bool(self.alwaysAskSave, serializer);
     sse_encode_opt_box_autoadd_bool(self.enableGpu, serializer);
+    sse_encode_opt_box_autoadd_bool(self.forceTvMode, serializer);
   }
 
   @protected

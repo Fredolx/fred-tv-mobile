@@ -1,11 +1,12 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'package:open_tv/home.dart';
 import 'package:open_tv/menu_tile.dart';
-import 'package:open_tv/models/filters.dart';
 import 'package:open_tv/models/home_manager.dart';
-import 'package:open_tv/models/media_type.dart';
-import 'package:open_tv/models/view_type.dart';
 import 'package:open_tv/settings_view.dart';
+import 'package:open_tv/src/rust/api/types.dart';
 
 class TvHome extends StatefulWidget {
   final bool nested;
@@ -71,6 +72,10 @@ class _TvHomeState extends State<TvHome> {
           Filters(
             viewType: widget.previousViewType!,
             mediaTypes: [MediaType.livestream],
+            page: 1,
+            useKeywords: false,
+            sort: SortType.provider,
+            sourceIds: Int64List(0),
           ),
         ),
       ),
@@ -86,6 +91,10 @@ class _TvHomeState extends State<TvHome> {
           Filters(
             viewType: widget.previousViewType!,
             mediaTypes: [MediaType.livestream],
+            page: 1,
+            useKeywords: false,
+            sort: SortType.provider,
+            sourceIds: Int64List(0),
           ),
         ),
       ),
@@ -101,6 +110,10 @@ class _TvHomeState extends State<TvHome> {
           Filters(
             viewType: widget.previousViewType!,
             mediaTypes: [MediaType.movie],
+            page: 1,
+            useKeywords: false,
+            sort: SortType.provider,
+            sourceIds: Int64List(0),
           ),
         ),
       ),
@@ -116,6 +129,10 @@ class _TvHomeState extends State<TvHome> {
           Filters(
             viewType: widget.previousViewType!,
             mediaTypes: [MediaType.serie],
+            page: 1,
+            useKeywords: false,
+            sort: SortType.provider,
+            sourceIds: Int64List(0),
           ),
         ),
       ),

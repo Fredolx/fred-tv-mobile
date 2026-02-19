@@ -6,10 +6,8 @@ use serde::Serialize;
 use std::{fs::File, path::PathBuf, sync::LazyLock};
 
 use crate::api::{
-    m3u,
-    source_type::SourceType,
-    sql,
-    types::{ChannelPreserve, Source},
+    m3u, sql,
+    types::{ChannelPreserve, Source, SourceType},
     xtream,
 };
 

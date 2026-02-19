@@ -4,12 +4,8 @@
 // ignore_for_file: invalid_use_of_internal_member, unused_import, unnecessary_import
 
 import '../frb_generated.dart';
-import 'media_type.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
-import 'sort_type.dart';
-import 'source_type.dart';
 import 'types.dart';
-import 'view_type.dart';
 
 Future<void> getM3U8({required Source source}) =>
     RustLib.instance.api.crateApiApiGetM3U8(source: source);

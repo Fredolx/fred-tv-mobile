@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:open_tv/backend/sql.dart';
@@ -16,6 +17,8 @@ import 'package:open_tv/models/source_type.dart';
 import 'package:open_tv/models/steps.dart';
 import 'package:open_tv/models/view_type.dart';
 import 'package:open_tv/error.dart';
+import 'package:open_tv/src/rust/api/sql.dart';
+import 'package:open_tv/src/rust/api/types.dart';
 
 class Setup extends StatefulWidget {
   final bool showAppBar;
@@ -59,7 +62,7 @@ class _SetupState extends State<Setup> {
           Source(
             name: formValues[Steps.name]!,
             sourceType: selectedSourceType,
-            url: selectedSourceType == SourceType.m3u
+            url: selectedSourceType == SourceType.m3U
                 ? formValues[Steps.url]!
                 : await fixUrl(formValues[Steps.url]!),
             username: selectedSourceType == SourceType.xtream
@@ -68,6 +71,7 @@ class _SetupState extends State<Setup> {
             password: selectedSourceType == SourceType.xtream
                 ? formValues[Steps.password]
                 : null,
+            enabled: true,
           ),
         );
       },
@@ -154,7 +158,7 @@ class _SetupState extends State<Setup> {
     }
     if (step == Steps.name) {
       var sourceName = formValues[step]!;
-      if (await Sql.sourceNameExists(sourceName)) {
+      if (await sourceNameExists(sourceName)) {
         existingSourceNames.add(sourceName);
         _formKeys[step]?.currentState?.validate();
         return;
@@ -189,7 +193,15 @@ class _SetupState extends State<Setup> {
       context,
       MaterialPageRoute(
         builder: (_) => Home(
-          home: HomeManager(filters: Filters(viewType: ViewType.all)),
+          home: HomeManager(
+            filters: Filters(
+              viewType: ViewType.all,
+              page: 1,
+              useKeywords: false,
+              sort: SortType.provider,
+              sourceIds: Int64List(0),
+            ),
+          ),
         ),
       ),
       (route) => false,

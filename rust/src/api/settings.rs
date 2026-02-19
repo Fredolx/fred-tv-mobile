@@ -18,6 +18,7 @@ pub const DEFAULT_SORT: &str = "defaultSort";
 pub const ENABLE_HWDEC: &str = "enableHWDEC";
 pub const ALWAYS_ASK_SAVE: &str = "alwaysAskSave";
 pub const ENABLE_GPU: &str = "enableGPU";
+pub const FORCE_TV_MODE: &str = "forceTVMode";
 
 pub(crate) fn get_settings() -> Result<Settings> {
     let map = sql::get_settings()?;
@@ -45,6 +46,7 @@ pub(crate) fn get_settings() -> Result<Settings> {
         enable_hwdec: map.get(ENABLE_HWDEC).and_then(|s| s.parse().ok()),
         always_ask_save: map.get(ALWAYS_ASK_SAVE).and_then(|s| s.parse().ok()),
         enable_gpu: map.get(ENABLE_GPU).and_then(|s| s.parse().ok()),
+        force_tv_mode: map.get(FORCE_TV_MODE).and_then(|s| s.parse().ok()),
     };
     Ok(settings)
 }
@@ -92,6 +94,9 @@ pub(crate) fn update_settings(settings: Settings) -> Result<()> {
     }
     if let Some(gpu) = settings.enable_gpu {
         map.insert(ENABLE_GPU.to_string(), gpu.to_string());
+    }
+    if let Some(force_tv_mode) = settings.force_tv_mode {
+        map.insert(FORCE_TV_MODE.to_string(), force_tv_mode.to_string());
     }
     sql::update_settings(map)?;
     Ok(())

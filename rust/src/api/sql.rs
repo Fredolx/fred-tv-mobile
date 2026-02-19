@@ -1,16 +1,14 @@
-use crate::api::{
-    media_type::MediaType,
-    sort_type::SortType,
-    source_type::SourceType,
-    types::{
-        Channel,
-        ChannelHttpHeaders,
-        ChannelPreserve,
-        Filters,
-        Season,
-        Source, // avoid conflict if MediaType imported above
-    },
-    view_type::ViewType,
+use crate::api::types::{
+    Channel,
+    ChannelHttpHeaders,
+    ChannelPreserve,
+    Filters,
+    MediaType,
+    Season,
+    SortType,
+    Source,
+    SourceType,
+    ViewType, // avoid conflict if MediaType imported above
 };
 use anyhow::{anyhow, Context, Result};
 use directories::ProjectDirs;

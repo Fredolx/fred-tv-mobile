@@ -4,14 +4,10 @@
 // ignore_for_file: invalid_use_of_internal_member, unused_import, unnecessary_import
 
 import '../frb_generated.dart';
-import 'media_type.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
-import 'sort_type.dart';
-import 'source_type.dart';
-import 'view_type.dart';
 
 // These types are ignored because they are neither used by any `pub` functions nor (for structs and enums) marked `#[frb(unignore)]`: `ChannelPreserve`, `CustomChannelExtraData`, `CustomChannel`, `ExportedGroup`, `ExportedSource`, `Group`, `IdName`
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`
 
 class Channel {
   final PlatformInt64? id;
@@ -185,6 +181,8 @@ class Filters {
           season == other.season;
 }
 
+enum MediaType { livestream, movie, serie, group, season }
+
 class Season {
   final PlatformInt64? id;
   final String name;
@@ -241,6 +239,7 @@ class Settings {
   final bool? enableHwdec;
   final bool? alwaysAskSave;
   final bool? enableGpu;
+  final bool? forceTvMode;
 
   const Settings({
     this.recordingPath,
@@ -256,6 +255,7 @@ class Settings {
     this.enableHwdec,
     this.alwaysAskSave,
     this.enableGpu,
+    this.forceTvMode,
   });
 
   @override
@@ -272,7 +272,8 @@ class Settings {
       defaultSort.hashCode ^
       enableHwdec.hashCode ^
       alwaysAskSave.hashCode ^
-      enableGpu.hashCode;
+      enableGpu.hashCode ^
+      forceTvMode.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -291,8 +292,11 @@ class Settings {
           defaultSort == other.defaultSort &&
           enableHwdec == other.enableHwdec &&
           alwaysAskSave == other.alwaysAskSave &&
-          enableGpu == other.enableGpu;
+          enableGpu == other.enableGpu &&
+          forceTvMode == other.forceTvMode;
 }
+
+enum SortType { alphabeticalAsc, alphabeticalDesc, provider }
 
 class Source {
   final PlatformInt64? id;
@@ -360,3 +364,7 @@ class Source {
           streamUserAgent == other.streamUserAgent &&
           lastUpdated == other.lastUpdated;
 }
+
+enum SourceType { m3U, m3ULink, xtream, custom }
+
+enum ViewType { all, favorites, categories, history, hidden }

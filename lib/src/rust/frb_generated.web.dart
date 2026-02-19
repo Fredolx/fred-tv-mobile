@@ -7,11 +7,7 @@
 // ignore_for_file: argument_type_not_assignable
 
 import 'api/api.dart';
-import 'api/media_type.dart';
-import 'api/sort_type.dart';
-import 'api/source_type.dart';
 import 'api/types.dart';
-import 'api/view_type.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'frb_generated.dart';

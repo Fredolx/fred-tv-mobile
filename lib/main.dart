@@ -2,22 +2,26 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:open_tv/backend/settings_service.dart';
-import 'package:open_tv/backend/sql.dart';
+import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
+import 'package:open_tv/backend/utils.dart';
 import 'package:open_tv/home.dart';
 import 'package:open_tv/models/custom_shortcut.dart';
 import 'package:open_tv/models/device_detector.dart';
-import 'package:open_tv/models/filters.dart';
 import 'package:open_tv/models/home_manager.dart';
-import 'package:open_tv/models/settings.dart';
-import 'package:open_tv/backend/utils.dart';
 import 'package:open_tv/setup.dart';
+import 'package:open_tv/src/rust/api/api.dart' as api;
+import 'package:open_tv/src/rust/api/sort_type.dart';
+import 'package:open_tv/src/rust/api/types.dart';
+import 'package:open_tv/src/rust/api/view_type.dart';
+import 'package:open_tv/src/rust/frb_generated.dart';
 import 'package:open_tv/tv_home.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final hasSources = await Sql.hasSources();
-  final settings = await SettingsService.getSettings();
+
+  RustLib.init();
+  final hasSources = await api.hasSources();
+  final settings = await api.getSettings();
   final hasTouchScreen = await Utils.hasTouchScreen();
   final isTV = await DeviceDetector.isTV();
   runApp(
@@ -102,16 +106,22 @@ class MyApp extends StatelessWidget {
       themeMode: ThemeMode.dark,
       debugShowCheckedModeBanner: false,
       home:
-          settings.forceTVMode ||
+          settings.forceTvMode == true ||
               isTV ||
               (!hasTouchScreen && (Platform.isAndroid || Platform.isIOS))
           ? TvHome()
           : skipSetup
           ? Home(
               firstLaunch: true,
-              refresh: settings.refreshOnStart,
+              refresh: settings.refreshOnStart == true,
               home: HomeManager(
-                filters: Filters(viewType: settings.defaultView),
+                filters: Filters(
+                  viewType: settings.defaultView ?? ViewType.all,
+                  sourceIds: Int64List(0),
+                  page: 1,
+                  useKeywords: false,
+                  sort: SortType.provider,
+                ),
               ),
             )
           : const Setup(),
