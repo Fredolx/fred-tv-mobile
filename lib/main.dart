@@ -1,23 +1,31 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:open_tv/backend/utils.dart';
+import 'package:flutter/services.dart';
+import 'package:open_tv/backend/settings_service.dart';
+import 'package:open_tv/backend/sql.dart';
 import 'package:open_tv/home.dart';
+import 'package:open_tv/models/custom_shortcut.dart';
+import 'package:open_tv/models/device_detector.dart';
+import 'package:open_tv/models/filters.dart';
 import 'package:open_tv/models/home_manager.dart';
+import 'package:open_tv/models/settings.dart';
+import 'package:open_tv/backend/utils.dart';
 import 'package:open_tv/setup.dart';
-import 'package:open_tv/src/rust/api/api.dart';
-import 'package:open_tv/src/rust/api/types.dart';
-import 'package:open_tv/src/rust/frb_generated.dart';
+import 'package:open_tv/tv_home.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await RustLib.init();
-  final _hasSources = await hasSources();
-  final settings = await getSettings();
+  final hasSources = await Sql.hasSources();
+  final settings = await SettingsService.getSettings();
   final hasTouchScreen = await Utils.hasTouchScreen();
+  final isTV = await DeviceDetector.isTV();
   runApp(
     MyApp(
-      skipSetup: _hasSources,
+      skipSetup: hasSources,
       settings: settings,
       hasTouchScreen: hasTouchScreen,
+      isTV: isTV,
     ),
   );
 }
@@ -26,17 +34,48 @@ class MyApp extends StatelessWidget {
   final bool skipSetup;
   final Settings settings;
   final bool hasTouchScreen;
+  final bool isTV;
+  static final GlobalKey<NavigatorState> navigatorKey =
+      GlobalKey<NavigatorState>();
+
   const MyApp({
     super.key,
     required this.skipSetup,
     required this.settings,
     required this.hasTouchScreen,
+    required this.isTV,
   });
+
+  bool get _isEditingText {
+    final focus = FocusManager.instance.primaryFocus;
+    return focus?.context?.findAncestorWidgetOfExactType<EditableText>() !=
+        null;
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Fred TV',
+      navigatorKey: navigatorKey,
+      builder: (context, child) {
+        return CallbackShortcuts(
+          bindings: {
+            CustomShortcut(
+              const SingleActivator(LogicalKeyboardKey.escape),
+            ): () {
+              if (_isEditingText) return;
+              navigatorKey.currentState?.maybePop();
+            },
+            CustomShortcut(
+              const SingleActivator(LogicalKeyboardKey.backspace),
+            ): () {
+              if (_isEditingText) return;
+              navigatorKey.currentState?.maybePop();
+            },
+          },
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
       theme: ThemeData(
         brightness: Brightness.dark,
         colorScheme: ColorScheme.fromSeed(
@@ -62,18 +101,17 @@ class MyApp extends StatelessWidget {
       ),
       themeMode: ThemeMode.dark,
       debugShowCheckedModeBanner: false,
-      home: skipSetup
+      home:
+          settings.forceTVMode ||
+              isTV ||
+              (!hasTouchScreen && (Platform.isAndroid || Platform.isIOS))
+          ? TvHome()
+          : skipSetup
           ? Home(
               firstLaunch: true,
-              refresh: settings.refreshOnStart ?? false,
+              refresh: settings.refreshOnStart,
               home: HomeManager(
-                filters: Filters(
-                  viewType: settings.defaultView,
-                  sourceIds: null,
-                  page: null,
-                  useKeywords: null,
-                  sort: null,
-                ),
+                filters: Filters(viewType: settings.defaultView),
               ),
             )
           : const Setup(),

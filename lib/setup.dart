@@ -5,15 +5,17 @@ import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:loader_overlay/loader_overlay.dart';
+import 'package:open_tv/backend/sql.dart';
+import 'package:open_tv/backend/utils.dart';
 import 'package:open_tv/correction_modal.dart';
 import 'package:open_tv/home.dart';
+import 'package:open_tv/models/filters.dart';
 import 'package:open_tv/models/home_manager.dart';
 import 'package:open_tv/models/source.dart';
 import 'package:open_tv/models/source_type.dart';
 import 'package:open_tv/models/steps.dart';
 import 'package:open_tv/models/view_type.dart';
 import 'package:open_tv/error.dart';
-import 'package:open_tv/src/rust/frb_generated.dart';
 
 class Setup extends StatefulWidget {
   final bool showAppBar;
@@ -53,7 +55,7 @@ class _SetupState extends State<Setup> {
   Future<void> finish() async {
     var result = await Error.tryAsync(
       () async {
-        await .processSource(
+        await Utils.processSource(
           Source(
             name: formValues[Steps.name]!,
             sourceType: selectedSourceType,
@@ -338,7 +340,6 @@ class _SetupState extends State<Setup> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
-              clipBehavior: Clip.antiAlias,
               elevation: 2,
               child: ListTile(
                 title: Text((SourceType.values[i]).label),
