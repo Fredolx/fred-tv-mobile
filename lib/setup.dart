@@ -47,29 +47,35 @@ class _SetupState extends State<Setup> {
     Steps.name: "",
     Steps.url: "",
     Steps.username: "",
-    Steps.password: ""
+    Steps.password: "",
   };
   final nextButtonFocusNode = FocusNode();
   Set<String> existingSourceNames = {};
 
   Future<void> finish() async {
-    var result = await Error.tryAsync(() async {
-      await Utils.processSource(
-        Source(
-          name: formValues[Steps.name]!,
-          sourceType: selectedSourceType,
-          url: selectedSourceType == SourceType.m3u
-              ? formValues[Steps.url]!
-              : await fixUrl(formValues[Steps.url]!),
-          username: selectedSourceType == SourceType.xtream
-              ? formValues[Steps.username]
-              : null,
-          password: selectedSourceType == SourceType.xtream
-              ? formValues[Steps.password]
-              : null,
-        ),
-      );
-    }, context, null, true, false);
+    var result = await Error.tryAsync(
+      () async {
+        await Utils.processSource(
+          Source(
+            name: formValues[Steps.name]!,
+            sourceType: selectedSourceType,
+            url: selectedSourceType == SourceType.m3u
+                ? formValues[Steps.url]!
+                : await fixUrl(formValues[Steps.url]!),
+            username: selectedSourceType == SourceType.xtream
+                ? formValues[Steps.username]
+                : null,
+            password: selectedSourceType == SourceType.xtream
+                ? formValues[Steps.password]
+                : null,
+          ),
+        );
+      },
+      context,
+      null,
+      true,
+      false,
+    );
     if (!result.success) {
       return;
     }
@@ -93,7 +99,9 @@ class _SetupState extends State<Setup> {
 
   Future showXtreamCorrectionModal() async {
     return await showDialog(
-        context: context, builder: (context) => CorrectionModal());
+      context: context,
+      builder: (context) => CorrectionModal(),
+    );
   }
 
   @override
@@ -178,135 +186,147 @@ class _SetupState extends State<Setup> {
 
   void navigateToHome() {
     Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-            builder: (_) => Home(
-                home: HomeManager(filters: Filters(viewType: ViewType.all)))),
-        (route) => false);
+      context,
+      MaterialPageRoute(
+        builder: (_) => Home(
+          home: HomeManager(filters: Filters(viewType: ViewType.all)),
+        ),
+      ),
+      (route) => false,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return PopScope(
-        canPop: step == Steps.welcome,
-        onPopInvokedWithResult: (didPop, result) {
-          if (!didPop) prevStep();
-        },
-        child: Scaffold(
-            appBar: widget.showAppBar ? AppBar() : null,
-            body: SafeArea(
-              child: LoaderOverlay(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 24.0, vertical: 16),
-                      child: TweenAnimationBuilder<double>(
-                        tween: Tween<double>(
-                          begin: 0,
-                          end: (step.index + 1) / Steps.values.length,
+      canPop: step == Steps.welcome,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) prevStep();
+      },
+      child: Scaffold(
+        appBar: widget.showAppBar ? AppBar() : null,
+        body: SafeArea(
+          child: LoaderOverlay(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24.0,
+                    vertical: 16,
+                  ),
+                  child: TweenAnimationBuilder<double>(
+                    tween: Tween<double>(
+                      begin: 0,
+                      end: (step.index + 1) / Steps.values.length,
+                    ),
+                    duration: const Duration(milliseconds: 400),
+                    curve: Curves.easeInOut,
+                    builder: (context, value, child) {
+                      return ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: LinearProgressIndicator(
+                          value: value,
+                          minHeight: 6,
                         ),
-                        duration: const Duration(milliseconds: 400),
-                        curve: Curves.easeInOut,
-                        builder: (context, value, child) {
-                          return ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: LinearProgressIndicator(
-                              value: value,
-                              minHeight: 6,
-                            ),
+                      );
+                    },
+                  ),
+                ),
+                Expanded(
+                  child: PageTransitionSwitcher(
+                    duration: const Duration(milliseconds: 400),
+                    reverse: !isForward,
+                    transitionBuilder:
+                        (child, primaryAnimation, secondaryAnimation) {
+                          return SharedAxisTransition(
+                            animation: primaryAnimation,
+                            secondaryAnimation: secondaryAnimation,
+                            transitionType: SharedAxisTransitionType.horizontal,
+                            child: child,
                           );
                         },
-                      ),
-                    ),
-                    Expanded(
-                      child: PageTransitionSwitcher(
-                          duration: const Duration(milliseconds: 400),
-                          reverse: !isForward,
-                          transitionBuilder:
-                              (child, primaryAnimation, secondaryAnimation) {
-                            return SharedAxisTransition(
-                              animation: primaryAnimation,
-                              secondaryAnimation: secondaryAnimation,
-                              transitionType:
-                                  SharedAxisTransitionType.horizontal,
-                              child: child,
-                            );
-                          },
-                          child: currentPage),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: FocusTraversalGroup(
-                          policy: OrderedTraversalPolicy(),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              AnimatedOpacity(
-                                opacity: step != Steps.welcome &&
-                                        step != Steps.finish
-                                    ? 1
-                                    : 0,
-                                duration: const Duration(milliseconds: 300),
-                                curve: Curves.easeInOut,
-                                child: IgnorePointer(
-                                    ignoring: step == Steps.welcome ||
-                                        step == Steps.finish,
-                                    child: FocusTraversalOrder(
-                                      order: NumericFocusOrder(2.0),
-                                      child: FilledButton.tonal(
-                                        onPressed: prevStep,
-                                        style: FilledButton.styleFrom(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 24, vertical: 16),
-                                        ),
-                                        child: const Text("Back",
-                                            style: TextStyle(fontSize: 18)),
-                                      ),
-                                    )),
-                              ),
-                              FocusTraversalOrder(
-                                  order: NumericFocusOrder(1.0),
-                                  child: FilledButton(
-                                    focusNode: nextButtonFocusNode,
-                                    onPressed:
-                                        !formPages.contains(step) || formValid
-                                            ? handleNext
-                                            : null,
-                                    style: FilledButton.styleFrom(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 24, vertical: 16),
-                                    ),
-                                    child: Text(
-                                      step == Steps.name &&
-                                              selectedSourceType ==
-                                                  SourceType.m3u
-                                          ? "Select file"
-                                          : step == Steps.finish
-                                              ? "Finish"
-                                              : "Next",
-                                      style: const TextStyle(
-                                        fontSize: 18,
-                                      ),
-                                    ),
-                                  )),
-                            ],
-                          )),
-                    ),
-                  ],
+                    child: currentPage,
+                  ),
                 ),
-              ),
-            )));
+                Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: FocusTraversalGroup(
+                    policy: OrderedTraversalPolicy(),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        AnimatedOpacity(
+                          opacity: step != Steps.welcome && step != Steps.finish
+                              ? 1
+                              : 0,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                          child: IgnorePointer(
+                            ignoring:
+                                step == Steps.welcome || step == Steps.finish,
+                            child: FocusTraversalOrder(
+                              order: NumericFocusOrder(2.0),
+                              child: FilledButton.tonal(
+                                onPressed: prevStep,
+                                style: FilledButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 24,
+                                    vertical: 16,
+                                  ),
+                                ),
+                                child: const Text(
+                                  "Back",
+                                  style: TextStyle(fontSize: 18),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        FocusTraversalOrder(
+                          order: NumericFocusOrder(1.0),
+                          child: FilledButton(
+                            focusNode: nextButtonFocusNode,
+                            onPressed: !formPages.contains(step) || formValid
+                                ? handleNext
+                                : null,
+                            style: FilledButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 16,
+                              ),
+                            ),
+                            child: Text(
+                              step == Steps.name &&
+                                      selectedSourceType == SourceType.m3u
+                                  ? "Select file"
+                                  : step == Steps.finish
+                                  ? "Finish"
+                                  : "Next",
+                              style: const TextStyle(fontSize: 18),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Widget get currentPage {
     switch (step) {
       case Steps.welcome:
         return getPage(
-            "Welcome to Fred TV",
-            "Let's set up your ${widget.showAppBar ? "new" : "first"} source",
-            null);
+          "Welcome to Fred TV",
+          "Let's set up your ${widget.showAppBar ? "new" : "first"} source",
+          null,
+        );
       case Steps.sourceType:
         return getPage(
           "What is your provider type?",
@@ -320,7 +340,6 @@ class _SetupState extends State<Setup> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
-              clipBehavior: Clip.antiAlias,
               elevation: 2,
               child: ListTile(
                 title: Text((SourceType.values[i]).label),
@@ -352,40 +371,42 @@ class _SetupState extends State<Setup> {
       case Steps.name:
         return getPage("What should we name this source?", null, [
           FormBuilder(
-              onChanged: () {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  setState(() {
-                    formValid =
-                        _formKeys[Steps.name]!.currentState?.isValid == true;
-                  });
+            onChanged: () {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                setState(() {
+                  formValid =
+                      _formKeys[Steps.name]!.currentState?.isValid == true;
                 });
-              },
-              initialValue: {Steps.name.name: formValues[Steps.name]},
-              key: _formKeys[Steps.name],
-              child: FormBuilderTextField(
-                autocorrect: false,
-                focusNode: focusNodes[Steps.name],
-                decoration: InputDecoration(
-                    labelText: "Name",
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.label_outline)),
-                textInputAction: TextInputAction.next,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                validator: FormBuilderValidators.compose([
-                  FormBuilderValidators.required(),
-                  (value) {
-                    var trimmed = value?.trim();
-                    if (trimmed == null || trimmed.isEmpty) {
-                      return null;
-                    }
-                    if (existingSourceNames.contains(trimmed)) {
-                      return "Name already exists";
-                    }
+              });
+            },
+            initialValue: {Steps.name.name: formValues[Steps.name]},
+            key: _formKeys[Steps.name],
+            child: FormBuilderTextField(
+              autocorrect: false,
+              focusNode: focusNodes[Steps.name],
+              decoration: InputDecoration(
+                labelText: "Name",
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.label_outline),
+              ),
+              textInputAction: TextInputAction.next,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              validator: FormBuilderValidators.compose([
+                FormBuilderValidators.required(),
+                (value) {
+                  var trimmed = value?.trim();
+                  if (trimmed == null || trimmed.isEmpty) {
                     return null;
                   }
-                ]),
-                name: 'name',
-              )),
+                  if (existingSourceNames.contains(trimmed)) {
+                    return "Name already exists";
+                  }
+                  return null;
+                },
+              ]),
+              name: 'name',
+            ),
+          ),
         ]);
       case Steps.url:
         return getPage("What is your provider's URL?", null, [
@@ -404,42 +425,44 @@ class _SetupState extends State<Setup> {
               autocorrect: false,
               focusNode: focusNodes[Steps.url],
               decoration: InputDecoration(
-                  labelText: "URL",
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.link)),
+                labelText: "URL",
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.link),
+              ),
               textInputAction: TextInputAction.next,
               autovalidateMode: AutovalidateMode.onUserInteraction,
               validator: FormBuilderValidators.required(),
               name: 'url',
             ),
-          )
+          ),
         ]);
       case Steps.username:
         return getPage("What is your username?", null, [
           FormBuilder(
-              onChanged: () {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  setState(() {
-                    formValid =
-                        _formKeys[Steps.username]!.currentState?.isValid ==
-                            true;
-                  });
+            onChanged: () {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                setState(() {
+                  formValid =
+                      _formKeys[Steps.username]!.currentState?.isValid == true;
                 });
-              },
-              initialValue: {Steps.username.name: formValues[Steps.username]},
-              key: _formKeys[Steps.username],
-              child: FormBuilderTextField(
-                autocorrect: false,
-                focusNode: focusNodes[Steps.username],
-                decoration: InputDecoration(
-                    labelText: "Username",
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.person)),
-                textInputAction: TextInputAction.next,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                validator: FormBuilderValidators.required(),
-                name: 'username',
-              ))
+              });
+            },
+            initialValue: {Steps.username.name: formValues[Steps.username]},
+            key: _formKeys[Steps.username],
+            child: FormBuilderTextField(
+              autocorrect: false,
+              focusNode: focusNodes[Steps.username],
+              decoration: InputDecoration(
+                labelText: "Username",
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.person),
+              ),
+              textInputAction: TextInputAction.next,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              validator: FormBuilderValidators.required(),
+              name: 'username',
+            ),
+          ),
         ]);
       case Steps.password:
         return getPage("What is your password?", null, [
@@ -458,15 +481,16 @@ class _SetupState extends State<Setup> {
               autocorrect: false,
               focusNode: focusNodes[Steps.password],
               decoration: InputDecoration(
-                  labelText: "Password",
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.password)),
+                labelText: "Password",
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.password),
+              ),
               textInputAction: TextInputAction.next,
               autovalidateMode: AutovalidateMode.onUserInteraction,
               validator: FormBuilderValidators.required(),
               name: 'password',
             ),
-          )
+          ),
         ]);
       case Steps.finish:
         return getPage("Done!", "You're all set 🎉", null);
@@ -474,7 +498,10 @@ class _SetupState extends State<Setup> {
   }
 
   Widget getPage(
-      final String title, final String? subtitle, final List<Widget>? content) {
+    final String title,
+    final String? subtitle,
+    final List<Widget>? content,
+  ) {
     return Center(
       key: ValueKey(title),
       child: SingleChildScrollView(
@@ -484,10 +511,7 @@ class _SetupState extends State<Setup> {
           children: [
             Text(
               title,
-              style: const TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             ),
             if (subtitle != null) ...[
               const SizedBox(height: 12),
@@ -497,10 +521,7 @@ class _SetupState extends State<Setup> {
                 textAlign: TextAlign.center,
               ),
             ],
-            if (content != null) ...[
-              const SizedBox(height: 24),
-              ...content,
-            ],
+            if (content != null) ...[const SizedBox(height: 24), ...content],
           ],
         ),
       ),

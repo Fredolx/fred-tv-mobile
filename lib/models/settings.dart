@@ -7,18 +7,21 @@ class Settings {
   bool showLivestreams;
   bool showMovies;
   bool showSeries;
-  Settings(
-      {this.defaultView = ViewType.all,
-      this.refreshOnStart = false,
-      this.showLivestreams = true,
-      this.showMovies = true,
-      this.showSeries = true});
+  bool forceTVMode;
+  Settings({
+    this.defaultView = ViewType.all,
+    this.refreshOnStart = false,
+    this.showLivestreams = true,
+    this.showMovies = true,
+    this.showSeries = true,
+    this.forceTVMode = false,
+  });
 
   List<MediaType> getMediaTypes() {
     return [
       if (showLivestreams) MediaType.livestream,
       if (showMovies) MediaType.movie,
-      if (showSeries) MediaType.serie
+      if (showSeries) MediaType.serie,
     ];
   }
 }
