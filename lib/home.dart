@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:open_tv/backend/settings_service.dart';
+import 'package:open_tv/backend/sql.dart';
+import 'package:open_tv/backend/utils.dart';
 import 'package:open_tv/bottom_nav.dart';
 import 'package:open_tv/channel_tile.dart';
 import 'package:open_tv/loading.dart';
@@ -19,13 +21,13 @@ class Home extends StatefulWidget {
   final HomeManager home;
   final bool refresh;
   final bool firstLaunch;
-  final bool autofocusBottomNav;
+  final bool hasTouchScreen;
   const Home({
     super.key,
     required this.home,
     this.refresh = false,
-    this.autofocusBottomNav = false,
     this.firstLaunch = false,
+    this.hasTouchScreen = true,
   });
   @override
   State<Home> createState() => _HomeState();
@@ -36,14 +38,12 @@ class _HomeState extends State<Home> {
   bool reachedMax = false;
   final int pageSize = 36;
   List<Channel> channels = [];
-  bool searchMode = false;
-  final FocusNode _focusNode = FocusNode();
   TextEditingController searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   bool isLoading = false;
   bool blockSettings = false;
   int? previousScroll;
-  final FocusNode _bottomNavFocusNode = FocusNode();
+  bool scrolledDeepEnough = false;
 
   @override
   void initState() {
@@ -91,21 +91,12 @@ class _HomeState extends State<Home> {
     );
   }
 
-  void toggleSearch() {
-    setState(() {
-      searchMode = !searchMode;
-    });
-    if (searchMode) {
-      WidgetsBinding.instance.addPostFrameCallback(
-        (_) => FocusScope.of(context).requestFocus(_focusNode),
-      );
-    } else {
-      FocusScope.of(context).unfocus();
-      widget.home.filters.query = null;
-      searchController.clear();
-      _scrollController.jumpTo(0);
-      load(false);
-    }
+  void scrollToTop() {
+    _scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+    );
   }
 
   Future<void> load([bool more = false]) async {
@@ -131,14 +122,18 @@ class _HomeState extends State<Home> {
 
   @override
   void dispose() {
-    _focusNode.dispose();
-    _bottomNavFocusNode.dispose();
     _scrollController.dispose();
     _debounce?.cancel();
     super.dispose();
   }
 
   void _scrollListener() async {
+    final bool shouldShow = _scrollController.offset > 200;
+
+    if (scrolledDeepEnough != shouldShow) {
+      setState(() => scrolledDeepEnough = shouldShow);
+    }
+
     if (_scrollController.position.pixels >=
             _scrollController.position.maxScrollExtent * 0.75 &&
         !isLoading &&
@@ -151,14 +146,6 @@ class _HomeState extends State<Home> {
         isLoading = false;
       });
     }
-  }
-
-  void handleBack() {
-    toggleSearch();
-  }
-
-  bool canPop() {
-    return !searchMode;
   }
 
   void clearSearch() {
@@ -177,7 +164,6 @@ class _HomeState extends State<Home> {
     Navigator.of(context).pushAndRemoveUntil(
       NoPushAnimationMaterialPageRoute(
         builder: (context) => Home(
-          autofocusBottomNav: true,
           home: HomeManager(
             filters: Filters(
               viewType: type,
@@ -213,173 +199,119 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    return CallbackShortcuts(
-      bindings: {
-        const SingleActivator(LogicalKeyboardKey.contextMenu): () {
-          debugPrint("test");
-          _bottomNavFocusNode.requestFocus();
-        },
-      },
-      child: PopScope(
-        canPop: canPop(),
-        onPopInvokedWithResult: (didPop, result) {
-          handleBack();
-        },
-        child: Scaffold(
-          appBar: widget.home.node != null
-              ? AppBar(
-                  title: Text(widget.home.node.toString()),
-                  leading: IconButton(
-                    icon: const Icon(Icons.arrow_back),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                )
-              : null,
-          body: Loading(
-            child: SafeArea(
-              child: Column(
-                children: [
-                  AnimatedSize(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                    child: searchMode
-                        ? Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .surfaceContainer, // Background color
-                              border: Border(
-                                bottom: BorderSide(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.surfaceBright,
-                                  width: 1,
-                                ),
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: TextField(
-                                    controller: searchController,
-                                    focusNode: _focusNode,
-                                    onChanged: (query) {
-                                      _debounce?.cancel();
-                                      _debounce = Timer(
-                                        const Duration(milliseconds: 500),
-                                        () {
-                                          widget.home.filters.query = query;
-                                          load(false);
-                                        },
-                                      );
-                                    },
-                                    decoration: InputDecoration(
-                                      hintText: "Search...",
-                                      prefixIcon: const Icon(Icons.search),
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                        borderSide: BorderSide.none,
-                                      ),
-                                      suffixIcon: IconButton(
-                                        onPressed: () {
-                                          widget.home.filters.useKeywords =
-                                              !widget.home.filters.useKeywords;
-                                          load(false);
-                                        },
-                                        icon: Icon(
-                                          widget.home.filters.useKeywords
-                                              ? Icons.label
-                                              : Icons.label_outline,
-                                        ),
-                                      ),
-                                      filled:
-                                          true, // Light background for contrast
-                                      contentPadding:
-                                          const EdgeInsets.symmetric(
-                                            vertical: 0,
-                                          ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                SizedBox(
-                                  width: 40,
-                                  child: IconButton(
-                                    onPressed: toggleSearch,
-                                    icon: const Icon(Icons.close),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        : const SizedBox.shrink(),
-                  ),
-                  Expanded(
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        const double maxContentWidth = 1600;
-                        final double constrainedWidth =
-                            constraints.maxWidth > maxContentWidth
-                            ? maxContentWidth
-                            : constraints.maxWidth;
-                        final double extraPadding =
-                            (constraints.maxWidth - constrainedWidth) / 2;
-                        final int crossAxisCount = (constrainedWidth / 290)
-                            .floor()
-                            .clamp(1, 4);
-                        return GridView.builder(
-                          shrinkWrap: true,
-                          controller: _scrollController,
-                          padding: EdgeInsets.fromLTRB(
-                            16 + extraPadding,
-                            15,
-                            16 + extraPadding,
-                            5,
+    return Scaffold(
+      appBar: widget.home.node != null
+          ? AppBar(
+              title: Text(widget.home.node.toString()),
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            )
+          : null,
+      body: Loading(
+        child: SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final double width = constraints.maxWidth;
+              final int crossAxisCount = (width / 350).floor().clamp(1, 3);
+              return CustomScrollView(
+                controller: _scrollController,
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Center(
+                        child: TextField(
+                          style: TextStyle(
+                            fontSize: Theme.of(
+                              context,
+                            ).textTheme.titleMedium?.fontSize!,
                           ),
-                          itemCount: channels.length,
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: crossAxisCount,
-                                mainAxisExtent: 90,
-                                mainAxisSpacing: 16,
-                                crossAxisSpacing: 8,
-                              ),
-                          itemBuilder: (context, index) {
-                            final channel = channels[index];
-                            return ChannelTile(
-                              channel: channel,
-                              parentContext: context,
-                              setNode: setNode,
-                              onFocusNavbar: () =>
-                                  _bottomNavFocusNode.requestFocus(),
+                          controller: searchController,
+                          onChanged: (query) {
+                            _debounce?.cancel();
+                            _debounce = Timer(
+                              const Duration(milliseconds: 500),
+                              () {
+                                widget.home.filters.query = query;
+                                load(false);
+                              },
                             );
                           },
+                          decoration: InputDecoration(
+                            hintText: "Search...",
+                            hintStyle: TextStyle(
+                              fontSize: Theme.of(
+                                context,
+                              ).textTheme.titleMedium?.fontSize!,
+                            ),
+                            prefixIcon: const Icon(Icons.search),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide.none,
+                            ),
+                            suffixIcon: IconButton(
+                              onPressed: () {
+                                widget.home.filters.useKeywords =
+                                    !widget.home.filters.useKeywords;
+                                load(false);
+                              },
+                              icon: Icon(
+                                widget.home.filters.useKeywords
+                                    ? Icons.label
+                                    : Icons.label_outline,
+                              ),
+                            ),
+                            filled: true,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SliverPadding(
+                    padding: EdgeInsets.fromLTRB(10, 5, 10, 10),
+                    sliver: SliverGrid(
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        final channel = channels[index];
+                        return ChannelTile(
+                          channel: channel,
+                          parentContext: context,
+                          setNode: setNode,
                         );
-                      },
+                      }, childCount: channels.length),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: crossAxisCount,
+                        mainAxisExtent: 100,
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: 12,
+                      ),
                     ),
                   ),
                 ],
-              ),
-            ),
+              );
+            },
           ),
-          bottomNavigationBar: BottomNav(
-            startingView: getStartingView(),
-            blockSettings: blockSettings,
-            updateViewMode: updateViewMode,
-            navFocusNode: _bottomNavFocusNode,
-            autofocus: widget.autofocusBottomNav,
-          ),
-          floatingActionButton: Visibility(
-            visible: !searchMode,
-            child: FloatingActionButton(
-              onPressed: toggleSearch,
-              tooltip: 'Search',
-              child: const Icon(Icons.search),
-            ),
+        ),
+      ),
+      bottomNavigationBar: widget.hasTouchScreen
+          ? BottomNav(
+              startingView: getStartingView(),
+              blockSettings: blockSettings,
+              updateViewMode: updateViewMode,
+            )
+          : null,
+      floatingActionButton: IgnorePointer(
+        ignoring: !scrolledDeepEnough,
+        child: AnimatedOpacity(
+          opacity: scrolledDeepEnough ? 1.0 : 0.0,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          child: FloatingActionButton(
+            onPressed: scrollToTop,
+            shape: const CircleBorder(),
+            tooltip: 'Scroll to Top',
+            child: const Icon(Icons.arrow_upward),
           ),
         ),
       ),
