@@ -130,21 +130,13 @@ class _ChannelTileState extends State<ChannelTile> {
                           memCacheHeight: 300,
                           memCacheWidth: 300,
                           fit: BoxFit.contain,
-                          errorWidget: (_, __, ___) => Icon(
+                          errorWidget: (_, __, ___) => const Icon(
                             Icons.tv,
-                            size: Theme.of(
-                              context,
-                            ).textTheme.headlineLarge?.fontSize,
+                            size: 45,
                             color: Colors.grey,
                           ),
                         )
-                      : Icon(
-                          Icons.tv,
-                          size: Theme.of(
-                            context,
-                          ).textTheme.headlineLarge?.fontSize,
-                          color: Colors.grey,
-                        ),
+                      : const Icon(Icons.tv, size: 45, color: Colors.grey),
                 ),
               ),
             ),
@@ -160,9 +152,9 @@ class _ChannelTileState extends State<ChannelTile> {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize:
-                          Theme.of(context).textTheme.titleMedium?.fontSize ??
-                          22,
+                      fontSize: Theme.of(
+                        context,
+                      ).textTheme.titleMedium?.fontSize!,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -173,11 +165,7 @@ class _ChannelTileState extends State<ChannelTile> {
               Padding(
                 padding: EdgeInsets.only(right: 8.0),
                 child: Center(
-                  child: Icon(
-                    Icons.star,
-                    size: Theme.of(context).textTheme.headlineSmall?.fontSize,
-                    color: Colors.amber,
-                  ),
+                  child: const Icon(Icons.star, size: 25, color: Colors.amber),
                 ),
               ),
           ],

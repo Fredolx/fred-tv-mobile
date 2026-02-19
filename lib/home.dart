@@ -224,11 +224,9 @@ class _HomeState extends State<Home> {
                       child: Center(
                         child: TextField(
                           style: TextStyle(
-                            fontSize:
-                                Theme.of(
-                                  context,
-                                ).textTheme.titleMedium?.fontSize ??
-                                40,
+                            fontSize: Theme.of(
+                              context,
+                            ).textTheme.titleMedium?.fontSize!,
                           ),
                           controller: searchController,
                           onChanged: (query) {
@@ -244,32 +242,16 @@ class _HomeState extends State<Home> {
                           decoration: InputDecoration(
                             hintText: "Search...",
                             hintStyle: TextStyle(
-                              fontSize:
-                                  Theme.of(
-                                    context,
-                                  ).textTheme.titleMedium?.fontSize ??
-                                  40,
+                              fontSize: Theme.of(
+                                context,
+                              ).textTheme.titleMedium?.fontSize!,
                             ),
-                            prefixIcon: Icon(
-                              Icons.search,
-                              size:
-                                  (Theme.of(
-                                        context,
-                                      ).textTheme.titleMedium?.fontSize ??
-                                      40) *
-                                  1.5,
-                            ),
+                            prefixIcon: const Icon(Icons.search),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide.none,
                             ),
                             suffixIcon: IconButton(
-                              iconSize:
-                                  (Theme.of(
-                                        context,
-                                      ).textTheme.titleMedium?.fontSize ??
-                                      40) *
-                                  1.5,
                               onPressed: () {
                                 widget.home.filters.useKeywords =
                                     !widget.home.filters.useKeywords;
