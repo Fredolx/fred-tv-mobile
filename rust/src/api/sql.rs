@@ -19,6 +19,7 @@ use rusqlite_migration::{Migrations, M};
 use std::{collections::HashMap, sync::LazyLock};
 
 const PAGE_SIZE: u8 = 36;
+const VERSION_STR: &str = "lastSeenVersion";
 pub const DB_NAME: &str = "db.sqlite";
 static CONN: LazyLock<Pool<SqliteConnectionManager>> = LazyLock::new(|| create_connection_pool());
 
@@ -1237,4 +1238,17 @@ pub(crate) fn has_sources() -> Result<bool> {
         )
         .optional()?
         .is_some())
+}
+
+pub(crate) fn update_last_seen_version(version: String) -> Result<()> {
+    let sql = get_conn()?;
+    sql.execute(
+        r#"
+            INSERT INTO Settings (key, value)
+            VALUES (?1, ?2)
+            ON CONFLICT(key) DO UPDATE SET value = ?2
+            "#,
+        params![VERSION_STR, version],
+    )?;
+    Ok(())
 }

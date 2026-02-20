@@ -42,7 +42,11 @@ pub fn drop_db() -> Result<()> {
 }
 
 pub async fn refresh_source(source: Source) -> Result<()> {
-    utils::refresh_source(source).await
+    utils::refresh_or_add_source(source, true).await
+}
+
+pub async fn add_source(source: Source) -> Result<()> {
+    utils::refresh_or_add_source(source, false).await
 }
 
 pub async fn refresh_all() -> Result<()> {
@@ -63,6 +67,26 @@ pub fn clear_history() -> Result<()> {
 
 pub fn has_sources() -> Result<bool> {
     sql::has_sources()
+}
+
+pub fn get_sources() -> Result<Vec<Source>> {
+    sql::get_sources()
+}
+
+pub fn source_name_exists(name: String) -> Result<bool> {
+    sql::source_name_exists(&name)
+}
+
+pub fn update_last_seen_version(version: String) -> Result<()> {
+    sql::update_last_seen_version(version)
+}
+
+pub fn set_source_enabled(value: bool, source_id: i64) -> Result<()> {
+    sql::set_source_enabled(value, source_id)
+}
+
+pub fn delete_source(id: i64) -> Result<()> {
+    sql::delete_source(id)
 }
 
 #[flutter_rust_bridge::frb(init)]

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:open_tv/models/view_type.dart';
 import 'package:open_tv/settings_view.dart';
 
 class BottomNav extends StatefulWidget {

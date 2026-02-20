@@ -4,6 +4,7 @@
 // ignore_for_file: unused_import, unused_element, unnecessary_import, duplicate_ignore, invalid_use_of_internal_member, annotate_overrides, non_constant_identifier_names, curly_braces_in_flow_control_structures, prefer_const_literals_to_create_immutables, unused_field
 
 import 'api/api.dart';
+import 'api/m3u.dart';
 import 'api/types.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -87,6 +88,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw);
+
+  @protected
+  List<Source> dco_decode_list_source(dynamic raw);
 
   @protected
   MediaType dco_decode_media_type(dynamic raw);
@@ -218,6 +222,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   Uint8List sse_decode_list_prim_u_8_strict(SseDeserializer deserializer);
+
+  @protected
+  List<Source> sse_decode_list_source(SseDeserializer deserializer);
 
   @protected
   MediaType sse_decode_media_type(SseDeserializer deserializer);
@@ -371,6 +378,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     Uint8List self,
     SseSerializer serializer,
   );
+
+  @protected
+  void sse_encode_list_source(List<Source> self, SseSerializer serializer);
 
   @protected
   void sse_encode_media_type(MediaType self, SseSerializer serializer);

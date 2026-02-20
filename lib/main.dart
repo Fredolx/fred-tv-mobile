@@ -10,9 +10,7 @@ import 'package:open_tv/models/device_detector.dart';
 import 'package:open_tv/models/home_manager.dart';
 import 'package:open_tv/setup.dart';
 import 'package:open_tv/src/rust/api/api.dart' as api;
-import 'package:open_tv/src/rust/api/sort_type.dart';
 import 'package:open_tv/src/rust/api/types.dart';
-import 'package:open_tv/src/rust/api/view_type.dart';
 import 'package:open_tv/src/rust/frb_generated.dart';
 import 'package:open_tv/tv_home.dart';
 

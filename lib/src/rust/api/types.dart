@@ -229,7 +229,7 @@ class Settings {
   final String? recordingPath;
   final String? mpvParams;
   final bool? useStreamCaching;
-  final ViewType? defaultView;
+  ViewType? defaultView;
   final int? volume;
   final bool? refreshOnStart;
   final int? restreamPort;
@@ -241,7 +241,7 @@ class Settings {
   final bool? enableGpu;
   final bool? forceTvMode;
 
-  const Settings({
+  Settings({
     this.recordingPath,
     this.mpvParams,
     this.useStreamCaching,
@@ -367,4 +367,4 @@ class Source {
 
 enum SourceType { m3U, m3ULink, xtream, custom }
 
-enum ViewType { all, favorites, categories, history, hidden }
+enum ViewType { all, favorites, categories, history, hidden, settings }

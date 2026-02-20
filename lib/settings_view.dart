@@ -1,22 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:open_tv/backend/settings_service.dart';
-import 'package:open_tv/backend/sql.dart';
-import 'package:open_tv/backend/utils.dart';
+import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'package:open_tv/bottom_nav.dart';
 import 'package:open_tv/confirm_delete.dart';
-import 'package:open_tv/models/filters.dart';
 import 'package:open_tv/select_dialog.dart';
 import 'package:open_tv/edit_dialog.dart';
 import 'package:open_tv/home.dart';
 import 'package:open_tv/loading.dart';
 import 'package:open_tv/models/home_manager.dart';
 import 'package:open_tv/models/id_data.dart';
-import 'package:open_tv/models/settings.dart';
-import 'package:open_tv/models/source.dart';
-import 'package:open_tv/models/source_type.dart';
-import 'package:open_tv/models/view_type.dart';
 import 'package:open_tv/error.dart';
 import 'package:open_tv/setup.dart';
+import 'package:open_tv/src/rust/api/api.dart' as api;
+import 'package:open_tv/src/rust/api/types.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SettingsView extends StatefulWidget {
@@ -39,10 +34,7 @@ class _SettingsState extends State<SettingsView> {
   }
 
   Future<void> initAsync() async {
-    var results = await Future.wait([
-      SettingsService.getSettings(),
-      Sql.getSources(),
-    ]);
+    var results = await Future.wait([api.getSettings(), api.getSources()]);
     setState(() {
       settings = results[0] as Settings;
       sources = results[1] as List<Source>;
@@ -56,7 +48,15 @@ class _SettingsState extends State<SettingsView> {
         context,
         PageRouteBuilder(
           pageBuilder: (_, __, ___) => Home(
-            home: HomeManager(filters: Filters(viewType: view)),
+            home: HomeManager(
+              filters: Filters(
+                viewType: view,
+                sourceIds: Int64List(0),
+                page: 1,
+                useKeywords: false,
+                sort: SortType.provider,
+              ),
+            ),
           ),
           transitionDuration: Duration.zero,
           reverseTransitionDuration: Duration.zero,
@@ -86,7 +86,7 @@ class _SettingsState extends State<SettingsView> {
           title: "Default view",
           data: ViewType.values
               .take(4)
-              .map((x) => IdData(id: x.index, data: viewTypeToString(x)))
+              .map((x) => IdData(id: x.index, data: x.name))
               .toList(),
           action: (view) {
             setState(() {
@@ -102,7 +102,10 @@ class _SettingsState extends State<SettingsView> {
 
   Future<void> toggleSource(Source source) async {
     await Error.tryAsyncNoLoading(
-      () async => await Sql.setSourceEnabled(!source.enabled, source.id!),
+      () async => await api.setSourceEnabled(
+        value: source.enabled,
+        sourceId: source.id!,
+      ),
       context,
     );
     await reloadSources();
@@ -128,19 +131,19 @@ class _SettingsState extends State<SettingsView> {
         onLongPress: () => toggleSource(source),
         contentPadding: const EdgeInsets.only(left: 20),
         title: Text(source.name),
-        subtitle: Text(source.sourceType.label),
+        subtitle: Text(source.sourceType.name),
         trailing: Row(
           mainAxisSize:
               MainAxisSize.min, // Ensures the row takes up minimal space
           children: [
             Offstage(
-              offstage: source.sourceType == SourceType.m3u,
+              offstage: source.sourceType == SourceType.m3U,
               child: IconButton(
                 icon: const Icon(Icons.refresh),
                 onPressed: () async {
                   await Error.tryAsync(
                     () async {
-                      await Utils.refreshSource(source);
+                      await api.refreshSource(source: source);
                     },
                     context,
                     "Source has been refreshed successfully",
@@ -149,7 +152,7 @@ class _SettingsState extends State<SettingsView> {
               ),
             ),
             Offstage(
-              offstage: source.sourceType == SourceType.m3u,
+              offstage: source.sourceType == SourceType.m3U,
               child: IconButton(
                 icon: const Icon(Icons.edit),
                 onPressed: () async => await showEditDialog(context, source),
@@ -174,7 +177,7 @@ class _SettingsState extends State<SettingsView> {
         name: source.name,
         confirm: () async {
           await Error.tryAsync(
-            () async => await Sql.deleteSource(source.id!),
+            () async => await api.deleteSource(id: source.id!),
             context,
             "Successfully deleted source",
           );
@@ -193,7 +196,7 @@ class _SettingsState extends State<SettingsView> {
 
   Future<void> reloadSources() async {
     await Error.tryAsyncNoLoading(
-      () async => sources = await Sql.getSources(),
+      () async => sources = await api.getSources(),
       context,
     );
     setState(() {
@@ -203,7 +206,7 @@ class _SettingsState extends State<SettingsView> {
 
   Future<void> updateSettings() async {
     await Error.tryAsyncNoLoading(
-      () async => await SettingsService.updateSettings(settings),
+      () async => await api.updateSettings(settings: settings),
       context,
     );
   }
@@ -245,7 +248,7 @@ class _SettingsState extends State<SettingsView> {
                   ),
                   ListTile(
                     title: const Text("Default view"),
-                    subtitle: Text(viewTypeToString(settings.defaultView)),
+                    subtitle: Text(settings.defaultView!.name),
                     onTap: () async => await _showDefaultViewDialog(context),
                   ),
                   ListTile(
@@ -254,10 +257,10 @@ class _SettingsState extends State<SettingsView> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Switch(
-                          value: settings.forceTVMode,
+                          value: settings.forceTvMode ?? false,
                           onChanged: (bool value) {
                             setState(() {
-                              settings.forceTVMode = value;
+                              settings.forceTvMode = value;
                             });
                             updateSettings();
                           },
@@ -351,7 +354,7 @@ class _SettingsState extends State<SettingsView> {
                         children: [
                           IconButton(
                             onPressed: () async => await Error.tryAsync(
-                              () async => await Utils.refreshAllSources(),
+                              () async => await refreshAll(),
                               context,
                               "Successfully refreshed all sources",
                             ),
