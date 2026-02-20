@@ -35,6 +35,9 @@ Future<void> dropDb() => RustLib.instance.api.crateApiApiDropDb();
 Future<void> refreshSource({required Source source}) =>
     RustLib.instance.api.crateApiApiRefreshSource(source: source);
 
+Future<void> addSource({required Source source}) =>
+    RustLib.instance.api.crateApiApiAddSource(source: source);
+
 Future<void> refreshAll() => RustLib.instance.api.crateApiApiRefreshAll();
 
 Future<String> getUserAgentFromSource({required Source source}) =>
@@ -46,3 +49,23 @@ Future<void> addLastWatched({required PlatformInt64 id}) =>
 Future<void> clearHistory() => RustLib.instance.api.crateApiApiClearHistory();
 
 Future<bool> hasSources() => RustLib.instance.api.crateApiApiHasSources();
+
+Future<List<Source>> getSources() =>
+    RustLib.instance.api.crateApiApiGetSources();
+
+Future<bool> sourceNameExists({required String name}) =>
+    RustLib.instance.api.crateApiApiSourceNameExists(name: name);
+
+Future<void> updateLastSeenVersion({required String version}) =>
+    RustLib.instance.api.crateApiApiUpdateLastSeenVersion(version: version);
+
+Future<void> setSourceEnabled({
+  required bool value,
+  required PlatformInt64 sourceId,
+}) => RustLib.instance.api.crateApiApiSetSourceEnabled(
+  value: value,
+  sourceId: sourceId,
+);
+
+Future<void> deleteSource({required PlatformInt64 id}) =>
+    RustLib.instance.api.crateApiApiDeleteSource(id: id);

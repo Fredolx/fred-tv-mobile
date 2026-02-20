@@ -67,19 +67,15 @@ pub struct Source {
 #[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
 #[frb(non_opaque)]
 pub struct Settings {
-    pub recording_path: Option<String>,
-    pub mpv_params: Option<String>,
+    #[frb(non_final)]
     pub use_stream_caching: Option<bool>,
+    #[frb(non_final)]
     pub default_view: Option<ViewType>,
-    pub volume: Option<u8>,
+    #[frb(non_final)]
     pub refresh_on_start: Option<bool>,
-    pub restream_port: Option<u16>,
-    pub enable_tray_icon: Option<bool>,
-    pub zoom: Option<u16>,
+    #[frb(non_final)]
     pub default_sort: Option<SortType>,
-    pub enable_hwdec: Option<bool>,
-    pub always_ask_save: Option<bool>,
-    pub enable_gpu: Option<bool>,
+    #[frb(non_final)]
     pub force_tv_mode: Option<bool>,
 }
 
@@ -242,6 +238,7 @@ pub enum ViewType {
     Categories = 2,
     History = 3,
     Hidden = 4,
+    Settings = 5,
 }
 
 impl From<u8> for ViewType {
@@ -252,6 +249,7 @@ impl From<u8> for ViewType {
             2 => ViewType::Categories,
             3 => ViewType::History,
             4 => ViewType::Hidden,
+            5 => ViewType::Settings,
             _ => ViewType::All, // Default fallback
         }
     }

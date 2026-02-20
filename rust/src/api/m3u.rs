@@ -46,7 +46,7 @@ struct M3UProcessing {
     line_count: usize,
 }
 
-pub(crate) fn read_m3u8(mut source: Source, wipe: bool) -> Result<()> {
+pub fn read_m3u8(mut source: Source, wipe: bool) -> Result<()> {
     let path = match source.source_type {
         SourceType::M3uLink => get_tmp_path(),
         _ => source.url.clone().context("no file path found")?,

@@ -6,18 +6,12 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:loader_overlay/loader_overlay.dart';
-import 'package:open_tv/backend/sql.dart';
-import 'package:open_tv/backend/utils.dart';
 import 'package:open_tv/correction_modal.dart';
 import 'package:open_tv/home.dart';
-import 'package:open_tv/models/filters.dart';
 import 'package:open_tv/models/home_manager.dart';
-import 'package:open_tv/models/source.dart';
-import 'package:open_tv/models/source_type.dart';
 import 'package:open_tv/models/steps.dart';
-import 'package:open_tv/models/view_type.dart';
 import 'package:open_tv/error.dart';
-import 'package:open_tv/src/rust/api/sql.dart';
+import 'package:open_tv/src/rust/api/api.dart';
 import 'package:open_tv/src/rust/api/types.dart';
 
 class Setup extends StatefulWidget {
@@ -58,8 +52,8 @@ class _SetupState extends State<Setup> {
   Future<void> finish() async {
     var result = await Error.tryAsync(
       () async {
-        await Utils.processSource(
-          Source(
+        await refreshSource(
+          source: Source(
             name: formValues[Steps.name]!,
             sourceType: selectedSourceType,
             url: selectedSourceType == SourceType.m3U
@@ -158,16 +152,17 @@ class _SetupState extends State<Setup> {
     }
     if (step == Steps.name) {
       var sourceName = formValues[step]!;
-      if (await sourceNameExists(sourceName)) {
+      if (await sourceNameExists(name: sourceName)) {
         existingSourceNames.add(sourceName);
         _formKeys[step]?.currentState?.validate();
         return;
       }
     }
-    if (step == Steps.name && selectedSourceType == SourceType.m3u) {
+    if (step == Steps.name && selectedSourceType == SourceType.m3U) {
       if (!await selectFile()) return;
       finish();
-    } else if ((selectedSourceType == SourceType.m3uUrl && step == Steps.url) ||
+    } else if ((selectedSourceType == SourceType.m3ULink &&
+            step == Steps.url) ||
         step == Steps.password) {
       finish();
     } else if (step == Steps.finish) {
@@ -310,7 +305,7 @@ class _SetupState extends State<Setup> {
                             ),
                             child: Text(
                               step == Steps.name &&
-                                      selectedSourceType == SourceType.m3u
+                                      selectedSourceType == SourceType.m3U
                                   ? "Select file"
                                   : step == Steps.finish
                                   ? "Finish"
@@ -354,7 +349,7 @@ class _SetupState extends State<Setup> {
               ),
               elevation: 2,
               child: ListTile(
-                title: Text((SourceType.values[i]).label),
+                title: Text((SourceType.values[i]).name),
                 onTap: () {
                   setState(() {
                     formValues[Steps.url] = "";

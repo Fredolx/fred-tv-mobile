@@ -16,12 +16,12 @@ const DEFAULT_USER_AGENT: &str = "Fred TV";
 static ILLEGAL_CHARS_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r#"[<>:"/\\|?*\x00-\x1F]"#).unwrap());
 
-pub(crate) async fn refresh_source(source: Source) -> Result<()> {
+pub(crate) async fn refresh_or_add_source(source: Source, refresh: bool) -> Result<()> {
     let id = source.id;
     match source.source_type {
-        SourceType::M3u => m3u::read_m3u8(source, true)?,
-        SourceType::M3uLink => m3u::get_m3u8_from_link(source, true).await?,
-        SourceType::Xtream => xtream::get_xtream(source, true).await?,
+        SourceType::M3u => m3u::read_m3u8(source, refresh)?,
+        SourceType::M3uLink => m3u::get_m3u8_from_link(source, refresh).await?,
+        SourceType::Xtream => xtream::get_xtream(source, refresh).await?,
         SourceType::Custom => {}
     }
     if let Some(id) = id {
@@ -33,7 +33,7 @@ pub(crate) async fn refresh_source(source: Source) -> Result<()> {
 pub(crate) async fn refresh_all() -> Result<()> {
     let sources = sql::get_sources()?;
     for source in sources {
-        refresh_source(source).await?;
+        refresh_or_add_source(source, true).await?;
     }
     Ok(())
 }
