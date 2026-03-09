@@ -34,14 +34,19 @@ class _ChannelTileState extends State<ChannelTile> {
   void initState() {
     super.initState();
     _focusNode.onKeyEvent = (node, event) {
-      if (event is KeyDownEvent &&
-          event.logicalKey == LogicalKeyboardKey.arrowRight) {
-        if (!FocusScope.of(
-          context,
-        ).focusInDirection(TraversalDirection.right)) {
-          widget.onFocusNavbar?.call();
+      if (event is KeyDownEvent) {
+        if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
+          if (!FocusScope.of(
+            context,
+          ).focusInDirection(TraversalDirection.right)) {
+            widget.onFocusNavbar?.call();
+          }
+          return KeyEventResult.handled;
         }
-        return KeyEventResult.handled;
+        if (event.logicalKey == LogicalKeyboardKey.mediaPlayPause) {
+          favorite();
+          return KeyEventResult.handled;
+        }
       }
       return KeyEventResult.ignored;
     };

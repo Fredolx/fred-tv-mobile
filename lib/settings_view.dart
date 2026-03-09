@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:open_tv/backend/settings_service.dart';
 import 'package:open_tv/backend/sql.dart';
 import 'package:open_tv/backend/utils.dart';
@@ -34,10 +35,50 @@ class _SettingsState extends State<SettingsView> {
   List<Map<String, dynamic>> categories = [];
   String _categorySearch = '';
   bool loading = true;
+  bool _searchReadOnly = true;
+  late final FocusNode _searchFocusNode;
   @override
   void initState() {
     super.initState();
+    _searchFocusNode = FocusNode(
+      onKeyEvent: (node, event) {
+        if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+          return KeyEventResult.ignored;
+        }
+        if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+          setState(() => _searchReadOnly = true);
+          node.nextFocus();
+          return KeyEventResult.handled;
+        }
+        if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+          setState(() => _searchReadOnly = true);
+          node.previousFocus();
+          return KeyEventResult.handled;
+        }
+        if (event.logicalKey == LogicalKeyboardKey.enter ||
+            event.logicalKey == LogicalKeyboardKey.select) {
+          if (_searchReadOnly) {
+            setState(() => _searchReadOnly = false);
+            return KeyEventResult.handled;
+          }
+          return KeyEventResult.ignored;
+        }
+        if (event.logicalKey == LogicalKeyboardKey.escape ||
+            event.logicalKey == LogicalKeyboardKey.goBack) {
+          setState(() => _searchReadOnly = true);
+          node.unfocus();
+          return KeyEventResult.handled;
+        }
+        return KeyEventResult.ignored;
+      },
+    );
     initAsync();
+  }
+
+  @override
+  void dispose() {
+    _searchFocusNode.dispose();
+    super.dispose();
   }
 
   Future<void> initAsync() async {
@@ -487,6 +528,8 @@ class _SettingsState extends State<SettingsView> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10),
                       child: TextField(
+                        focusNode: _searchFocusNode,
+                        readOnly: _searchReadOnly,
                         decoration: const InputDecoration(
                           hintText: 'Search categories...',
                           prefixIcon: Icon(Icons.search),
