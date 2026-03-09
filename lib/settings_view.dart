@@ -9,6 +9,7 @@ import 'package:open_tv/select_dialog.dart';
 import 'package:open_tv/edit_dialog.dart';
 import 'package:open_tv/home.dart';
 import 'package:open_tv/loading.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 import 'package:open_tv/models/home_manager.dart';
 import 'package:open_tv/models/id_data.dart';
 import 'package:open_tv/models/settings.dart';
@@ -140,7 +141,9 @@ class _SettingsState extends State<SettingsView> {
                 onPressed: () async {
                   await Error.tryAsync(
                     () async {
-                      await Utils.refreshSource(source);
+                      await Utils.refreshSource(source, (msg) {
+                        if (context.mounted) context.loaderOverlay.progress(msg);
+                      });
                     },
                     context,
                     "Source has been refreshed successfully",
@@ -351,7 +354,9 @@ class _SettingsState extends State<SettingsView> {
                         children: [
                           IconButton(
                             onPressed: () async => await Error.tryAsync(
-                              () async => await Utils.refreshAllSources(),
+                              () async => await Utils.refreshAllSources((msg) {
+                                if (context.mounted) context.loaderOverlay.progress(msg);
+                              }),
                               context,
                               "Successfully refreshed all sources",
                             ),
