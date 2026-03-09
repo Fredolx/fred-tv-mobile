@@ -101,20 +101,19 @@ class MyApp extends StatelessWidget {
       ),
       themeMode: ThemeMode.dark,
       debugShowCheckedModeBanner: false,
-      home:
-          settings.forceTVMode ||
+      home: !skipSetup
+          ? const Setup()
+          : settings.forceTVMode ||
               isTV ||
               (!hasTouchScreen && (Platform.isAndroid || Platform.isIOS))
           ? TvHome()
-          : skipSetup
-          ? Home(
+          : Home(
               firstLaunch: true,
               refresh: settings.refreshOnStart,
               home: HomeManager(
                 filters: Filters(viewType: settings.defaultView),
               ),
-            )
-          : const Setup(),
+            ),
     );
   }
 }
