@@ -31,6 +31,8 @@ class SettingsView extends StatefulWidget {
 class _SettingsState extends State<SettingsView> {
   Settings settings = Settings();
   List<Source> sources = [];
+  List<Map<String, dynamic>> categories = [];
+  String _categorySearch = '';
   bool loading = true;
   @override
   void initState() {
@@ -42,10 +44,12 @@ class _SettingsState extends State<SettingsView> {
     var results = await Future.wait([
       SettingsService.getSettings(),
       Sql.getSources(),
+      Sql.getGroups(),
     ]);
     setState(() {
       settings = results[0] as Settings;
       sources = results[1] as List<Source>;
+      categories = results[2] as List<Map<String, dynamic>>;
       loading = false;
     });
   }
@@ -187,6 +191,79 @@ class _SettingsState extends State<SettingsView> {
             );
           }
         },
+      ),
+    );
+  }
+
+  Future<void> toggleCategory(Map<String, dynamic> category) async {
+    await Error.tryAsyncNoLoading(
+      () async =>
+          await Sql.setGroupEnabled(!(category['enabled'] as bool), category['id'] as int),
+      context,
+    );
+    await reloadCategories();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content:
+            Text("Category ${!(category['enabled'] as bool) ? "enabled" : "disabled"}"),
+        duration: const Duration(milliseconds: 500),
+      ),
+    );
+  }
+
+  Future<void> setAllCategoriesEnabled(bool enabled) async {
+    await Error.tryAsyncNoLoading(
+      () async => await Sql.setAllGroupsEnabled(enabled),
+      context,
+    );
+    await reloadCategories();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("All categories ${enabled ? "enabled" : "disabled"}"),
+        duration: const Duration(milliseconds: 500),
+      ),
+    );
+  }
+
+  Future<void> reloadCategories() async {
+    await Error.tryAsyncNoLoading(
+      () async => categories = await Sql.getGroups(),
+      context,
+    );
+    setState(() {
+      categories;
+    });
+  }
+
+  List<Map<String, dynamic>> get filteredCategories {
+    if (_categorySearch.isEmpty) return categories;
+    final query = _categorySearch.toLowerCase();
+    return categories
+        .where((c) =>
+            (c['name'] as String).toLowerCase().contains(query) ||
+            (c['sourceName'] as String).toLowerCase().contains(query))
+        .toList();
+  }
+
+  Widget getCategory(Map<String, dynamic> category) {
+    final enabled = category['enabled'] as bool;
+    return Card(
+      margin: const EdgeInsets.symmetric(
+        horizontal: 10,
+        vertical: 5,
+      ),
+      elevation: 5,
+      child: ListTile(
+        leading: Checkbox(
+          value: enabled,
+          onChanged: (_) => toggleCategory(category),
+        ),
+        onTap: () => toggleCategory(category),
+        contentPadding: const EdgeInsets.only(left: 10),
+        title: Text(category['name'] as String),
+        subtitle: Text(category['sourceName'] as String),
       ),
     );
   }
@@ -373,6 +450,58 @@ class _SettingsState extends State<SettingsView> {
                   ),
                   const SizedBox(height: 10),
                   ...sources.map(getSource),
+                  if (categories.isNotEmpty) ...[
+                    const Divider(),
+                    const Padding(
+                      padding: EdgeInsets.only(left: 10),
+                      child: Text(
+                        'Categories',
+                        style: TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 4),
+                      child: Row(
+                        children: [
+                          Checkbox(
+                            value: categories.every((c) => c['enabled'] as bool),
+                            tristate: true,
+                            onChanged: (value) {
+                              final allEnabled = categories.every((c) => c['enabled'] as bool);
+                              setAllCategoriesEnabled(!allEnabled);
+                            },
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              final allEnabled = categories.every((c) => c['enabled'] as bool);
+                              setAllCategoriesEnabled(!allEnabled);
+                            },
+                            child: const Text('Select All'),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: TextField(
+                        decoration: const InputDecoration(
+                          hintText: 'Search categories...',
+                          prefixIcon: Icon(Icons.search),
+                          isDense: true,
+                        ),
+                        onChanged: (value) {
+                          setState(() {
+                            _categorySearch = value;
+                          });
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    ...filteredCategories.map(getCategory),
+                  ],
                 ],
               ),
             ),
