@@ -8,6 +8,9 @@ class Settings {
   bool showMovies;
   bool showSeries;
   bool forceTVMode;
+  String hwdec;
+  bool displayResample;
+  int bufferSeconds;
   Settings({
     this.defaultView = ViewType.all,
     this.refreshOnStart = false,
@@ -15,6 +18,9 @@ class Settings {
     this.showMovies = true,
     this.showSeries = true,
     this.forceTVMode = false,
+    this.hwdec = 'auto',
+    this.displayResample = true,
+    this.bufferSeconds = 60,
   });
 
   List<MediaType> getMediaTypes() {

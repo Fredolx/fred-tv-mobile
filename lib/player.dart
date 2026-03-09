@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:media_kit_video/media_kit_video.dart';
+import 'package:open_tv/backend/settings_service.dart';
 import 'package:open_tv/backend/sql.dart';
 import 'package:open_tv/models/channel.dart';
 import 'package:open_tv/models/id_data.dart';
@@ -20,8 +21,12 @@ class Player extends StatefulWidget {
 
 class _PlayerState extends State<Player> {
   late mk.Player player = mk.Player();
-  late mkvideo.VideoController videoController =
-      mkvideo.VideoController(player);
+  late mkvideo.VideoController videoController = mkvideo.VideoController(
+    player,
+    configuration: const mkvideo.VideoControllerConfiguration(
+      enableHardwareAcceleration: true,
+    ),
+  );
   late final GlobalKey<VideoState> key = GlobalKey<VideoState>();
   bool exiting = false;
   bool fill = false;
@@ -36,6 +41,7 @@ class _PlayerState extends State<Player> {
 
   Future<void> initAsync() async {
     player.setPlaylistMode(mk.PlaylistMode.none);
+    await _applyMpvProperties();
     final seconds = widget.channel.mediaType == MediaType.movie
         ? await Sql.getPosition(widget.channel.id!)
         : null;
@@ -62,6 +68,26 @@ class _PlayerState extends State<Player> {
         onDisconnect();
       }
     }));
+  }
+
+  Future<void> _applyMpvProperties() async {
+    try {
+      final settings = await SettingsService.getSettings();
+      final nativePlayer = player.platform as dynamic;
+      await nativePlayer.setProperty('hwdec', settings.hwdec);
+      if (settings.displayResample) {
+        await nativePlayer.setProperty('video-sync', 'display-resample');
+        await nativePlayer.setProperty('interpolation', 'yes');
+        await nativePlayer.setProperty('tscale', 'oversample');
+      }
+      await nativePlayer.setProperty('cache', 'yes');
+      await nativePlayer.setProperty(
+          'cache-secs', settings.bufferSeconds.toString());
+      await nativePlayer.setProperty('demuxer-max-bytes', '150MiB');
+      await nativePlayer.setProperty('demuxer-max-back-bytes', '50MiB');
+    } catch (e) {
+      debugPrint('Failed to set mpv properties: $e');
+    }
   }
 
   Future<void> _startPlayback(Duration? startPosition) async {
