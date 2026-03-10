@@ -85,6 +85,11 @@ class _SettingsState extends State<SettingsView> {
   static final List<String> _hwdecLabels = Platform.isAndroid
       ? const ['Auto', 'MediaCodec (direct)', 'MediaCodec (copy-back)', 'Software only']
       : const ['Auto', 'VideoToolbox (direct)', 'VideoToolbox (copy-back)', 'Software only'];
+  static const _videoOutputOptions = ['gpu', 'direct'];
+  static const _videoOutputLabels = [
+    'GPU rendered (default)',
+    'Direct (fast)',
+  ];
   static const _bufferOptions = [5, 10, 30, 60];
 
   String _hwdecLabel(String value) {
@@ -107,6 +112,36 @@ class _SettingsState extends State<SettingsView> {
           action: (idx) {
             setState(() {
               settings.hwdec = _hwdecOptions[idx];
+              updateSettings();
+            });
+            Navigator.of(context).pop();
+          },
+        );
+      },
+    );
+  }
+
+  String _videoOutputLabel(String value) {
+    final idx = _videoOutputOptions.indexOf(value);
+    return idx >= 0 ? _videoOutputLabels[idx] : value;
+  }
+
+  Future<void> _showVideoOutputDialog(BuildContext context) async {
+    showDialog(
+      barrierDismissible: true,
+      context: context,
+      builder: (BuildContext context) {
+        return SelectDialog(
+          title: "Video output",
+          data: _videoOutputOptions
+              .asMap()
+              .entries
+              .map((e) =>
+                  IdData(id: e.key, data: _videoOutputLabels[e.key]))
+              .toList(),
+          action: (idx) {
+            setState(() {
+              settings.videoOutput = _videoOutputOptions[idx];
               updateSettings();
             });
             Navigator.of(context).pop();
@@ -404,24 +439,10 @@ class _SettingsState extends State<SettingsView> {
                     onTap: () async => await _showHwdecDialog(context),
                   ),
                   ListTile(
-                    title: const Text("Smooth playback"),
-                    subtitle: const Text(
-                      "Sync video to display refresh rate",
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Switch(
-                          value: settings.displayResample,
-                          onChanged: (bool value) {
-                            setState(() {
-                              settings.displayResample = value;
-                            });
-                            updateSettings();
-                          },
-                        ),
-                      ],
-                    ),
+                    title: const Text("Video output"),
+                    subtitle: Text(_videoOutputLabel(settings.videoOutput)),
+                    onTap: () async =>
+                        await _showVideoOutputDialog(context),
                   ),
                   ListTile(
                     title: const Text("Buffer size"),

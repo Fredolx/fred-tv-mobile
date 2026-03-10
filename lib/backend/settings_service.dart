@@ -13,7 +13,7 @@ const showSeries = "showSeries";
 const lastSeenVersion = "lastSeenVersion";
 const forceTvMode = "forceTVMode";
 const hwdecKey = "hwdec";
-const displayResampleKey = "displayResample";
+const videoOutputKey = "videoOutput";
 const bufferSecondsKey = "bufferSeconds";
 
 class SettingsService {
@@ -48,9 +48,9 @@ class SettingsService {
     if (hwdecVal != null) {
       settings.hwdec = hwdecVal;
     }
-    var resample = settingsMap[displayResampleKey];
-    if (resample != null) {
-      settings.displayResample = int.parse(resample) == 1;
+    var videoOut = settingsMap[videoOutputKey];
+    if (videoOut != null) {
+      settings.videoOutput = videoOut;
     }
     var buffer = settingsMap[bufferSecondsKey];
     if (buffer != null) {
@@ -69,8 +69,7 @@ class SettingsService {
     settingsMap[showSeries] = (settings.showSeries ? 1 : 0).toString();
     settingsMap[forceTvMode] = (settings.forceTVMode ? 1 : 0).toString();
     settingsMap[hwdecKey] = settings.hwdec;
-    settingsMap[displayResampleKey] =
-        (settings.displayResample ? 1 : 0).toString();
+    settingsMap[videoOutputKey] = settings.videoOutput;
     settingsMap[bufferSecondsKey] = settings.bufferSeconds.toString();
     await Sql.updateSettings(settingsMap);
   }

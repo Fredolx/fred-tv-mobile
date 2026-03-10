@@ -9,7 +9,7 @@ class Settings {
   bool showSeries;
   bool forceTVMode;
   String hwdec;
-  bool displayResample;
+  String videoOutput;
   int bufferSeconds;
   Settings({
     this.defaultView = ViewType.all,
@@ -19,7 +19,7 @@ class Settings {
     this.showSeries = true,
     this.forceTVMode = false,
     this.hwdec = 'auto',
-    this.displayResample = true,
+    this.videoOutput = 'gpu',
     this.bufferSeconds = 60,
   });
 
