@@ -529,7 +529,7 @@ class _SettingsState extends State<SettingsView> {
                       padding: const EdgeInsets.symmetric(horizontal: 10),
                       child: TextField(
                         focusNode: _searchFocusNode,
-                        readOnly: _searchReadOnly,
+                        readOnly: !widget.showNavBar && _searchReadOnly,
                         decoration: const InputDecoration(
                           hintText: 'Search categories...',
                           prefixIcon: Icon(Icons.search),
