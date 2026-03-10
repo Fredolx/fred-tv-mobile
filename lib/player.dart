@@ -89,7 +89,7 @@ class _PlayerState extends State<Player> {
       await nativePlayer.setProperty('cache', 'yes');
       await nativePlayer.setProperty(
           'cache-secs', settings.bufferSeconds.toString());
-      await nativePlayer.setProperty('demuxer-max-bytes', '150MiB');
+      await nativePlayer.setProperty('demuxer-max-bytes', '512MiB');
       await nativePlayer.setProperty('demuxer-max-back-bytes', '50MiB');
     } catch (e) {
       debugPrint('Failed to set mpv properties: $e');
