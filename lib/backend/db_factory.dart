@@ -121,6 +121,15 @@ class DbFactory {
         await tx.execute('''
           CREATE INDEX index_groups_media_type ON groups(media_type);
         ''');
+      }))
+      ..add(SqliteMigration(4, (tx) async {
+        await tx.execute('''
+          ALTER TABLE groups
+          ADD COLUMN enabled integer DEFAULT 1;
+        ''');
+        await tx.execute('''
+          CREATE INDEX index_groups_enabled ON groups(enabled);
+        ''');
       }));
     await migrations.migrate(db);
     return db;
