@@ -101,19 +101,18 @@ class MyApp extends StatelessWidget {
       ),
       themeMode: ThemeMode.dark,
       debugShowCheckedModeBanner: false,
-      home:
-          settings.forceTVMode ||
-              isTV ||
-              (!hasTouchScreen && (Platform.isAndroid || Platform.isIOS))
-          ? TvHome()
-          : skipSetup
-          ? Home(
-              firstLaunch: true,
-              refresh: settings.refreshOnStart,
-              home: HomeManager(
-                filters: Filters(viewType: settings.defaultView),
-              ),
-            )
+      home: skipSetup
+          ? (settings.forceTVMode ||
+                    isTV ||
+                    (!hasTouchScreen && (Platform.isAndroid || Platform.isIOS))
+                ? TvHome()
+                : Home(
+                    firstLaunch: true,
+                    refresh: settings.refreshOnStart,
+                    home: HomeManager(
+                      filters: Filters(viewType: settings.defaultView),
+                    ),
+                  ))
           : const Setup(),
     );
   }
