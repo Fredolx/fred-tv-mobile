@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:open_tv/backend/settings_service.dart';
 import 'package:open_tv/backend/sql.dart';
 import 'package:open_tv/backend/xtream.dart';
 import 'package:open_tv/memory.dart';
@@ -98,10 +99,13 @@ class _ChannelTileState extends State<ChannelTile> {
         ),
       );
     } else {
+      var settings = await SettingsService.getSettings();
       Sql.addToHistory(widget.channel.id!);
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (_) => Player(channel: widget.channel)),
+        MaterialPageRoute(
+          builder: (_) => Player(channel: widget.channel, settings: settings),
+        ),
       );
     }
   }
