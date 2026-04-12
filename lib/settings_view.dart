@@ -266,6 +266,23 @@ class _SettingsState extends State<SettingsView> {
                     ),
                   ),
                   ListTile(
+                    title: const Text("Stream caching"),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Switch(
+                          value: settings.streamCaching,
+                          onChanged: (bool value) {
+                            setState(() {
+                              settings.streamCaching = value;
+                            });
+                            updateSettings();
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  ListTile(
                     title: const Text("Refresh sources on start"),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
