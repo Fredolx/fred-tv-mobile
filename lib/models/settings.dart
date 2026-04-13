@@ -5,7 +5,7 @@ class Settings {
   ViewType defaultView;
   bool refreshOnStart;
   bool showLivestreams;
-  bool streamCaching;
+  bool lowLatency;
   bool showMovies;
   bool showSeries;
   bool forceTVMode;
@@ -13,7 +13,7 @@ class Settings {
     this.defaultView = ViewType.all,
     this.refreshOnStart = false,
     this.showLivestreams = true,
-    this.streamCaching = true,
+    this.lowLatency = false,
     this.showMovies = true,
     this.showSeries = true,
     this.forceTVMode = false,

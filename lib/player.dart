@@ -21,12 +21,7 @@ class Player extends StatefulWidget {
 }
 
 class _PlayerState extends State<Player> {
-  final bufferSize = 32 * 1024 * 1024;
-  late mk.Player player = mk.Player(
-    configuration: mk.PlayerConfiguration(
-      bufferSize: widget.settings.streamCaching ? bufferSize : 0,
-    ),
-  );
+  late mk.Player player = mk.Player();
   late mkvideo.VideoController videoController = mkvideo.VideoController(
     player,
   );
@@ -44,36 +39,37 @@ class _PlayerState extends State<Player> {
 
   Future<void> initAsync() async {
     player.setPlaylistMode(mk.PlaylistMode.none);
+    await setMpvOptions();
     final seconds = widget.channel.mediaType == MediaType.movie
         ? await Sql.getPosition(widget.channel.id!)
         : null;
     await _startPlayback(seconds != null ? Duration(seconds: seconds) : null);
-
-    void onDisconnect() async {
-      if (!mounted || exiting) return;
-      if (widget.channel.mediaType == MediaType.livestream) {
-        debugPrint("Live stream dropped/error. Attempting to reconnect...");
-        await Future.delayed(const Duration(seconds: 1));
-        if (!mounted || exiting) return;
-        await _startPlayback(null);
-      }
-    }
-
     subscriptions.add(
       player.stream.completed.listen((completed) {
         if (completed) onDisconnect();
       }),
     );
+  }
 
-    subscriptions.add(
-      player.stream.error.listen((error) async {
-        debugPrint("Stream error: $error");
-        await Future.delayed(const Duration(seconds: 2));
-        if (!player.state.playing) {
-          onDisconnect();
+  Future<void> setMpvOptions() async {
+    if (player.platform is mk.NativePlayer) {
+      final nativePlayer = player.platform as mk.NativePlayer;
+      if (widget.channel.mediaType == MediaType.livestream) {
+        if (widget.settings.lowLatency) {
+          await nativePlayer.setProperty('profile', 'low-latency');
         }
-      }),
-    );
+      }
+    }
+  }
+
+  void onDisconnect() async {
+    if (!mounted || exiting) return;
+    if (widget.channel.mediaType == MediaType.livestream) {
+      debugPrint("Live stream dropped/error. Attempting to reconnect...");
+      await Future.delayed(const Duration(seconds: 1));
+      if (!mounted || exiting) return;
+      await _startPlayback(null);
+    }
   }
 
   Future<void> _startPlayback(Duration? startPosition) async {
