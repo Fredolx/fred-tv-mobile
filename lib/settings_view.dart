@@ -266,15 +266,15 @@ class _SettingsState extends State<SettingsView> {
                     ),
                   ),
                   ListTile(
-                    title: const Text("Stream caching"),
+                    title: const Text("Low latency livestreams"),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Switch(
-                          value: settings.streamCaching,
+                          value: settings.lowLatency,
                           onChanged: (bool value) {
                             setState(() {
-                              settings.streamCaching = value;
+                              settings.lowLatency = value;
                             });
                             updateSettings();
                           },
