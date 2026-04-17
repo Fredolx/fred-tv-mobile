@@ -21,7 +21,7 @@ class Player extends StatefulWidget {
 }
 
 class _PlayerState extends State<Player> {
-  late mk.Player player = mk.Player(configuration: mk.PlayerConfiguration());
+  late mk.Player player = mk.Player();
   late mkvideo.VideoController videoController = mkvideo.VideoController(
     player,
   );
@@ -81,7 +81,7 @@ class _PlayerState extends State<Player> {
         final headers = await Sql.getChannelHeaders(widget.channel.id!);
         await player.open(
           mk.Media(
-            "https://stream.fredol.dev/test/stream.m3u8",
+            widget.channel.url!,
             start: startPosition,
             httpHeaders: headers != null
                 ? {
