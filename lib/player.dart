@@ -21,13 +21,14 @@ class Player extends StatefulWidget {
 }
 
 class _PlayerState extends State<Player> {
-  late mk.Player player = mk.Player();
+  late mk.Player player = mk.Player(configuration: mk.PlayerConfiguration());
   late mkvideo.VideoController videoController = mkvideo.VideoController(
     player,
   );
   late final GlobalKey<VideoState> key = GlobalKey<VideoState>();
   bool exiting = false;
   bool fill = false;
+  bool retrying = false;
   List<StreamSubscription> subscriptions = [];
 
   @override
@@ -63,7 +64,7 @@ class _PlayerState extends State<Player> {
   }
 
   void onDisconnect() async {
-    if (!mounted || exiting) return;
+    if (!mounted || exiting || retrying) return;
     if (widget.channel.mediaType == MediaType.livestream) {
       debugPrint("Live stream dropped/error. Attempting to reconnect...");
       await Future.delayed(const Duration(seconds: 1));
@@ -73,13 +74,14 @@ class _PlayerState extends State<Player> {
   }
 
   Future<void> _startPlayback(Duration? startPosition) async {
+    retrying = true;
     while (true) {
       if (!mounted || exiting) return;
       try {
         final headers = await Sql.getChannelHeaders(widget.channel.id!);
         await player.open(
           mk.Media(
-            widget.channel.url!,
+            "https://stream.fredol.dev/test/stream.m3u8",
             start: startPosition,
             httpHeaders: headers != null
                 ? {
@@ -93,6 +95,9 @@ class _PlayerState extends State<Player> {
           ),
         );
         await key.currentState?.enterFullscreen();
+        await Future.delayed(const Duration(seconds: 10));
+        if (player.state.buffering) throw Exception("Player still buffering");
+        retrying = false;
         return;
       } catch (e) {
         debugPrint("Playback failed: $e. Retrying in 2s...");
