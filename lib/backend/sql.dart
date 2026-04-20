@@ -158,13 +158,17 @@ class Sql {
         ? query.split(" ").map((f) => "%$f%").toList()
         : ["%$query%"];
     var sqlQuery = '''
-        SELECT * FROM channels 
+        SELECT * FROM channels
         WHERE (${getKeywordsSql(keywords.length)})
         AND media_type IN (${generatePlaceholders(mediaTypes.length)})
         AND source_id IN (${generatePlaceholders(filters.sourceIds!.length)})
         AND url IS NOT NULL
     ''';
     List<Object> params = [];
+    if (filters.enabledGroupIds != null && filters.enabledGroupIds!.isNotEmpty) {
+      sqlQuery +=
+          "\nAND (group_id IS NULL OR group_id IN (${generatePlaceholders(filters.enabledGroupIds!.length)}))";
+    }
     if (filters.viewType == ViewType.favorites && filters.seriesId == null) {
       sqlQuery += "\nAND favorite = 1";
     }
@@ -181,6 +185,9 @@ class Sql {
     params.addAll(keywords);
     params.addAll(mediaTypes);
     params.addAll(filters.sourceIds!);
+    if (filters.enabledGroupIds != null && filters.enabledGroupIds!.isNotEmpty) {
+      params.addAll(filters.enabledGroupIds!);
+    }
     if (filters.seriesId != null) {
       params.add(filters.seriesId!);
     } else if (filters.groupId != null) {
@@ -224,10 +231,11 @@ class Sql {
         : ["%$query%"];
     var mediaTypes = filters.mediaTypes!.map((x) => x.index);
     var sqlQuery = '''
-        SELECT * FROM groups 
+        SELECT * FROM groups
         WHERE (${getKeywordsSql(keywords.length)})
         AND (media_type IS NULL OR media_type IN (${generatePlaceholders(mediaTypes.length)}))
         AND source_id IN (${generatePlaceholders(filters.sourceIds!.length)})
+        AND enabled = 1
         LIMIT ?, ?
     ''';
     List<Object> params = [];
@@ -375,10 +383,53 @@ class Sql {
   static Future<void> setSourceEnabled(bool enabled, int sourceId) async {
     var db = await DbFactory.db;
     await db.execute('''
-      UPDATE sources 
-      SET enabled = ? 
+      UPDATE sources
+      SET enabled = ?
       WHERE id = ?
     ''', [enabled, sourceId]);
+  }
+
+  static Future<void> setGroupEnabled(bool enabled, int groupId) async {
+    var db = await DbFactory.db;
+    await db.execute('''
+      UPDATE groups
+      SET enabled = ?
+      WHERE id = ?
+    ''', [enabled ? 1 : 0, groupId]);
+  }
+
+  static Future<void> setAllGroupsEnabled(bool enabled) async {
+    var db = await DbFactory.db;
+    await db.execute('''
+      UPDATE groups
+      SET enabled = ?
+    ''', [enabled ? 1 : 0]);
+  }
+
+  static Future<List<Map<String, dynamic>>> getGroups() async {
+    var db = await DbFactory.db;
+    var results = await db.getAll('''
+      SELECT g.id, g.name, g.enabled, s.name as source_name
+      FROM groups g
+      JOIN sources s ON g.source_id = s.id
+      ORDER BY s.name, g.name
+    ''');
+    return results
+        .map((row) => {
+              'id': row.columnAt(0) as int,
+              'name': row.columnAt(1) as String,
+              'enabled': row.columnAt(2) == 1,
+              'sourceName': row.columnAt(3) as String,
+            })
+        .toList();
+  }
+
+  static Future<List<int>> getEnabledGroupIds() async {
+    var db = await DbFactory.db;
+    var results = await db.getAll('''
+      SELECT id FROM groups WHERE enabled = 1
+    ''');
+    return results.map((row) => row.columnAt(0) as int).toList();
   }
 
   static Future setPosition(int channelId, int seconds) async {

@@ -61,6 +61,9 @@ class _HomeState extends State<Home> {
       widget.home.filters.mediaTypes = (await SettingsService.getSettings())
           .getMediaTypes();
     }
+    if (widget.home.filters.enabledGroupIds == null) {
+      widget.home.filters.enabledGroupIds = await Sql.getEnabledGroupIds();
+    }
     await load();
     final String? version = await SettingsService.shouldShowWhatsNew();
     if (widget.firstLaunch && version != null) {
@@ -169,6 +172,7 @@ class _HomeState extends State<Home> {
               viewType: type,
               mediaTypes: widget.home.filters.mediaTypes,
               sourceIds: widget.home.filters.sourceIds,
+              enabledGroupIds: widget.home.filters.enabledGroupIds,
             ),
           ),
         ),
@@ -184,6 +188,7 @@ class _HomeState extends State<Home> {
         viewType: ViewType.all,
         mediaTypes: widget.home.filters.mediaTypes,
         sourceIds: widget.home.filters.sourceIds,
+        enabledGroupIds: widget.home.filters.enabledGroupIds,
       ),
     );
     if (widget.home.filters.groupId != null) {
