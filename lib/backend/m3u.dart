@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:open_tv/backend/sql.dart';
-import 'package:open_tv/backend/utils.dart';
+import 'package:open_tv/backend/utils.dart' show Utils, ProgressCallback;
 import 'package:open_tv/models/channel.dart';
 import 'package:open_tv/models/channel_http_headers.dart';
 import 'package:open_tv/models/channel_preserve.dart';
@@ -20,9 +20,10 @@ final httpOriginRegex = RegExp(r'http-origin=(.+)');
 final httpReferrerRegex = RegExp(r'http-referrer=(.+)');
 final httpUserAgentRegex = RegExp(r'http-user-agent=(.+)');
 
-Future<void> processM3U(Source source, bool wipe, [String? path]) async {
+Future<void> processM3U(Source source, bool wipe, [String? path, ProgressCallback? onProgress]) async {
   path ??= source.url;
   List<ChannelPreserve>? preserve;
+  onProgress?.call("Parsing channels...");
   var file = File(
     path!,
   ).openRead().transform(utf8.decoder).transform(const LineSplitter());
@@ -37,6 +38,7 @@ Future<void> processM3U(Source source, bool wipe, [String? path]) async {
   String? channelLine;
   ChannelHttpHeaders? headers;
   var httpHeadersSet = false;
+  int channelCount = 0;
   await for (var line in file) {
     final lineUpper = line.toUpperCase();
     if (lineUpper.startsWith("#EXTINF")) {
@@ -49,6 +51,10 @@ Future<void> processM3U(Source source, bool wipe, [String? path]) async {
           httpHeadersSet ? headers : null,
           statements,
         );
+        channelCount++;
+        if (channelCount % 100 == 0) {
+          onProgress?.call("Parsing channels ($channelCount found)...");
+        }
       }
       channelLine = line;
       lastLine = null;
@@ -67,11 +73,13 @@ Future<void> processM3U(Source source, bool wipe, [String? path]) async {
   }
   if (channelLine != null && lastLine != null && lastLine.trim().isNotEmpty) {
     commitChannel(channelLine, lastLine, headers, statements);
+    channelCount++;
   }
   statements.add(Sql.updateGroups());
   if (preserve != null) {
     statements.add(Sql.restorePreserve(preserve));
   }
+  onProgress?.call("Saving to database ($channelCount channels)...");
   await Sql.commitWrite(statements);
 }
 
@@ -147,12 +155,13 @@ bool setChannelHeaders(String headerLine, ChannelHttpHeaders headers) {
   return false;
 }
 
-Future<void> processM3UUrl(Source source, bool wipe) async {
-  var path = await downloadM3U(source.url!);
-  await processM3U(source, wipe, path);
+Future<void> processM3UUrl(Source source, bool wipe, [ProgressCallback? onProgress]) async {
+  var path = await downloadM3U(source.url!, onProgress);
+  await processM3U(source, wipe, path, onProgress);
 }
 
-Future<String> downloadM3U(String urlStr) async {
+Future<String> downloadM3U(String urlStr, [ProgressCallback? onProgress]) async {
+  onProgress?.call("Downloading playlist...");
   final url = Uri.parse(urlStr);
   final client = http.Client();
   final request = http.Request('GET', url);

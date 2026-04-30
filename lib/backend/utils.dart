@@ -9,6 +9,8 @@ import 'package:open_tv/models/source_type.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
+typedef ProgressCallback = void Function(String message);
+
 class Utils {
   static String? _appDir;
   static Future<String> get appDir async {
@@ -23,29 +25,35 @@ class Utils {
     return join(tempDir, fileName);
   }
 
-  static Future<void> refreshSource(Source source) async {
+  static Future<void> refreshSource(Source source, [ProgressCallback? onProgress]) async {
     refreshedSeries.clear();
-    await processSource(source, true);
+    await processSource(source, true, onProgress);
   }
 
-  static Future<void> processSource(Source source, [bool wipe = false]) async {
+  static Future<void> processSource(Source source, [bool wipe = false, ProgressCallback? onProgress]) async {
     switch (source.sourceType) {
       case SourceType.m3u:
-        await processM3U(source, wipe);
+        await processM3U(source, wipe, null, onProgress);
         break;
       case SourceType.m3uUrl:
-        await processM3UUrl(source, wipe);
+        await processM3UUrl(source, wipe, onProgress);
         break;
       case SourceType.xtream:
-        await getXtream(source, wipe);
+        await getXtream(source, wipe, onProgress);
         break;
     }
   }
 
-  static Future<void> refreshAllSources() async {
+  static Future<void> refreshAllSources([ProgressCallback? onProgress]) async {
     var sources = await Sql.getSources();
-    for (var source in sources) {
-      await refreshSource(source);
+    for (var i = 0; i < sources.length; i++) {
+      var source = sources[i];
+      ProgressCallback? sourceProgress;
+      if (onProgress != null) {
+        var prefix = sources.length > 1 ? "Refreshing ${source.name} (${i + 1}/${sources.length})\n" : "";
+        sourceProgress = (msg) => onProgress("$prefix$msg");
+      }
+      await refreshSource(source, sourceProgress);
     }
   }
 

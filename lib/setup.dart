@@ -7,6 +7,7 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:open_tv/backend/sql.dart';
 import 'package:open_tv/backend/utils.dart';
+import 'package:open_tv/loading.dart' show progressOverlayBuilder;
 import 'package:open_tv/correction_modal.dart';
 import 'package:open_tv/home.dart';
 import 'package:open_tv/models/filters.dart';
@@ -69,6 +70,10 @@ class _SetupState extends State<Setup> {
                 ? formValues[Steps.password]
                 : null,
           ),
+          false,
+          (msg) {
+            if (context.mounted) context.loaderOverlay.progress(msg);
+          },
         );
       },
       context,
@@ -207,6 +212,7 @@ class _SetupState extends State<Setup> {
         appBar: widget.showAppBar ? AppBar() : null,
         body: SafeArea(
           child: LoaderOverlay(
+            overlayWidgetBuilder: progressOverlayBuilder,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
