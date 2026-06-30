@@ -56,10 +56,8 @@ pub struct Source {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub password: Option<String>,
     pub source_type: u8,
-    pub use_tvg_id: Option<bool>,
     pub enabled: bool,
     pub user_agent: Option<String>,
-    pub max_streams: Option<u8>,
     pub stream_user_agent: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub last_updated: Option<i64>,

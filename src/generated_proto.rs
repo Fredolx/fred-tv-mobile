@@ -84,5 +84,17 @@ pub struct FfiResult {
     pub success: bool,
     #[prost(string, optional, tag = "2")]
     pub error_message: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(oneof = "ffi_result::Data", tags = "3, 4")]
+    pub data: ::core::option::Option<ffi_result::Data>,
+}
+/// Nested message and enum types in `FFIResult`.
+pub mod ffi_result {
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Oneof)]
+    pub enum Data {
+        #[prost(message, tag = "3")]
+        Settings(super::Settings),
+        #[prost(message, tag = "4")]
+        Source(super::Source),
+    }
 }
 // @@protoc_insertion_point(module)

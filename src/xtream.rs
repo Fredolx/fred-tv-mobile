@@ -5,11 +5,9 @@ use crate::sql;
 use crate::sql::insert_season;
 use crate::types::Channel;
 use crate::types::ChannelPreserve;
-use crate::types::EPG;
 use crate::types::Season;
 use crate::types::Source;
 use crate::types::XtreamStatus;
-use crate::utils::get_local_time;
 use crate::utils::get_user_agent_from_source;
 use anyhow::anyhow;
 use anyhow::{Context, Result};
@@ -20,13 +18,13 @@ use chrono::Local;
 use chrono::NaiveDateTime;
 use futures::future::join_all;
 use reqwest::Client;
+use reqwest::Url;
 use rusqlite::Transaction;
 use serde::Deserialize;
 use serde::Serialize;
 use std::collections::HashMap;
 use std::str::FromStr;
 use tokio::join;
-use url::Url;
 
 const GET_LIVE_STREAMS: &str = "get_live_streams";
 const GET_VODS: &str = "get_vod_streams";
@@ -253,7 +251,7 @@ fn convert_xtream_live_to_channel(
     stream_type: u8,
     category_name: Option<String>,
 ) -> Result<Channel> {
-    let stream_id = get_serde_json_u64(&stream.stream_id);
+    let stream_id = get_serde_json_i64(&stream.stream_id);
     Ok(Channel {
         id: None,
         group: category_name.map(|x| x.trim().to_string()),
@@ -278,7 +276,7 @@ fn convert_xtream_live_to_channel(
         favorite: false,
         group_id: None,
         series_id: None,
-        tv_archive: get_serde_json_u64(&stream.tv_archive).map(|x| x == 1),
+        tv_archive: get_serde_json_i64(&stream.tv_archive).map(|x| x == 1),
         season_id: None,
         episode_num: None,
         hidden: Some(false),
@@ -342,10 +340,10 @@ pub async fn get_episodes(channel: Channel) -> Result<()> {
         .filter_map(|x| get_serde_json_i64(&x.season_number).map(|y| (y, x.clone())))
         .collect();
     episodes.sort_by(|a, b| {
-        get_serde_json_u64(&a.season)
-            .cmp(&get_serde_json_u64(&b.season))
+        get_serde_json_i64(&a.season)
+            .cmp(&get_serde_json_i64(&b.season))
             .then_with(|| {
-                get_serde_json_u64(&a.episode_num).cmp(&get_serde_json_u64(&b.episode_num))
+                get_serde_json_i64(&a.episode_num).cmp(&get_serde_json_i64(&b.episode_num))
             })
     });
     insert_episodes(&source, seasons, episodes, series_id, channel.image)?;
@@ -356,7 +354,7 @@ fn insert_episodes(
     source: &Source,
     seasons: HashMap<i64, XtreamSeason>,
     episodes: Vec<XtreamEpisode>,
-    series_id: u64,
+    series_id: i64,
     default_season_image: Option<String>,
 ) -> Result<()> {
     let mut seasons_db: HashMap<i64, i64> = HashMap::new();
@@ -390,7 +388,7 @@ fn insert_episode(
     tx: &Transaction,
     seasons_db: &mut HashMap<i64, i64>,
     seasons: &HashMap<i64, XtreamSeason>,
-    series_id: u64,
+    series_id: i64,
     default_season_image: Option<String>,
 ) -> Result<()> {
     let season_number = get_serde_json_i64(&episode.season).unwrap_or(NO_SEASON_NUMBER);
@@ -426,7 +424,7 @@ fn insert_episode(
 
 fn create_makeshift_season(
     number: i64,
-    series_id: u64,
+    series_id: i64,
     source_id: i64,
     image: Option<String>,
 ) -> Season {
@@ -447,15 +445,8 @@ fn get_serde_json_string(value: &serde_json::Value) -> Option<String> {
     value
         .as_str()
         .map(|cid| cid.to_string())
-        .or_else(|| value.as_u64().map(|cid| cid.to_string()))
+        .or_else(|| value.as_i64().map(|cid| cid.to_string()))
         .map(|cid| cid.trim().to_string())
-}
-
-fn get_serde_json_u64(value: &serde_json::Value) -> Option<u64> {
-    value
-        .as_str()
-        .and_then(|val| val.trim().parse::<u64>().ok())
-        .or_else(|| value.as_u64())
 }
 
 fn get_serde_json_i64(value: &serde_json::Value) -> Option<i64> {
@@ -465,7 +456,7 @@ fn get_serde_json_i64(value: &serde_json::Value) -> Option<i64> {
         .or_else(|| value.as_i64())
 }
 
-fn xtream_season_to_season(season: XtreamSeason, source_id: i64, series_id: u64) -> Result<Season> {
+fn xtream_season_to_season(season: XtreamSeason, source_id: i64, series_id: i64) -> Result<Season> {
     let season_number = get_serde_json_i64(&season.season_number).context("no season number")?;
     Ok(Season {
         season_number,
@@ -480,7 +471,7 @@ fn xtream_season_to_season(season: XtreamSeason, source_id: i64, series_id: u64)
 fn episode_to_channel(
     episode: XtreamEpisode,
     source: &Source,
-    series_id: u64,
+    series_id: i64,
     season_id: i64,
 ) -> Result<Channel> {
     Ok(Channel {
@@ -507,111 +498,4 @@ fn episode_to_channel(
         tv_archive: None,
         hidden: Some(false),
     })
-}
-
-pub async fn get_epg(channel: Channel) -> Result<Vec<EPG>> {
-    let mut source = sql::get_source_from_id(channel.source_id.context("no source id")?)?;
-    let mut url = build_xtream_url(&mut source)?;
-    let user_agent = get_user_agent_from_source(&source)?;
-    let stream_id = channel.stream_id.context("No stream id")?.to_string();
-    url.query_pairs_mut().append_pair("stream_id", &stream_id);
-    let epg: XtreamEPG = get_xtream_http_data(url, GET_EPG, &user_agent).await?;
-    let url = get_timeshift_url_base(&source)?;
-    let current_time = Local::now();
-    let mut otv_epgs = Vec::new();
-    for item in epg.epg_listings {
-        let item = xtream_epg_to_epg(item, &url, &stream_id)?;
-        if is_valid_epg(&item, &current_time)? {
-            otv_epgs.push(item);
-        }
-    }
-    Ok(otv_epgs)
-}
-
-fn is_valid_epg(epg: &EPG, now: &DateTime<Local>) -> Result<bool> {
-    let epg_start_local = crate::utils::get_local_time(epg.start_timestamp)?;
-    if epg_start_local < *now && !epg.has_archive && !epg.now_playing {
-        return Ok(false);
-    }
-    Ok(true)
-}
-
-fn xtream_epg_to_epg(epg: XtreamEPGItem, url: &Url, stream_id: &str) -> Result<EPG> {
-    let start_timestamp =
-        get_serde_json_i64(&epg.start_timestamp).context("no valid start timestamp")?;
-    Ok(EPG {
-        epg_id: get_serde_json_string(&epg.id).context("no epg id")?,
-        title: String::from_utf8(BASE64_STANDARD.decode(&epg.title)?)?,
-        description: String::from_utf8(BASE64_STANDARD.decode(&epg.description)?)?,
-        start_time: get_local_time(start_timestamp)?
-            .format("%B %d, %H:%M")
-            .to_string(),
-        end_time: get_local_time(
-            get_serde_json_i64(&epg.stop_timestamp).context("no valid end timestamp")?,
-        )?
-        .format("%B %d, %H:%M")
-        .to_string(),
-        start_timestamp,
-        timeshift_url: if epg.has_archive == 1 {
-            Some(get_timeshift_url(
-                url.clone(),
-                epg.start,
-                epg.end,
-                stream_id,
-            )?)
-        } else {
-            None
-        },
-        has_archive: epg.has_archive == 1,
-        now_playing: epg.now_playing == 1,
-    })
-}
-
-fn get_timeshift_url_base(source: &Source) -> Result<Url> {
-    let mut url = Url::parse(source.url_origin.as_ref().context("no origin")?)?;
-    url.path_segments_mut()
-        .map_err(|_| anyhow::anyhow!("Can't mutate url"))?
-        .extend(&["streaming", "timeshift.php"]);
-    url.query_pairs_mut()
-        .append_pair("username", source.username.as_ref().context("no username")?)
-        .append_pair("password", source.password.as_ref().context("no password")?);
-    Ok(url)
-}
-
-fn get_timeshift_url(mut url: Url, start: String, end: String, stream_id: &str) -> Result<String> {
-    let start = NaiveDateTime::parse_from_str(&start, "%Y-%m-%d %H:%M:%S")?;
-    let duration = NaiveDateTime::parse_from_str(&end, "%Y-%m-%d %H:%M:%S")?
-        .signed_duration_since(start)
-        .num_minutes()
-        .to_string();
-    let start = start.format("%Y-%m-%d:%H-%M").to_string();
-    url.query_pairs_mut()
-        .append_pair("stream", stream_id)
-        .append_pair("start", &start)
-        .append_pair("duration", &duration);
-    Ok(url.to_string())
-}
-
-async fn get_status(source: &mut Source) -> Result<(i64, XtreamStatus)> {
-    let url = build_xtream_url(source)?;
-    let user_agent = get_user_agent_from_source(&source)?;
-    let client = Client::builder().user_agent(user_agent).build()?;
-    let data = client.get(url).send().await?.json::<XtreamStatus>().await?;
-    Ok((source.id.context("no id")?, data))
-}
-
-pub async fn get_all_expiries() -> Result<HashMap<i64, i64>> {
-    let mut sources = sql::get_sources_by_type(source_type::XTREAM)?;
-    let to_await = sources.iter_mut().map(|source| get_status(source));
-    let results: Vec<std::result::Result<(i64, XtreamStatus), anyhow::Error>> =
-        join_all(to_await).await;
-    let statuses: HashMap<i64, i64> = results
-        .into_iter()
-        .flatten()
-        .filter_map(|(id, status)| {
-            let exp_date = get_serde_json_i64(&status.user_info.exp_date)?;
-            Some((id, exp_date))
-        })
-        .collect();
-    Ok(statuses)
 }

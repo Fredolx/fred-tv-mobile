@@ -44,7 +44,6 @@ struct M3UProcessing {
     last_non_empty_line: Option<String>,
     groups: HashMap<String, i64>,
     source_id: i64,
-    use_tvg_id: Option<bool>,
     line_count: usize,
 }
 
@@ -73,7 +72,6 @@ pub fn read_m3u8(mut source: Source, wipe: bool) -> Result<()> {
         groups: HashMap::new(),
         last_non_empty_line: None,
         source_id: source.id.context("no source id")?,
-        use_tvg_id: source.use_tvg_id,
         line_count: 0,
     };
     while let Some((c1, l1)) = lines.next() {
@@ -126,7 +124,6 @@ fn try_commit_channel(processing: &mut M3UProcessing, tx: &Transaction) {
             &mut processing.groups,
             processing.channel_headers.take(),
             processing.source_id,
-            processing.use_tvg_id,
             &tx,
         )
         .with_context(|| {
@@ -147,14 +144,12 @@ fn commit_channel(
     groups: &mut HashMap<String, i64>,
     headers: Option<ChannelHttpHeaders>,
     source_id: i64,
-    use_tvg_id: Option<bool>,
     tx: &Transaction,
 ) -> Result<()> {
     let mut channel = get_channel_from_lines(
         channel_line,
         last_line.context("missing last line")?,
         source_id,
-        use_tvg_id,
     )?;
     set_channel_group_id(groups, &mut channel, tx, &source_id).unwrap_or_else(|e| {
         log::log(format!(
@@ -237,7 +232,6 @@ fn get_channel_from_lines(
     first: String,
     mut second: String,
     source_id: i64,
-    use_tvg_id: Option<bool>,
 ) -> Result<Channel> {
     second = second.trim().to_string();
     if second.is_empty() {
@@ -257,11 +251,7 @@ fn get_channel_from_lines(
                     .captures(&first)
                     .and_then(extract_non_empty_capture)
             };
-            if let Some(true) = use_tvg_id {
-                return id().or(name_alt());
-            } else {
-                return name_alt().or(id());
-            }
+            return name_alt().or(id());
         })
         .context("Couldn't find name from Name or ID")?;
     let group = GROUP_REGEX
@@ -313,13 +303,13 @@ mod test_m3u {
     #[test]
     fn test_get_channel_from_lines() {
         get_channel_from_lines(r#"#EXTINF:-1 tvg-id="Amazing Channel" tvg-name="Amazing Channel" tvg-logo="http://myurl.local/logos/amazing/amazing-1.png" group-title="The Best Channels"#.to_string()
-       , r#"http://myurl.local/1234/1234/1234"#.to_string(), 0,Some(true)).unwrap();
+       , r#"http://myurl.local/1234/1234/1234"#.to_string(), 0).unwrap();
         get_channel_from_lines(r#"#EXTINF:-1 tvg-id="Amazing Channel" tvg-name="" tvg-logo="http://myurl.local/logos/amazing/amazing-1.png" group-title="The Best Channels"#.to_string()
-       , r#"http://myurl.local/1234/1234/1234"#.to_string(), 0, Some(true)).unwrap();
+       , r#"http://myurl.local/1234/1234/1234"#.to_string(), 0).unwrap();
         assert!(get_channel_from_lines(r#"#EXTINF:-1 tvg-id="" tvg-name="" tvg-logo="http://myurl.local/logos/amazing/amazing-1.png" group-title="The Best Channels"#.to_string()
-       , r#"http://myurl.local/1234/1234/1234"#.to_string(), 0, Some(true)).is_err());
+       , r#"http://myurl.local/1234/1234/1234"#.to_string(), 0).is_err());
         assert!(get_channel_from_lines(r#"#EXTINF:-1 tvg-id=" " tvg-name="" tvg-logo="http://myurl.local/logos/amazing/amazing-1.png" group-title="The Best Channels"#.to_string()
-       , r#"http://myurl.local/1234/1234/1234"#.to_string(), 0, Some(true)).is_err());
+       , r#"http://myurl.local/1234/1234/1234"#.to_string(), 0).is_err());
         assert!(get_channel_from_lines(r#"#EXTINF:-1 tvg-id="Id Of Channel" tvg-name="Name Of Channel" tvg-logo="http://myurl.local/amazing/stuff.png" group-title="|EU| FRANCE HEVC",Alt Name Of Channel"#.to_string(), "http://myurl.local/1111/1111.ts".to_string(), 0, Some(true)).unwrap().name == "Name Of Channel");
         assert!(get_channel_from_lines(r#"#EXTINF:-1 tvg-id="Id Of Channel" tvg-name="" tvg-logo="http://myurl.local/amazing/stuff.png" group-title="|EU| FRANCE HEVC",Alt Name Of Channel"#.to_string(), "http://myurl.local/1111/1111.ts".to_string(), 0, Some(true)).unwrap().name == "Id Of Channel");
         assert!(get_channel_from_lines(r#"#EXTINF:-1 tvg-id="Id Of Channel" tvg-name="" tvg-logo="http://myurl.local/amazing/stuff.png" group-title="|EU| FRANCE HEVC",Alt Name Of Channel"#.to_string(), "http://myurl.local/1111/1111.ts".to_string(), 0, Some(false)).unwrap().name == "Alt Name Of Channel");
