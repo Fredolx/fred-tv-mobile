@@ -1,0 +1,52 @@
+syntax = "proto3";
+package generated_proto;
+
+message Channel {
+  optional int64 id = 1;
+  string name = 2;
+  optional string url = 3;
+  optional string group = 4;
+  optional string image = 5;
+  uint32 media_type = 6;
+  optional int64 source_id = 7;
+  optional uint64 series_id = 8;
+  optional int64 group_id = 9;
+  bool favorite = 10;
+  optional uint64 stream_id = 11;
+  optional bool tv_archive = 12;
+  optional int64 season_id = 13;
+  optional int64 episode_num = 14;
+}
+
+message ChannelList {
+  repeated Channel channels = 1;
+}
+
+message Source {
+  optional int64 id = 1;
+  string name = 2;
+  optional string url = 3;
+  optional string url_origin = 4;
+  optional string username = 5;
+  optional string password = 6;
+  uint32 source_type = 7;         
+  bool enabled = 9;
+  optional string user_agent = 10;
+  optional string stream_user_agent = 12;
+  optional int64 last_updated = 13;
+}
+
+message Settings {
+  optional string mpv_params = 2;
+  optional bool use_stream_caching = 3;
+  optional uint32 default_view = 4;
+  optional uint32 volume = 5;
+  optional bool refresh_on_start = 6;
+  optional uint32 zoom = 9;
+  optional uint32 default_sort = 10;
+}
+
+message FFIResult {
+  bool success = 1;
+  optional string error_message = 2;
+} 
