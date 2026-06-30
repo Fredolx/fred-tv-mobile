@@ -49,4 +49,8 @@ message Settings {
 message FFIResult {
   bool success = 1;
   optional string error_message = 2;
+  oneof data {
+    Settings settings = 3;
+    Source source = 4;
+  }
 } 

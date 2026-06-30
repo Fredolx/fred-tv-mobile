@@ -537,7 +537,7 @@ fn generate_placeholders(size: usize) -> String {
         .join(",")
 }
 
-pub fn series_has_episodes(series_id: u32, source_id: i32) -> Result<bool> {
+pub fn series_has_episodes(series_id: i64, source_id: i64) -> Result<bool> {
     let sql = get_conn()?;
     let series_exists = sql
         .query_row(
