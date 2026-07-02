@@ -14,6 +14,8 @@ mod utils;
 mod view_type;
 mod xtream;
 
+use anyhow::Result;
+
 impl From<crate::generated_proto::Source> for crate::types::Source {
     fn from(source: crate::generated_proto::Source) -> Self {
         crate::types::Source {
@@ -30,6 +32,17 @@ impl From<crate::generated_proto::Source> for crate::types::Source {
             enabled: source.enabled,
         }
     }
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn test(task_id: u64, callback: FfiCallback) {
+    c::queue_blocking(task_id, callback, || test_impl().into_ffi());
+}
+
+fn test_impl() -> Result<generated_proto::ffi_result::Data> {
+    Ok(generated_proto::ffi_result::Data::Test(
+        generated_proto::Test { test: 2 + 2 },
+    ))
 }
 
 #[unsafe(no_mangle)]

@@ -32,7 +32,7 @@ tokio = { version = "1.52", features = ["full"] }
 build-android = "cargo ndk -t arm64-v8a -t armeabi-v7a -t x86_64 --platform 30 -o flutter/android/app/src/main/jniLibs build --release"
 # install cbindgen, cargo install cbindgen
 gen-header = "cbindgen --config ./template.toml --crate fred-tv-lib --output out/lib.h"
-# install protobuf, on windows: scoop install protobuf
+# install protobuf, on windows: scoop install protobuf. AND cargo install protoc-gen-prost
 gen-proto-rust = "protoc --prost_opt=flat_output_dir=true --prost_out=src -I ./protocol/ generated_proto.proto"
 # needed: dart pub global activate protoc_plugin
 gen-proto-dart = "protoc --dart_out=flutter/lib/generated -I ./protocol/ generated_proto.proto"

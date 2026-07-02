@@ -16,6 +16,7 @@ import 'package:open_tv/models/source_type.dart';
 import 'package:open_tv/models/steps.dart';
 import 'package:open_tv/models/view_type.dart';
 import 'package:open_tv/error.dart';
+import 'package:open_tv/native_bridge.dart';
 
 class Setup extends StatefulWidget {
   final bool showAppBar;
@@ -27,6 +28,7 @@ class Setup extends StatefulWidget {
 
 class _SetupState extends State<Setup> {
   Steps step = Steps.welcome;
+  int value = -1;
   SourceType selectedSourceType = SourceType.xtream;
   bool isForward = true;
   bool formValid = false;
@@ -107,7 +109,15 @@ class _SetupState extends State<Setup> {
   @override
   void initState() {
     nextButtonFocusNode.requestFocus();
+    getValue();
     super.initState();
+  }
+
+  Future<void> getValue() async {
+    var result = await NativeBridge.instance.test();
+    setState(() {
+      value = result.test.test;
+    });
   }
 
   @override
@@ -323,7 +333,7 @@ class _SetupState extends State<Setup> {
     switch (step) {
       case Steps.welcome:
         return getPage(
-          "Welcome to Fred TV",
+          "Welcome to Fred TV ${value}",
           "Let's set up your ${widget.showAppBar ? "new" : "first"} source",
           null,
         );
