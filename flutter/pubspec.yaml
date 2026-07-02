@@ -21,6 +21,15 @@ version: 1.4.1+11
 environment:
   sdk: ^3.10.7
 
+ffigen:
+  name: RustLibBindings
+  output: "lib/generated/bindings.dart"
+  compiler-opts:
+    - "-I/usr/lib/clang/22/include"
+  headers:
+    entry-points:
+      - '..\out\lib.h'
+
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
 # consider running `flutter pub upgrade --major-versions`. Alternatively,
@@ -54,6 +63,8 @@ dependencies:
   package_info_plus: ^9.0.0
   animations: ^2.1.0
   device_info_plus: ^12.3.0
+  ffi: ^2.2.0
+  protobuf: ^6.0.0
 
 dev_dependencies:
   flutter_test:
@@ -65,6 +76,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  ffigen: ^20.1.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
