@@ -78,13 +78,18 @@ pub struct Settings {
     #[prost(uint32, optional, tag = "10")]
     pub default_sort: ::core::option::Option<u32>,
 }
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct Test {
+    #[prost(uint32, tag = "1")]
+    pub test: u32,
+}
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct FfiResult {
     #[prost(bool, tag = "1")]
     pub success: bool,
     #[prost(string, optional, tag = "2")]
     pub error_message: ::core::option::Option<::prost::alloc::string::String>,
-    #[prost(oneof = "ffi_result::Data", tags = "3, 4")]
+    #[prost(oneof = "ffi_result::Data", tags = "3, 4, 5")]
     pub data: ::core::option::Option<ffi_result::Data>,
 }
 /// Nested message and enum types in `FFIResult`.
@@ -95,6 +100,8 @@ pub mod ffi_result {
         Settings(super::Settings),
         #[prost(message, tag = "4")]
         Source(super::Source),
+        #[prost(message, tag = "5")]
+        Test(super::Test),
     }
 }
 // @@protoc_insertion_point(module)

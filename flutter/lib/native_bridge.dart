@@ -16,8 +16,9 @@ class NativeBridge {
   final Map<int, Completer<pb.FFIResult>> _pendingRequests = {};
   late final NativeCallable<Void Function(Uint64, ffi.Bytes)> _globalCallback;
 
-  static NativeBridge get instance =>
-      _instance ??= NativeBridge._internal(ffi.RustLibBindings(_openDynamicLibrary()));
+  static NativeBridge get instance => _instance ??= NativeBridge._internal(
+    ffi.RustLibBindings(_openDynamicLibrary()),
+  );
 
   static DynamicLibrary _openDynamicLibrary() {
     if (Platform.isAndroid || Platform.isLinux) {
@@ -56,10 +57,7 @@ class NativeBridge {
   }
 
   Future<pb.FFIResult> _executeAsync(
-    void Function(
-      int taskId,
-      ffi.FfiCallback callback,
-    ) ffiAction,
+    void Function(int taskId, ffi.FfiCallback callback) ffiAction,
   ) {
     final taskId = _nextTaskId++;
     final completer = Completer<pb.FFIResult>();
@@ -70,11 +68,8 @@ class NativeBridge {
 
   Future<pb.FFIResult> _executeWithMsg<T extends $pb.GeneratedMessage>(
     T request,
-    void Function(
-      int taskId,
-      ffi.Bytes message,
-      ffi.FfiCallback callback,
-    ) ffiAction,
+    void Function(int taskId, ffi.Bytes message, ffi.FfiCallback callback)
+    ffiAction,
   ) {
     final pbBytes = request.writeToBuffer();
     final nativeBuffer = malloc.allocate<Uint8>(pbBytes.length);
@@ -111,6 +106,12 @@ class NativeBridge {
   Future<pb.FFIResult> refreshSource(pb.Source source) {
     return _executeWithMsg(source, (id, msg, cb) {
       _bindings.refresh_source(id, cb, msg);
+    });
+  }
+
+  Future<pb.FFIResult> test() {
+    return _executeAsync((id, cb) {
+      _bindings.test(id, cb);
     });
   }
 

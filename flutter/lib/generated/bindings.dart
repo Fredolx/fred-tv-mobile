@@ -1667,6 +1667,16 @@ class RustLibBindings {
       >('refresh_source');
   late final _refresh_source = _refresh_sourcePtr
       .asFunction<void Function(int, FfiCallback, Bytes)>();
+
+  void test(int task_id, FfiCallback callback) {
+    return _test(task_id, callback);
+  }
+
+  late final _testPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Uint64, FfiCallback)>>(
+        'test',
+      );
+  late final _test = _testPtr.asFunction<void Function(int, FfiCallback)>();
 }
 
 typedef ptrdiff_t = ffi.Long;

@@ -583,7 +583,61 @@ class Settings extends $pb.GeneratedMessage {
   void clearDefaultSort() => $_clearField(10);
 }
 
-enum FFIResult_Data { settings, source, notSet }
+class Test extends $pb.GeneratedMessage {
+  factory Test({
+    $core.int? test,
+  }) {
+    final result = create();
+    if (test != null) result.test = test;
+    return result;
+  }
+
+  Test._();
+
+  factory Test.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory Test.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'Test',
+      package:
+          const $pb.PackageName(_omitMessageNames ? '' : 'generated_proto'),
+      createEmptyInstance: create)
+    ..aI(1, _omitFieldNames ? '' : 'test', fieldType: $pb.PbFieldType.OU3)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  Test clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  Test copyWith(void Function(Test) updates) =>
+      super.copyWith((message) => updates(message as Test)) as Test;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static Test create() => Test._();
+  @$core.override
+  Test createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static Test getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Test>(create);
+  static Test? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get test => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set test($core.int value) => $_setUnsignedInt32(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasTest() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearTest() => $_clearField(1);
+}
+
+enum FFIResult_Data { settings, source, test, notSet }
 
 class FFIResult extends $pb.GeneratedMessage {
   factory FFIResult({
@@ -591,12 +645,14 @@ class FFIResult extends $pb.GeneratedMessage {
     $core.String? errorMessage,
     Settings? settings,
     Source? source,
+    Test? test,
   }) {
     final result = create();
     if (success != null) result.success = success;
     if (errorMessage != null) result.errorMessage = errorMessage;
     if (settings != null) result.settings = settings;
     if (source != null) result.source = source;
+    if (test != null) result.test = test;
     return result;
   }
 
@@ -612,6 +668,7 @@ class FFIResult extends $pb.GeneratedMessage {
   static const $core.Map<$core.int, FFIResult_Data> _FFIResult_DataByTag = {
     3: FFIResult_Data.settings,
     4: FFIResult_Data.source,
+    5: FFIResult_Data.test,
     0: FFIResult_Data.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
@@ -619,12 +676,13 @@ class FFIResult extends $pb.GeneratedMessage {
       package:
           const $pb.PackageName(_omitMessageNames ? '' : 'generated_proto'),
       createEmptyInstance: create)
-    ..oo(0, [3, 4])
+    ..oo(0, [3, 4, 5])
     ..aOB(1, _omitFieldNames ? '' : 'success')
     ..aOS(2, _omitFieldNames ? '' : 'errorMessage')
     ..aOM<Settings>(3, _omitFieldNames ? '' : 'settings',
         subBuilder: Settings.create)
     ..aOM<Source>(4, _omitFieldNames ? '' : 'source', subBuilder: Source.create)
+    ..aOM<Test>(5, _omitFieldNames ? '' : 'test', subBuilder: Test.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -647,9 +705,11 @@ class FFIResult extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(3)
   @$pb.TagNumber(4)
+  @$pb.TagNumber(5)
   FFIResult_Data whichData() => _FFIResult_DataByTag[$_whichOneof(0)]!;
   @$pb.TagNumber(3)
   @$pb.TagNumber(4)
+  @$pb.TagNumber(5)
   void clearData() => $_clearField($_whichOneof(0));
 
   @$pb.TagNumber(1)
@@ -691,6 +751,17 @@ class FFIResult extends $pb.GeneratedMessage {
   void clearSource() => $_clearField(4);
   @$pb.TagNumber(4)
   Source ensureSource() => $_ensure(3);
+
+  @$pb.TagNumber(5)
+  Test get test => $_getN(4);
+  @$pb.TagNumber(5)
+  set test(Test value) => $_setField(5, value);
+  @$pb.TagNumber(5)
+  $core.bool hasTest() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearTest() => $_clearField(5);
+  @$pb.TagNumber(5)
+  Test ensureTest() => $_ensure(4);
 }
 
 const $core.bool _omitFieldNames =

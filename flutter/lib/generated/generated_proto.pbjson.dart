@@ -309,6 +309,18 @@ final $typed_data.Uint8List settingsDescriptor = $convert.base64Decode(
     'QgkKB192b2x1bWVCEwoRX3JlZnJlc2hfb25fc3RhcnRCBwoFX3pvb21CDwoNX2RlZmF1bHRfc2'
     '9ydA==');
 
+@$core.Deprecated('Use testDescriptor instead')
+const Test$json = {
+  '1': 'Test',
+  '2': [
+    {'1': 'test', '3': 1, '4': 1, '5': 13, '10': 'test'},
+  ],
+};
+
+/// Descriptor for `Test`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List testDescriptor =
+    $convert.base64Decode('CgRUZXN0EhIKBHRlc3QYASABKA1SBHRlc3Q=');
+
 @$core.Deprecated('Use fFIResultDescriptor instead')
 const FFIResult$json = {
   '1': 'FFIResult',
@@ -341,6 +353,15 @@ const FFIResult$json = {
       '9': 0,
       '10': 'source'
     },
+    {
+      '1': 'test',
+      '3': 5,
+      '4': 1,
+      '5': 11,
+      '6': '.generated_proto.Test',
+      '9': 0,
+      '10': 'test'
+    },
   ],
   '8': [
     {'1': 'data'},
@@ -353,4 +374,5 @@ final $typed_data.Uint8List fFIResultDescriptor = $convert.base64Decode(
     'CglGRklSZXN1bHQSGAoHc3VjY2VzcxgBIAEoCFIHc3VjY2VzcxIoCg1lcnJvcl9tZXNzYWdlGA'
     'IgASgJSAFSDGVycm9yTWVzc2FnZYgBARI3CghzZXR0aW5ncxgDIAEoCzIZLmdlbmVyYXRlZF9w'
     'cm90by5TZXR0aW5nc0gAUghzZXR0aW5ncxIxCgZzb3VyY2UYBCABKAsyFy5nZW5lcmF0ZWRfcH'
-    'JvdG8uU291cmNlSABSBnNvdXJjZUIGCgRkYXRhQhAKDl9lcnJvcl9tZXNzYWdl');
+    'JvdG8uU291cmNlSABSBnNvdXJjZRIrCgR0ZXN0GAUgASgLMhUuZ2VuZXJhdGVkX3Byb3RvLlRl'
+    'c3RIAFIEdGVzdEIGCgRkYXRhQhAKDl9lcnJvcl9tZXNzYWdl');
