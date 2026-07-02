@@ -1,9 +1,9 @@
+use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
     sync::{Arc, atomic::AtomicBool},
     thread::JoinHandle,
 };
-use serde::{Deserialize, Serialize};
 
 #[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
 pub struct Channel {

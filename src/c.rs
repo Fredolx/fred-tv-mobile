@@ -3,7 +3,7 @@ use std::sync::LazyLock;
 use prost::Message;
 use tokio::runtime::Runtime;
 
-use crate::generated_proto::FfiResult;
+use crate::generated_proto::{self, FfiResult};
 
 use anyhow::Result;
 
@@ -35,7 +35,7 @@ pub trait ResultFfiExt {
     fn into_ffi(self) -> FfiResult;
 }
 
-impl<T, E> ResultFfiExt for Result<T, E>
+impl<E> ResultFfiExt for Result<(), E>
 where
     E: std::fmt::Debug,
 {
@@ -44,6 +44,29 @@ where
             success: self.is_ok(),
             error_message: self.err().map(|e| format!("{:#?}", e)),
             data: None,
+        }
+    }
+}
+
+impl crate::generated_proto::FfiResult {
+    pub fn from_error<E: std::fmt::Debug>(e: E) -> Self {
+        Self {
+            success: false,
+            error_message: Some(format!("{:#?}", e)),
+            data: None,
+        }
+    }
+}
+
+impl<E> ResultFfiExt for Result<generated_proto::ffi_result::Data, E>
+where
+    E: std::fmt::Debug,
+{
+    fn into_ffi(self) -> FfiResult {
+        FfiResult {
+            success: self.is_ok(),
+            error_message: self.as_ref().err().map(|f| format!("{:#?}", f)),
+            data: self.ok(),
         }
     }
 }
@@ -67,6 +90,47 @@ pub fn queue_async(
 ) {
     RUNTIME.spawn(async move {
         send_to_callback(task_id, callback, fut.await);
+    });
+}
+
+pub fn queue_async_with_message<M, Fut, R>(
+    task_id: u64,
+    callback: FfiCallback,
+    message: Bytes,
+    f: impl FnOnce(M) -> Fut + Send + 'static,
+) where
+    M: prost::Message + Default + 'static,
+    Fut: Future<Output = R> + Send + 'static,
+    R: ResultFfiExt,
+{
+    let decoded = decode(message).and_then(|bytes| {
+        M::decode(bytes.as_slice()).map_err(|e| anyhow::anyhow!("Failed to parse protobuf: {e}"))
+    });
+
+    queue_async(task_id, callback, async move {
+        match decoded {
+            Ok(proto_msg) => f(proto_msg).await.into_ffi(),
+            Err(e) => crate::generated_proto::FfiResult::from_error(e),
+        }
+    });
+}
+
+pub fn queue_blocking_with_message<M, R>(
+    task_id: u64,
+    callback: FfiCallback,
+    message: Bytes,
+    f: impl FnOnce(M) -> R + Send + 'static,
+) where
+    M: prost::Message + Default + 'static,
+    R: ResultFfiExt,
+{
+    let decoded = decode(message).and_then(|bytes| {
+        M::decode(bytes.as_slice()).map_err(|e| anyhow::anyhow!("Failed to parse protobuf: {e}"))
+    });
+
+    queue_blocking(task_id, callback, move || match decoded {
+        Ok(proto_msg) => f(proto_msg).into_ffi(),
+        Err(e) => crate::generated_proto::FfiResult::from_error(e),
     });
 }
 
