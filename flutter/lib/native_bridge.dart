@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:ffi';
+import 'dart:io' show Platform;
 import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
 import 'package:protobuf/protobuf.dart' as $pb;
@@ -8,12 +9,30 @@ import 'generated/generated_proto.pb.dart' as pb;
 import 'generated/bindings.dart' as ffi;
 
 class NativeBridge {
+  static NativeBridge? _instance;
+
   final ffi.RustLibBindings _bindings;
   int _nextTaskId = 0;
   final Map<int, Completer<pb.FFIResult>> _pendingRequests = {};
   late final NativeCallable<Void Function(Uint64, ffi.Bytes)> _globalCallback;
 
-  NativeBridge(this._bindings) {
+  static NativeBridge get instance =>
+      _instance ??= NativeBridge._internal(ffi.RustLibBindings(_openDynamicLibrary()));
+
+  static DynamicLibrary _openDynamicLibrary() {
+    if (Platform.isAndroid || Platform.isLinux) {
+      return DynamicLibrary.open("libfred_tv_lib.so");
+    }
+    if (Platform.isIOS || Platform.isMacOS) {
+      return DynamicLibrary.process();
+    }
+    if (Platform.isWindows) {
+      return DynamicLibrary.open("fred_tv_lib.dll");
+    }
+    return DynamicLibrary.open("libfred_tv_lib.so");
+  }
+
+  NativeBridge._internal(this._bindings) {
     _globalCallback = NativeCallable<Void Function(Uint64, ffi.Bytes)>.listener(
       (int taskId, ffi.Bytes response) {
         final completer = _pendingRequests.remove(taskId);
@@ -103,5 +122,6 @@ class NativeBridge {
       }
     }
     _pendingRequests.clear();
+    _instance = null;
   }
 }

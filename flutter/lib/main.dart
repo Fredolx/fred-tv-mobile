@@ -11,11 +11,13 @@ import 'package:open_tv/models/filters.dart';
 import 'package:open_tv/models/home_manager.dart';
 import 'package:open_tv/models/settings.dart';
 import 'package:open_tv/backend/utils.dart';
+import 'package:open_tv/native_bridge.dart';
 import 'package:open_tv/setup.dart';
 import 'package:open_tv/tv_home.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await NativeBridge.instance.initialize();
   final hasSources = await Sql.hasSources();
   final settings = await SettingsService.getSettings();
   final hasTouchScreen = await Utils.hasTouchScreen();
