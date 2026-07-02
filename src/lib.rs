@@ -14,8 +14,6 @@ mod utils;
 mod view_type;
 mod xtream;
 
-use anyhow::Result;
-
 impl From<crate::generated_proto::Source> for crate::types::Source {
     fn from(source: crate::generated_proto::Source) -> Self {
         crate::types::Source {
@@ -45,12 +43,10 @@ pub extern "C" fn process_source(task_id: u64, callback: FfiCallback, message: B
         task_id,
         callback,
         message,
-        |source: crate::generated_proto::Source| async move { process_source_impl(source).await },
+        |source: crate::generated_proto::Source| async move {
+            utils::process_source(crate::types::Source::from(source)).await
+        },
     );
-}
-
-async fn process_source_impl(source: crate::generated_proto::Source) -> Result<()> {
-    utils::process_source(crate::types::Source::from(source)).await
 }
 
 #[unsafe(no_mangle)]
@@ -59,12 +55,10 @@ pub extern "C" fn refresh_source(task_id: u64, callback: FfiCallback, message: B
         task_id,
         callback,
         message,
-        |source: crate::generated_proto::Source| async move { refresh_source_impl(source).await },
+        |source: crate::generated_proto::Source| async move {
+            utils::refresh_source(crate::types::Source::from(source)).await
+        },
     );
-}
-
-async fn refresh_source_impl(source: crate::generated_proto::Source) -> Result<()> {
-    utils::refresh_source(crate::types::Source::from(source)).await
 }
 
 #[unsafe(no_mangle)]
