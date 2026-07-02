@@ -3,9 +3,7 @@ use std::{collections::HashMap, sync::LazyLock};
 
 use crate::log::log;
 use crate::sort_type;
-use crate::types::{
-    ChannelPreserve, Season,
-};
+use crate::types::{ChannelPreserve, Season};
 use crate::{
     media_type, source_type,
     types::{Channel, ChannelHttpHeaders, Filters, Source},
@@ -45,9 +43,8 @@ fn get_and_create_sqlite_db_path() -> String {
 
 pub fn apply_migrations() -> Result<()> {
     let mut sql = get_conn()?;
-    let migrations = Migrations::new(vec![
-        M::up(
-            r#"
+    let migrations = Migrations::new(vec![M::up(
+        r#"
 CREATE TABLE "sources" (
   "id"                INTEGER PRIMARY KEY,
   "name"              varchar(100),
@@ -150,8 +147,7 @@ CREATE UNIQUE INDEX unique_seasons ON seasons(season_number, series_id, source_i
 
 ANALYZE;
 "#,
-        ),
-    ]);
+    )]);
     migrations.to_latest(&mut sql)?;
     Ok(())
 }
@@ -176,8 +172,8 @@ pub fn create_or_find_source_by_name(tx: &Transaction, source: &Source) -> Resul
         return Ok(id);
     }
     tx.execute(
-    "INSERT INTO sources (name, source_type, url, username, password, use_tvg_id, user_agent, max_streams, last_updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-    params![source.name, source.source_type.clone() as u8, source.url, source.username, source.password, source.use_tvg_id, source.user_agent, source.max_streams, chrono::Utc::now().timestamp()],
+    "INSERT INTO sources (name, source_type, url, username, password, user_agent, last_updated) VALUES (?, ?, ?, ?, ?, ?, ?)",
+    params![source.name, source.source_type.clone() as u8, source.url, source.username, source.password, source.user_agent, chrono::Utc::now().timestamp()],
     )?;
     Ok(tx.last_insert_rowid())
 }
@@ -837,9 +833,7 @@ fn row_to_source(row: &Row) -> std::result::Result<Source, rusqlite::Error> {
         source_type: row.get("source_type")?,
         url_origin: None,
         enabled: row.get("enabled")?,
-        use_tvg_id: row.get("use_tvg_id")?,
         user_agent: row.get("user_agent")?,
-        max_streams: row.get("max_streams")?,
         stream_user_agent: row.get("stream_user_agent")?,
         last_updated: row.get("last_updated")?,
     })
@@ -890,9 +884,7 @@ pub fn update_source(source: Source) -> Result<()> {
             source.username,
             source.password,
             source.url,
-            source.use_tvg_id,
             source.user_agent,
-            source.max_streams,
             source.stream_user_agent,
             source.id
         ],

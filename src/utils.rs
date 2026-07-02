@@ -10,11 +10,7 @@ use anyhow::{Context, Result, anyhow};
 use directories::{BaseDirs, ProjectDirs};
 use regex::Regex;
 use serde::Serialize;
-use std::{
-    fs::File,
-    path::PathBuf,
-    sync::LazyLock,
-};
+use std::{fs::File, path::PathBuf, sync::LazyLock};
 
 const MACOS_POTENTIAL_PATHS: [&str; 3] = [
     "/opt/local/bin",    // MacPorts
@@ -33,7 +29,6 @@ pub async fn refresh_source(source: Source) -> Result<()> {
         source_type::M3U => m3u::read_m3u8(source, true)?,
         source_type::M3U_LINK => m3u::get_m3u8_from_link(source, true).await?,
         source_type::XTREAM => xtream::get_xtream(source, true).await?,
-        source_type::CUSTOM => {}
         _ => return Err(anyhow!("invalid source_type")),
     }
     if let Some(id) = id {
@@ -48,6 +43,15 @@ pub async fn refresh_all() -> Result<()> {
         refresh_source(source).await?;
     }
     Ok(())
+}
+
+pub async fn process_source(source: Source) -> Result<()> {
+    match source.source_type {
+        source_type::M3U => m3u::read_m3u8(source, false),
+        source_type::M3U_LINK => m3u::get_m3u8_from_link(source, false).await,
+        source_type::XTREAM => xtream::get_xtream(source, false).await,
+        _ => Err(anyhow!("invalid source_type")),
+    }
 }
 
 fn get_filename(channel_name: String, url: String) -> Result<String> {

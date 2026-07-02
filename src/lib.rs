@@ -1,7 +1,4 @@
-use crate::{
-    c::{Bytes, FfiCallback, wrap_result_into_ffi_result},
-    generated_proto::{FfiResult, ffi_result::Data::Source},
-};
+use crate::c::{Bytes, FfiCallback, ResultFfiExt};
 
 mod c;
 mod generated_proto;
@@ -22,21 +19,23 @@ use prost::Message;
 
 #[unsafe(no_mangle)]
 pub extern "C" fn initialize(task_id: u64, callback: FfiCallback) {
-    c::queue_blocking(task_id, callback, || {
-        wrap_result_into_ffi_result(sql::apply_migrations())
-    })
+    c::queue_blocking(task_id, callback, || sql::apply_migrations().into_ffi())
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn get_xtream(task_id: u64, callback: FfiCallback, message: Bytes) {
+pub extern "C" fn process_source(task_id: u64, callback: FfiCallback, message: Bytes) {
     let decoded = c::decode(message);
     c::queue_async(task_id, callback, async move {
-       //let result = decoded.map(async |d| get_xtream_impl(d).await).or
-        wrap_result_into_ffi_result(result)
+        if decoded.is_err() {
+            return decoded.into_ffi();
+        }
+        process_source_impl(decoded.expect("not supposed to crash"))
+            .await
+            .into_ffi()
     });
 }
 
-async fn get_xtream_impl(decoded: Vec<u8>) -> Result<()> {
+async fn process_source_impl(decoded: Vec<u8>) -> Result<()> {
     let source = crate::generated_proto::Source::decode(decoded.as_slice())?;
     let source = crate::types::Source {
         id: source.id,
@@ -49,9 +48,12 @@ async fn get_xtream_impl(decoded: Vec<u8>) -> Result<()> {
         url_origin: source.url_origin,
         stream_user_agent: source.stream_user_agent,
         user_agent: source.user_agent,
-        enabled: source.enabled
+        enabled: source.enabled,
     };
-    xtream::get_xtream(source, false).await
+    utils::process_source(source).await
+}
+pub extern "C" fn refresh_source(task_id: u64, callback: FfiCallback, message: Bytes) {
+    let decoded = c::decode(message);
 }
 
 #[unsafe(no_mangle)]

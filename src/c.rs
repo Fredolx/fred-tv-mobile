@@ -31,14 +31,20 @@ impl Bytes {
     }
 }
 
-pub fn wrap_result_into_ffi_result<E, T>(result: Result<T, E>) -> FfiResult
+pub trait ResultFfiExt {
+    fn into_ffi(self) -> FfiResult;
+}
+
+impl<T, E> ResultFfiExt for Result<T, E>
 where
     E: std::fmt::Debug,
 {
-    FfiResult {
-        success: result.is_ok(),
-        error_message: result.err().map(|e| format!("{:#?}", e)),
-        data: None,
+    fn into_ffi(self) -> FfiResult {
+        FfiResult {
+            success: self.is_ok(),
+            error_message: self.err().map(|e| format!("{:#?}", e)),
+            data: None,
+        }
     }
 }
 
@@ -73,7 +79,7 @@ pub fn decode(bytes: Bytes) -> Result<Vec<u8>> {
         return Err(anyhow::anyhow!("Failed to decode, ptr is null"));
     }
     if bytes.len == 0 {
-        return Err(anyhow::anyhow!("Failed to decode, no data was sent"))
+        return Err(anyhow::anyhow!("Failed to decode, no data was sent"));
     }
     let raw_slice = unsafe { std::slice::from_raw_parts(bytes.ptr, bytes.len) };
     Ok(raw_slice.to_vec())
