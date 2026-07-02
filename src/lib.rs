@@ -14,8 +14,25 @@ mod utils;
 mod view_type;
 mod xtream;
 
-use anyhow::{Context, Result};
-use prost::Message;
+use anyhow::Result;
+
+impl From<crate::generated_proto::Source> for crate::types::Source {
+    fn from(source: crate::generated_proto::Source) -> Self {
+        crate::types::Source {
+            id: source.id,
+            name: source.name,
+            source_type: source.source_type as u8,
+            last_updated: source.last_updated,
+            username: source.username,
+            password: source.password,
+            url: source.url,
+            url_origin: source.url_origin,
+            stream_user_agent: source.stream_user_agent,
+            user_agent: source.user_agent,
+            enabled: source.enabled,
+        }
+    }
+}
 
 #[unsafe(no_mangle)]
 pub extern "C" fn initialize(task_id: u64, callback: FfiCallback) {
@@ -24,36 +41,30 @@ pub extern "C" fn initialize(task_id: u64, callback: FfiCallback) {
 
 #[unsafe(no_mangle)]
 pub extern "C" fn process_source(task_id: u64, callback: FfiCallback, message: Bytes) {
-    let decoded = c::decode(message);
-    c::queue_async(task_id, callback, async move {
-        if decoded.is_err() {
-            return decoded.into_ffi();
-        }
-        process_source_impl(decoded.expect("not supposed to crash"))
-            .await
-            .into_ffi()
-    });
+    c::queue_async_with_message(
+        task_id,
+        callback,
+        message,
+        |source: crate::generated_proto::Source| async move { process_source_impl(source).await },
+    );
 }
 
-async fn process_source_impl(decoded: Vec<u8>) -> Result<()> {
-    let source = crate::generated_proto::Source::decode(decoded.as_slice())?;
-    let source = crate::types::Source {
-        id: source.id,
-        name: source.name,
-        source_type: source.source_type as u8,
-        last_updated: source.last_updated,
-        username: source.username,
-        password: source.password,
-        url: source.url,
-        url_origin: source.url_origin,
-        stream_user_agent: source.stream_user_agent,
-        user_agent: source.user_agent,
-        enabled: source.enabled,
-    };
-    utils::process_source(source).await
+async fn process_source_impl(source: crate::generated_proto::Source) -> Result<()> {
+    utils::process_source(crate::types::Source::from(source)).await
 }
+
+#[unsafe(no_mangle)]
 pub extern "C" fn refresh_source(task_id: u64, callback: FfiCallback, message: Bytes) {
-    let decoded = c::decode(message);
+    c::queue_async_with_message(
+        task_id,
+        callback,
+        message,
+        |source: crate::generated_proto::Source| async move { refresh_source_impl(source).await },
+    );
+}
+
+async fn refresh_source_impl(source: crate::generated_proto::Source) -> Result<()> {
+    utils::refresh_source(crate::types::Source::from(source)).await
 }
 
 #[unsafe(no_mangle)]
