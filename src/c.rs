@@ -35,6 +35,12 @@ pub trait ResultFfiExt {
     fn into_ffi(self) -> FfiResult;
 }
 
+impl ResultFfiExt for FfiResult {
+    fn into_ffi(self) -> FfiResult {
+        self
+    }
+}
+
 impl<E> ResultFfiExt for Result<(), E>
 where
     E: std::fmt::Debug,
@@ -73,23 +79,28 @@ where
 
 pub type FfiCallback = extern "C" fn(task_id: u64, response: Bytes);
 
-pub fn queue_blocking(
+pub fn queue_blocking<R>(
     task_id: u64,
     callback: FfiCallback,
-    f: impl FnOnce() -> FfiResult + Send + 'static,
-) {
+    f: impl FnOnce() -> R + Send + 'static,
+) where
+    R: ResultFfiExt,
+{
     RUNTIME.spawn_blocking(move || {
-        send_to_callback(task_id, callback, f());
+        send_to_callback(task_id, callback, f().into_ffi());
     });
 }
 
-pub fn queue_async(
+pub fn queue_async<Fut, R>(
     task_id: u64,
     callback: FfiCallback,
-    fut: impl Future<Output = FfiResult> + Send + 'static,
-) {
+    fut: Fut,
+) where
+    Fut: Future<Output = R> + Send + 'static,
+    R: ResultFfiExt,
+{
     RUNTIME.spawn(async move {
-        send_to_callback(task_id, callback, fut.await);
+        send_to_callback(task_id, callback, fut.await.into_ffi());
     });
 }
 

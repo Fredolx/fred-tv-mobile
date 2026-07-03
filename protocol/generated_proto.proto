@@ -37,17 +37,52 @@ message Source {
 }
 
 message Settings {
-  optional string mpv_params = 2;
   optional bool use_stream_caching = 3;
   optional uint32 default_view = 4;
   optional uint32 volume = 5;
   optional bool refresh_on_start = 6;
-  optional uint32 zoom = 9;
   optional uint32 default_sort = 10;
 }
 
 message Test {
   uint32 test = 1;
+}
+
+enum MediaType {
+  MEDIA_TYPE_LIVESTREAM = 0;
+  MEDIA_TYPE_MOVIE = 1;
+  MEDIA_TYPE_SERIE = 2;
+  MEDIA_TYPE_GROUP = 3;
+  MEDIA_TYPE_SEASON = 4;
+}
+
+enum ViewType {
+  VIEW_TYPE_ALL = 0;
+  VIEW_TYPE_FAVORITES = 1;
+  VIEW_TYPE_CATEGORIES = 2;
+  VIEW_TYPE_HISTORY = 3;
+}
+
+message Filters {
+  optional string query = 1;
+  repeated int64 source_ids = 2;
+  repeated MediaType media_types = 3; 
+  ViewType view_type = 4;
+  uint32 page = 5;
+  optional int64 series_id = 6;
+  optional int64 group_id = 7;
+  bool use_keywords = 8;
+  uint32 sort = 9;
+  optional int64 season = 10;
+}
+
+message toggle_favorite {
+  int64 channelId = 1;
+  bool favorite = 2;
+}
+
+message id {
+  int64 id = 1;
 }
 
 message FFIResult {
@@ -57,5 +92,8 @@ message FFIResult {
     Settings settings = 3;
     Source source = 4;
     Test test = 5;
+    ChannelList channelList = 6;
   }
-} 
+}
+
+
