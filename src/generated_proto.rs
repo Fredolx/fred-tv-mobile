@@ -61,10 +61,8 @@ pub struct Source {
     #[prost(int64, optional, tag = "13")]
     pub last_updated: ::core::option::Option<i64>,
 }
-#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct Settings {
-    #[prost(string, optional, tag = "2")]
-    pub mpv_params: ::core::option::Option<::prost::alloc::string::String>,
     #[prost(bool, optional, tag = "3")]
     pub use_stream_caching: ::core::option::Option<bool>,
     #[prost(uint32, optional, tag = "4")]
@@ -73,8 +71,6 @@ pub struct Settings {
     pub volume: ::core::option::Option<u32>,
     #[prost(bool, optional, tag = "6")]
     pub refresh_on_start: ::core::option::Option<bool>,
-    #[prost(uint32, optional, tag = "9")]
-    pub zoom: ::core::option::Option<u32>,
     #[prost(uint32, optional, tag = "10")]
     pub default_sort: ::core::option::Option<u32>,
 }
@@ -84,17 +80,52 @@ pub struct Test {
     pub test: u32,
 }
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct Filters {
+    #[prost(string, optional, tag = "1")]
+    pub query: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(int64, repeated, tag = "2")]
+    pub source_ids: ::prost::alloc::vec::Vec<i64>,
+    #[prost(enumeration = "MediaType", repeated, tag = "3")]
+    pub media_types: ::prost::alloc::vec::Vec<i32>,
+    #[prost(enumeration = "ViewType", tag = "4")]
+    pub view_type: i32,
+    #[prost(uint32, tag = "5")]
+    pub page: u32,
+    #[prost(int64, optional, tag = "6")]
+    pub series_id: ::core::option::Option<i64>,
+    #[prost(int64, optional, tag = "7")]
+    pub group_id: ::core::option::Option<i64>,
+    #[prost(bool, tag = "8")]
+    pub use_keywords: bool,
+    #[prost(uint32, tag = "9")]
+    pub sort: u32,
+    #[prost(int64, optional, tag = "10")]
+    pub season: ::core::option::Option<i64>,
+}
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct ToggleFavorite {
+    #[prost(int64, tag = "1")]
+    pub channel_id: i64,
+    #[prost(bool, tag = "2")]
+    pub favorite: bool,
+}
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct Id {
+    #[prost(int64, tag = "1")]
+    pub id: i64,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct FfiResult {
     #[prost(bool, tag = "1")]
     pub success: bool,
     #[prost(string, optional, tag = "2")]
     pub error_message: ::core::option::Option<::prost::alloc::string::String>,
-    #[prost(oneof = "ffi_result::Data", tags = "3, 4, 5")]
+    #[prost(oneof = "ffi_result::Data", tags = "3, 4, 5, 6")]
     pub data: ::core::option::Option<ffi_result::Data>,
 }
 /// Nested message and enum types in `FFIResult`.
 pub mod ffi_result {
-    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Oneof)]
+    #[derive(Clone, PartialEq, ::prost::Oneof)]
     pub enum Data {
         #[prost(message, tag = "3")]
         Settings(super::Settings),
@@ -102,6 +133,75 @@ pub mod ffi_result {
         Source(super::Source),
         #[prost(message, tag = "5")]
         Test(super::Test),
+        #[prost(message, tag = "6")]
+        ChannelList(super::ChannelList),
+    }
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+#[repr(i32)]
+pub enum MediaType {
+    Livestream = 0,
+    Movie = 1,
+    Serie = 2,
+    Group = 3,
+    Season = 4,
+}
+impl MediaType {
+    /// String value of the enum field names used in the ProtoBuf definition.
+    ///
+    /// The values are not transformed in any way and thus are considered stable
+    /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+    pub fn as_str_name(&self) -> &'static str {
+        match self {
+            Self::Livestream => "MEDIA_TYPE_LIVESTREAM",
+            Self::Movie => "MEDIA_TYPE_MOVIE",
+            Self::Serie => "MEDIA_TYPE_SERIE",
+            Self::Group => "MEDIA_TYPE_GROUP",
+            Self::Season => "MEDIA_TYPE_SEASON",
+        }
+    }
+    /// Creates an enum from field names used in the ProtoBuf definition.
+    pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
+        match value {
+            "MEDIA_TYPE_LIVESTREAM" => Some(Self::Livestream),
+            "MEDIA_TYPE_MOVIE" => Some(Self::Movie),
+            "MEDIA_TYPE_SERIE" => Some(Self::Serie),
+            "MEDIA_TYPE_GROUP" => Some(Self::Group),
+            "MEDIA_TYPE_SEASON" => Some(Self::Season),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+#[repr(i32)]
+pub enum ViewType {
+    All = 0,
+    Favorites = 1,
+    Categories = 2,
+    History = 3,
+}
+impl ViewType {
+    /// String value of the enum field names used in the ProtoBuf definition.
+    ///
+    /// The values are not transformed in any way and thus are considered stable
+    /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+    pub fn as_str_name(&self) -> &'static str {
+        match self {
+            Self::All => "VIEW_TYPE_ALL",
+            Self::Favorites => "VIEW_TYPE_FAVORITES",
+            Self::Categories => "VIEW_TYPE_CATEGORIES",
+            Self::History => "VIEW_TYPE_HISTORY",
+        }
+    }
+    /// Creates an enum from field names used in the ProtoBuf definition.
+    pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
+        match value {
+            "VIEW_TYPE_ALL" => Some(Self::All),
+            "VIEW_TYPE_FAVORITES" => Some(Self::Favorites),
+            "VIEW_TYPE_CATEGORIES" => Some(Self::Categories),
+            "VIEW_TYPE_HISTORY" => Some(Self::History),
+            _ => None,
+        }
     }
 }
 // @@protoc_insertion_point(module)

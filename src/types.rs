@@ -1,9 +1,4 @@
 use serde::{Deserialize, Serialize};
-use std::{
-    collections::HashMap,
-    sync::{Arc, atomic::AtomicBool},
-    thread::JoinHandle,
-};
 
 #[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
 pub struct Channel {
@@ -64,31 +59,12 @@ pub struct Source {
 }
 
 #[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
-pub struct XtreamStatus {
-    pub user_info: XtreamStatusUserInfo,
-}
-
-#[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
-pub struct XtreamStatusUserInfo {
-    pub exp_date: serde_json::Value,
-}
-
-#[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
 pub struct Settings {
-    pub recording_path: Option<String>,
-    pub mpv_params: Option<String>,
     pub use_stream_caching: Option<bool>,
     pub default_view: Option<u8>,
     pub volume: Option<u8>,
     pub refresh_on_start: Option<bool>,
-    pub restream_port: Option<u16>,
-    pub enable_tray_icon: Option<bool>,
-    pub zoom: Option<u16>,
     pub default_sort: Option<u8>,
-    pub enable_hwdec: Option<bool>,
-    pub always_ask_save: Option<bool>,
-    pub enable_gpu: Option<bool>,
-    pub player: Option<String>,
 }
 
 #[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
