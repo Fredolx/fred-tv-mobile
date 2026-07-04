@@ -44,10 +44,6 @@ message Settings {
   optional uint32 default_sort = 10;
 }
 
-message Test {
-  uint32 test = 1;
-}
-
 enum MediaType {
   MEDIA_TYPE_LIVESTREAM = 0;
   MEDIA_TYPE_MOVIE = 1;
@@ -77,12 +73,25 @@ message Filters {
 }
 
 message toggle_favorite {
-  int64 channelId = 1;
+  int64 channel_id = 1;
   bool favorite = 2;
 }
 
 message id {
   int64 id = 1;
+}
+
+message movie_position {
+  int64 channel_id = 1;
+  int64 position = 2;
+}
+
+message StrMessage {
+  string value = 1;
+}
+
+message BoolMessage {
+  bool value = 1;
 }
 
 message FFIResult {
@@ -91,8 +100,8 @@ message FFIResult {
   oneof data {
     Settings settings = 3;
     Source source = 4;
-    Test test = 5;
     ChannelList channelList = 6;
+    BoolMessage boolMessage = 7;
   }
 }
 
