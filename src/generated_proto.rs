@@ -74,11 +74,6 @@ pub struct Settings {
     #[prost(uint32, optional, tag = "10")]
     pub default_sort: ::core::option::Option<u32>,
 }
-#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
-pub struct Test {
-    #[prost(uint32, tag = "1")]
-    pub test: u32,
-}
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct Filters {
     #[prost(string, optional, tag = "1")]
@@ -114,13 +109,30 @@ pub struct Id {
     #[prost(int64, tag = "1")]
     pub id: i64,
 }
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct MoviePosition {
+    #[prost(int64, tag = "1")]
+    pub channel_id: i64,
+    #[prost(int64, tag = "2")]
+    pub position: i64,
+}
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct StrMessage {
+    #[prost(string, tag = "1")]
+    pub value: ::prost::alloc::string::String,
+}
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct BoolMessage {
+    #[prost(bool, tag = "1")]
+    pub value: bool,
+}
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct FfiResult {
     #[prost(bool, tag = "1")]
     pub success: bool,
     #[prost(string, optional, tag = "2")]
     pub error_message: ::core::option::Option<::prost::alloc::string::String>,
-    #[prost(oneof = "ffi_result::Data", tags = "3, 4, 5, 6")]
+    #[prost(oneof = "ffi_result::Data", tags = "3, 4, 6, 7")]
     pub data: ::core::option::Option<ffi_result::Data>,
 }
 /// Nested message and enum types in `FFIResult`.
@@ -131,10 +143,10 @@ pub mod ffi_result {
         Settings(super::Settings),
         #[prost(message, tag = "4")]
         Source(super::Source),
-        #[prost(message, tag = "5")]
-        Test(super::Test),
         #[prost(message, tag = "6")]
         ChannelList(super::ChannelList),
+        #[prost(message, tag = "7")]
+        BoolMessage(super::BoolMessage),
     }
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]

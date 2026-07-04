@@ -135,19 +135,6 @@ pub fn get_user_agent_from_source(source: &Source) -> Result<String> {
     Ok(user_agent.to_string())
 }
 
-fn expand(path: &str, base: Option<&BaseDirs>) -> Option<PathBuf> {
-    if let Some(rest) = path.strip_prefix("~/").or_else(|| path.strip_prefix("~\\")) {
-        return Some(base?.home_dir().join(rest));
-    }
-    if let Some(rest) = path.strip_prefix("%USERPROFILE%\\") {
-        return Some(base?.home_dir().join(rest));
-    }
-    if let Some(rest) = path.strip_prefix("%LOCALAPPDATA%\\") {
-        return Some(base?.data_local_dir().join(rest));
-    }
-    Some(PathBuf::from(path))
-}
-
 #[cfg(test)]
 mod test_utils {
     use super::sanitize;

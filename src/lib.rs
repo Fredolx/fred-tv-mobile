@@ -200,7 +200,37 @@ pub extern "C" fn add_last_watched(task_id: u64, callback: FfiCallback, message:
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn set_movie_position(task_id: u64, callback: FfiCallback, message: Bytes) {}
+pub extern "C" fn set_movie_position(task_id: u64, callback: FfiCallback, message: Bytes) {
+    c::queue_blocking_with_message(
+        task_id,
+        callback,
+        message,
+        |position: generated_proto::MoviePosition| {
+            sql::set_movie_position(position.channel_id, position.position)
+        },
+    )
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn clear_history(task_id: u64, callback: FfiCallback) {
+    c::queue_blocking(task_id, callback, || sql::clear_history());
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn source_name_exists(task_id: u64, callback: FfiCallback, message: Bytes) {
+    c::queue_blocking_with_message(
+        task_id,
+        callback,
+        message,
+        |str_message: generated_proto::StrMessage| {
+            Ok(crate::generated_proto::ffi_result::Data::BoolMessage(
+                crate::generated_proto::BoolMessage {
+                    value: sql::source_name_exists(&str_message.value)?,
+                },
+            ))
+        },
+    )
+}
 
 #[unsafe(no_mangle)]
 pub extern "C" fn free_message(bytes: Bytes) {

@@ -1,22 +1,14 @@
 use crate::log;
 use crate::media_type;
-use crate::source_type;
 use crate::sql;
 use crate::sql::insert_season;
 use crate::types::Channel;
 use crate::types::ChannelPreserve;
 use crate::types::Season;
 use crate::types::Source;
-use crate::types::XtreamStatus;
 use crate::utils::get_user_agent_from_source;
 use anyhow::anyhow;
 use anyhow::{Context, Result};
-use base64::Engine;
-use base64::prelude::BASE64_STANDARD;
-use chrono::DateTime;
-use chrono::Local;
-use chrono::NaiveDateTime;
-use futures::future::join_all;
 use reqwest::Client;
 use reqwest::Url;
 use rusqlite::Transaction;
@@ -33,7 +25,6 @@ const GET_SERIES_INFO: &str = "get_series_info";
 const GET_SERIES_CATEGORIES: &str = "get_series_categories";
 const GET_LIVE_STREAM_CATEGORIES: &str = "get_live_categories";
 const GET_VOD_CATEGORIES: &str = "get_vod_categories";
-const GET_EPG: &str = "get_simple_data_table";
 const LIVE_STREAM_EXTENSION: &str = "ts";
 const NO_SEASON_NUMBER: i64 = -9999;
 
@@ -91,23 +82,6 @@ struct XtreamCategory {
     #[serde(default)]
     category_id: serde_json::Value,
     category_name: String,
-}
-#[derive(Serialize, Deserialize, Clone, Debug)]
-struct XtreamEPG {
-    epg_listings: Vec<XtreamEPGItem>,
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
-struct XtreamEPGItem {
-    id: serde_json::Value,
-    title: String,
-    description: String,
-    start_timestamp: serde_json::Value,
-    stop_timestamp: serde_json::Value,
-    now_playing: u8,
-    has_archive: u8,
-    start: String,
-    end: String,
 }
 
 fn build_xtream_url(source: &mut Source) -> Result<Url> {

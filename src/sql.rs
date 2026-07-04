@@ -754,45 +754,6 @@ pub fn favorite_channel(channel_id: i64, favorite: bool) -> Result<()> {
     Ok(())
 }
 
-pub fn hide_channel(channel_id: i64, hidden: bool) -> Result<()> {
-    let sql = get_conn()?;
-    sql.execute(
-        r#"
-        UPDATE channels
-        SET hidden = ?1
-        WHERE id = ?2
-    "#,
-        params![hidden, channel_id],
-    )?;
-    Ok(())
-}
-
-pub fn hide_group(group_id: i64, hidden: bool) -> Result<()> {
-    let sql = get_conn()?;
-    sql.execute(
-        r#"
-        UPDATE groups
-        SET hidden = ?1
-        WHERE id = ?2
-    "#,
-        params![hidden, group_id],
-    )?;
-    Ok(())
-}
-
-pub fn remove_last_watched(channel_id: i64) -> Result<()> {
-    let sql = get_conn()?;
-    sql.execute(
-        r#"
-        UPDATE channels
-        SET last_watched = NULL
-        WHERE id = ?1
-    "#,
-        params![channel_id],
-    )?;
-    Ok(())
-}
-
 pub fn get_sources() -> Result<Vec<Source>> {
     let sql = get_conn()?;
     let sources: Vec<Source> = sql
@@ -1057,6 +1018,19 @@ pub fn update_source_last_updated(source_id: i64) -> Result<()> {
     sql.execute(
         "UPDATE sources SET last_updated = ? WHERE id = ?",
         params![chrono::Utc::now().timestamp(), source_id],
+    )?;
+    Ok(())
+}
+
+pub fn set_movie_position(channel_id: i64, movie_position: i64) -> Result<()> {
+    let sql = get_conn()?;
+    sql.execute(
+        r#"
+        INSERT INTO movie_positions (channel_id, position)
+        VALUES (?, ?)
+        ON CONFLICT(channel_id) DO UPDATE SET position = excluded.position
+        "#,
+        params![channel_id, movie_position],
     )?;
     Ok(())
 }
