@@ -718,8 +718,8 @@ class Filters extends $pb.GeneratedMessage {
   void clearSeason() => $_clearField(10);
 }
 
-class toggle_favorite extends $pb.GeneratedMessage {
-  factory toggle_favorite({
+class ToggleFavorite extends $pb.GeneratedMessage {
+  factory ToggleFavorite({
     $fixnum.Int64? channelId,
     $core.bool? favorite,
   }) {
@@ -729,17 +729,17 @@ class toggle_favorite extends $pb.GeneratedMessage {
     return result;
   }
 
-  toggle_favorite._();
+  ToggleFavorite._();
 
-  factory toggle_favorite.fromBuffer($core.List<$core.int> data,
+  factory ToggleFavorite.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(data, registry);
-  factory toggle_favorite.fromJson($core.String json,
+  factory ToggleFavorite.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'toggle_favorite',
+      _omitMessageNames ? '' : 'ToggleFavorite',
       package:
           const $pb.PackageName(_omitMessageNames ? '' : 'generated_proto'),
       createEmptyInstance: create)
@@ -748,23 +748,23 @@ class toggle_favorite extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  toggle_favorite clone() => deepCopy();
+  ToggleFavorite clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  toggle_favorite copyWith(void Function(toggle_favorite) updates) =>
-      super.copyWith((message) => updates(message as toggle_favorite))
-          as toggle_favorite;
+  ToggleFavorite copyWith(void Function(ToggleFavorite) updates) =>
+      super.copyWith((message) => updates(message as ToggleFavorite))
+          as ToggleFavorite;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
-  static toggle_favorite create() => toggle_favorite._();
+  static ToggleFavorite create() => ToggleFavorite._();
   @$core.override
-  toggle_favorite createEmptyInstance() => create();
+  ToggleFavorite createEmptyInstance() => create();
   @$core.pragma('dart2js:noInline')
-  static toggle_favorite getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<toggle_favorite>(create);
-  static toggle_favorite? _defaultInstance;
+  static ToggleFavorite getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ToggleFavorite>(create);
+  static ToggleFavorite? _defaultInstance;
 
   @$pb.TagNumber(1)
   $fixnum.Int64 get channelId => $_getI64(0);
@@ -785,8 +785,8 @@ class toggle_favorite extends $pb.GeneratedMessage {
   void clearFavorite() => $_clearField(2);
 }
 
-class id_message extends $pb.GeneratedMessage {
-  factory id_message({
+class IdMessage extends $pb.GeneratedMessage {
+  factory IdMessage({
     $fixnum.Int64? value,
   }) {
     final result = create();
@@ -794,17 +794,17 @@ class id_message extends $pb.GeneratedMessage {
     return result;
   }
 
-  id_message._();
+  IdMessage._();
 
-  factory id_message.fromBuffer($core.List<$core.int> data,
+  factory IdMessage.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(data, registry);
-  factory id_message.fromJson($core.String json,
+  factory IdMessage.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'id_message',
+      _omitMessageNames ? '' : 'IdMessage',
       package:
           const $pb.PackageName(_omitMessageNames ? '' : 'generated_proto'),
       createEmptyInstance: create)
@@ -812,22 +812,22 @@ class id_message extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  id_message clone() => deepCopy();
+  IdMessage clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  id_message copyWith(void Function(id_message) updates) =>
-      super.copyWith((message) => updates(message as id_message)) as id_message;
+  IdMessage copyWith(void Function(IdMessage) updates) =>
+      super.copyWith((message) => updates(message as IdMessage)) as IdMessage;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
-  static id_message create() => id_message._();
+  static IdMessage create() => IdMessage._();
   @$core.override
-  id_message createEmptyInstance() => create();
+  IdMessage createEmptyInstance() => create();
   @$core.pragma('dart2js:noInline')
-  static id_message getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<id_message>(create);
-  static id_message? _defaultInstance;
+  static IdMessage getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<IdMessage>(create);
+  static IdMessage? _defaultInstance;
 
   @$pb.TagNumber(1)
   $fixnum.Int64 get value => $_getI64(0);
@@ -839,8 +839,8 @@ class id_message extends $pb.GeneratedMessage {
   void clearValue() => $_clearField(1);
 }
 
-class movie_position extends $pb.GeneratedMessage {
-  factory movie_position({
+class MoviePosition extends $pb.GeneratedMessage {
+  factory MoviePosition({
     $fixnum.Int64? channelId,
     $fixnum.Int64? position,
   }) {
@@ -850,17 +850,17 @@ class movie_position extends $pb.GeneratedMessage {
     return result;
   }
 
-  movie_position._();
+  MoviePosition._();
 
-  factory movie_position.fromBuffer($core.List<$core.int> data,
+  factory MoviePosition.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(data, registry);
-  factory movie_position.fromJson($core.String json,
+  factory MoviePosition.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'movie_position',
+      _omitMessageNames ? '' : 'MoviePosition',
       package:
           const $pb.PackageName(_omitMessageNames ? '' : 'generated_proto'),
       createEmptyInstance: create)
@@ -869,23 +869,23 @@ class movie_position extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  movie_position clone() => deepCopy();
+  MoviePosition clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  movie_position copyWith(void Function(movie_position) updates) =>
-      super.copyWith((message) => updates(message as movie_position))
-          as movie_position;
+  MoviePosition copyWith(void Function(MoviePosition) updates) =>
+      super.copyWith((message) => updates(message as MoviePosition))
+          as MoviePosition;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
-  static movie_position create() => movie_position._();
+  static MoviePosition create() => MoviePosition._();
   @$core.override
-  movie_position createEmptyInstance() => create();
+  MoviePosition createEmptyInstance() => create();
   @$core.pragma('dart2js:noInline')
-  static movie_position getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<movie_position>(create);
-  static movie_position? _defaultInstance;
+  static MoviePosition getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<MoviePosition>(create);
+  static MoviePosition? _defaultInstance;
 
   @$pb.TagNumber(1)
   $fixnum.Int64 get channelId => $_getI64(0);

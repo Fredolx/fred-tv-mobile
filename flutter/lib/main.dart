@@ -2,8 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:open_tv/backend/settings_service.dart';
-import 'package:open_tv/backend/sql.dart';
 import 'package:open_tv/generated/generated_proto.pb.dart' as gen;
 import 'package:open_tv/home.dart';
 import 'package:open_tv/models/custom_shortcut.dart';
@@ -11,7 +9,7 @@ import 'package:open_tv/models/device_detector.dart';
 import 'package:open_tv/models/filters.dart';
 import 'package:open_tv/models/home_manager.dart';
 import 'package:open_tv/models/settings.dart';
-import 'package:open_tv/backend/utils.dart';
+import 'package:open_tv/utils.dart';
 import 'package:open_tv/native_bridge.dart' as nb;
 import 'package:open_tv/setup.dart';
 import 'package:open_tv/tv_home.dart';

@@ -1,16 +1,18 @@
+import 'dart:ffi';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:open_tv/backend/settings_service.dart';
-import 'package:open_tv/backend/sql.dart';
-import 'package:open_tv/backend/xtream.dart';
+import 'package:open_tv/generated/generated_proto.pb.dart' as pb;
 import 'package:open_tv/memory.dart';
 import 'package:open_tv/models/channel.dart';
 import 'package:open_tv/error.dart';
 import 'package:open_tv/models/media_type.dart';
 import 'package:open_tv/models/node.dart';
 import 'package:open_tv/models/node_type.dart';
+import 'package:open_tv/native_bridge.dart';
 import 'package:open_tv/player.dart';
+import 'package:fixnum/fixnum.dart';
 
 class ChannelTile extends StatefulWidget {
   final Channel channel;
@@ -60,7 +62,9 @@ class _ChannelTileState extends State<ChannelTile> {
   Future<void> favorite() async {
     if (widget.channel.mediaType == MediaType.group) return;
     await Error.tryAsyncNoLoading(() async {
-      await Sql.favoriteChannel(widget.channel.id!, !widget.channel.favorite);
+      await NativeBridge.instance.favorite(
+        pb.ToggleFavorite(channelId: Int64(widget.channel.id!)),
+      );
       setState(() {
         widget.channel.favorite = !widget.channel.favorite;
       });
