@@ -212,6 +212,22 @@ pub extern "C" fn set_movie_position(task_id: u64, callback: FfiCallback, messag
 }
 
 #[unsafe(no_mangle)]
+pub extern "C" fn get_movie_position(task_id: u64, callback: FfiCallback, message: Bytes) {
+    c::queue_blocking_with_message(
+        task_id,
+        callback,
+        message,
+        |id_message: generated_proto::Id| {
+            Ok(generated_proto::ffi_result::Data::MoviePosition(
+                generated_proto::GetMoviePosition {
+                    position: sql::get_movie_position(id_message.id)?,
+                },
+            ))
+        },
+    )
+}
+
+#[unsafe(no_mangle)]
 pub extern "C" fn clear_history(task_id: u64, callback: FfiCallback) {
     c::queue_blocking(task_id, callback, || sql::clear_history());
 }

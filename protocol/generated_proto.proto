@@ -94,14 +94,19 @@ message BoolMessage {
   bool value = 1;
 }
 
+message GetMoviePosition {
+  optional int64 position = 1; 
+}
+
 message FFIResult {
   bool success = 1;
   optional string error_message = 2;
   oneof data {
     Settings settings = 3;
     Source source = 4;
-    ChannelList channelList = 6;
-    BoolMessage boolMessage = 7;
+    ChannelList channel_list = 6;
+    BoolMessage bool_message = 7;
+    GetMoviePosition movie_position = 8;
   }
 }
 

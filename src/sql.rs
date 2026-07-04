@@ -1034,3 +1034,20 @@ pub fn set_movie_position(channel_id: i64, movie_position: i64) -> Result<()> {
     )?;
     Ok(())
 }
+
+pub fn get_movie_position(channel_id: i64) -> Result<Option<i64>> {
+    let sql = get_conn()?;
+    let position: Option<i64> = sql
+        .query_row(
+            r#"
+        SELECT position
+        FROM movie_positions
+        WHERE channel_id = ?
+        LIMIT 1
+    "#,
+            params!(channel_id),
+            |row| row.get(0),
+        )
+        .optional()?;
+    Ok(position)
+}
