@@ -91,9 +91,9 @@ class NativeBridge {
     }
   }
 
-  Future<pb.FFIResult> initialize() {
-    return _executeAsync((id, cb) {
-      _bindings.initialize(id, cb);
+  Future<pb.FFIResult> initialize(pb.InitMessage init) {
+    return _executeWithMsg(init, (id, msg, cb) {
+      _bindings.initialize(id, cb, msg);
     });
   }
 
@@ -106,12 +106,6 @@ class NativeBridge {
   Future<pb.FFIResult> refreshSource(pb.Source source) {
     return _executeWithMsg(source, (id, msg, cb) {
       _bindings.refresh_source(id, cb, msg);
-    });
-  }
-
-  Future<pb.FFIResult> test() {
-    return _executeAsync((id, cb) {
-      _bindings.test(id, cb);
     });
   }
 

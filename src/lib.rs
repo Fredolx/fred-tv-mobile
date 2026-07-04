@@ -105,8 +105,20 @@ impl From<Vec<crate::types::Channel>> for crate::generated_proto::ChannelList {
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn initialize(task_id: u64, callback: FfiCallback) {
-    c::queue_blocking(task_id, callback, || sql::apply_migrations())
+pub extern "C" fn initialize(task_id: u64, callback: FfiCallback, message: Bytes) {
+    c::queue_blocking_with_message(
+        task_id,
+        callback,
+        message,
+        |init_msg: generated_proto::InitMessage| {
+            if let Some(path) = init_msg.path {
+                sql::DB_PATH_OVERRIDE
+                    .set(path)
+                    .map_err(|e| anyhow::anyhow!(e))?;
+            }
+            sql::apply_migrations()
+        },
+    )
 }
 
 #[unsafe(no_mangle)]
@@ -195,7 +207,7 @@ pub extern "C" fn add_last_watched(task_id: u64, callback: FfiCallback, message:
         task_id,
         callback,
         message,
-        |id: crate::generated_proto::Id| sql::add_last_watched(id.id),
+        |id: crate::generated_proto::IdMessage| sql::add_last_watched(id.value),
     );
 }
 
@@ -217,10 +229,10 @@ pub extern "C" fn get_movie_position(task_id: u64, callback: FfiCallback, messag
         task_id,
         callback,
         message,
-        |id_message: generated_proto::Id| {
+        |id_message: generated_proto::IdMessage| {
             Ok(generated_proto::ffi_result::Data::MoviePosition(
                 generated_proto::GetMoviePosition {
-                    position: sql::get_movie_position(id_message.id)?,
+                    position: sql::get_movie_position(id_message.value)?,
                 },
             ))
         },

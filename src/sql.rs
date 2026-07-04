@@ -1,11 +1,11 @@
+use std::sync::OnceLock;
 use std::vec;
 use std::{collections::HashMap, sync::LazyLock};
 
-use crate::log::log;
 use crate::sort_type;
 use crate::types::{ChannelPreserve, Season};
 use crate::{
-    media_type, source_type,
+    media_type,
     types::{Channel, ChannelHttpHeaders, Filters, Source},
     view_type,
 };
@@ -17,7 +17,8 @@ use rusqlite::{OptionalExtension, Row, Transaction, params, params_from_iter};
 use rusqlite_migration::{M, Migrations};
 
 const PAGE_SIZE: u8 = 36;
-pub const DB_NAME: &str = "db.sqlite";
+pub const DB_NAME: &str = "db_rust.sqlite";
+pub static DB_PATH_OVERRIDE: OnceLock<String> = OnceLock::new();
 static CONN: LazyLock<Pool<SqliteConnectionManager>> = LazyLock::new(|| create_connection_pool());
 
 pub fn get_conn() -> Result<PooledConnection<SqliteConnectionManager>> {
@@ -30,10 +31,13 @@ fn create_connection_pool() -> Pool<SqliteConnectionManager> {
 }
 
 fn get_and_create_sqlite_db_path() -> String {
-    let mut path = ProjectDirs::from("dev", "fredol", "open-tv")
-        .unwrap()
-        .data_dir()
-        .to_owned();
+    let mut path = match DB_PATH_OVERRIDE.get() {
+        Some(path) => std::path::PathBuf::from(path),
+        None => ProjectDirs::from("dev", "fredol", "open-tv")
+            .unwrap()
+            .data_dir()
+            .to_owned(),
+    };
     if !path.exists() {
         std::fs::create_dir_all(&path).unwrap();
     }
