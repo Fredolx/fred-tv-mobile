@@ -126,13 +126,18 @@ pub struct BoolMessage {
     #[prost(bool, tag = "1")]
     pub value: bool,
 }
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct GetMoviePosition {
+    #[prost(int64, optional, tag = "1")]
+    pub position: ::core::option::Option<i64>,
+}
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct FfiResult {
     #[prost(bool, tag = "1")]
     pub success: bool,
     #[prost(string, optional, tag = "2")]
     pub error_message: ::core::option::Option<::prost::alloc::string::String>,
-    #[prost(oneof = "ffi_result::Data", tags = "3, 4, 6, 7")]
+    #[prost(oneof = "ffi_result::Data", tags = "3, 4, 6, 7, 8")]
     pub data: ::core::option::Option<ffi_result::Data>,
 }
 /// Nested message and enum types in `FFIResult`.
@@ -147,6 +152,8 @@ pub mod ffi_result {
         ChannelList(super::ChannelList),
         #[prost(message, tag = "7")]
         BoolMessage(super::BoolMessage),
+        #[prost(message, tag = "8")]
+        MoviePosition(super::GetMoviePosition),
     }
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
