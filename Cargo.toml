@@ -24,6 +24,7 @@ rusqlite_migration = "2.5.0"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 simplelog = "0.12.2"
+sysdirs = "0.9.4"
 tokio = { version = "1.52", features = ["full"] }
 
 # Install cargo-cmd:

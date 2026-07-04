@@ -15,7 +15,11 @@ import 'dart:core' as $core;
 import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
+import 'generated_proto.pbenum.dart';
+
 export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
+
+export 'generated_proto.pbenum.dart';
 
 class Channel extends $pb.GeneratedMessage {
   factory Channel({
@@ -457,21 +461,17 @@ class Source extends $pb.GeneratedMessage {
 
 class Settings extends $pb.GeneratedMessage {
   factory Settings({
-    $core.String? mpvParams,
     $core.bool? useStreamCaching,
     $core.int? defaultView,
     $core.int? volume,
     $core.bool? refreshOnStart,
-    $core.int? zoom,
     $core.int? defaultSort,
   }) {
     final result = create();
-    if (mpvParams != null) result.mpvParams = mpvParams;
     if (useStreamCaching != null) result.useStreamCaching = useStreamCaching;
     if (defaultView != null) result.defaultView = defaultView;
     if (volume != null) result.volume = volume;
     if (refreshOnStart != null) result.refreshOnStart = refreshOnStart;
-    if (zoom != null) result.zoom = zoom;
     if (defaultSort != null) result.defaultSort = defaultSort;
     return result;
   }
@@ -490,13 +490,11 @@ class Settings extends $pb.GeneratedMessage {
       package:
           const $pb.PackageName(_omitMessageNames ? '' : 'generated_proto'),
       createEmptyInstance: create)
-    ..aOS(2, _omitFieldNames ? '' : 'mpvParams')
     ..aOB(3, _omitFieldNames ? '' : 'useStreamCaching')
     ..aI(4, _omitFieldNames ? '' : 'defaultView',
         fieldType: $pb.PbFieldType.OU3)
     ..aI(5, _omitFieldNames ? '' : 'volume', fieldType: $pb.PbFieldType.OU3)
     ..aOB(6, _omitFieldNames ? '' : 'refreshOnStart')
-    ..aI(9, _omitFieldNames ? '' : 'zoom', fieldType: $pb.PbFieldType.OU3)
     ..aI(10, _omitFieldNames ? '' : 'defaultSort',
         fieldType: $pb.PbFieldType.OU3)
     ..hasRequiredFields = false;
@@ -519,125 +517,622 @@ class Settings extends $pb.GeneratedMessage {
       _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Settings>(create);
   static Settings? _defaultInstance;
 
-  @$pb.TagNumber(2)
-  $core.String get mpvParams => $_getSZ(0);
-  @$pb.TagNumber(2)
-  set mpvParams($core.String value) => $_setString(0, value);
-  @$pb.TagNumber(2)
-  $core.bool hasMpvParams() => $_has(0);
-  @$pb.TagNumber(2)
-  void clearMpvParams() => $_clearField(2);
-
   @$pb.TagNumber(3)
-  $core.bool get useStreamCaching => $_getBF(1);
+  $core.bool get useStreamCaching => $_getBF(0);
   @$pb.TagNumber(3)
-  set useStreamCaching($core.bool value) => $_setBool(1, value);
+  set useStreamCaching($core.bool value) => $_setBool(0, value);
   @$pb.TagNumber(3)
-  $core.bool hasUseStreamCaching() => $_has(1);
+  $core.bool hasUseStreamCaching() => $_has(0);
   @$pb.TagNumber(3)
   void clearUseStreamCaching() => $_clearField(3);
 
   @$pb.TagNumber(4)
-  $core.int get defaultView => $_getIZ(2);
+  $core.int get defaultView => $_getIZ(1);
   @$pb.TagNumber(4)
-  set defaultView($core.int value) => $_setUnsignedInt32(2, value);
+  set defaultView($core.int value) => $_setUnsignedInt32(1, value);
   @$pb.TagNumber(4)
-  $core.bool hasDefaultView() => $_has(2);
+  $core.bool hasDefaultView() => $_has(1);
   @$pb.TagNumber(4)
   void clearDefaultView() => $_clearField(4);
 
   @$pb.TagNumber(5)
-  $core.int get volume => $_getIZ(3);
+  $core.int get volume => $_getIZ(2);
   @$pb.TagNumber(5)
-  set volume($core.int value) => $_setUnsignedInt32(3, value);
+  set volume($core.int value) => $_setUnsignedInt32(2, value);
   @$pb.TagNumber(5)
-  $core.bool hasVolume() => $_has(3);
+  $core.bool hasVolume() => $_has(2);
   @$pb.TagNumber(5)
   void clearVolume() => $_clearField(5);
 
   @$pb.TagNumber(6)
-  $core.bool get refreshOnStart => $_getBF(4);
+  $core.bool get refreshOnStart => $_getBF(3);
   @$pb.TagNumber(6)
-  set refreshOnStart($core.bool value) => $_setBool(4, value);
+  set refreshOnStart($core.bool value) => $_setBool(3, value);
   @$pb.TagNumber(6)
-  $core.bool hasRefreshOnStart() => $_has(4);
+  $core.bool hasRefreshOnStart() => $_has(3);
   @$pb.TagNumber(6)
   void clearRefreshOnStart() => $_clearField(6);
 
-  @$pb.TagNumber(9)
-  $core.int get zoom => $_getIZ(5);
-  @$pb.TagNumber(9)
-  set zoom($core.int value) => $_setUnsignedInt32(5, value);
-  @$pb.TagNumber(9)
-  $core.bool hasZoom() => $_has(5);
-  @$pb.TagNumber(9)
-  void clearZoom() => $_clearField(9);
-
   @$pb.TagNumber(10)
-  $core.int get defaultSort => $_getIZ(6);
+  $core.int get defaultSort => $_getIZ(4);
   @$pb.TagNumber(10)
-  set defaultSort($core.int value) => $_setUnsignedInt32(6, value);
+  set defaultSort($core.int value) => $_setUnsignedInt32(4, value);
   @$pb.TagNumber(10)
-  $core.bool hasDefaultSort() => $_has(6);
+  $core.bool hasDefaultSort() => $_has(4);
   @$pb.TagNumber(10)
   void clearDefaultSort() => $_clearField(10);
 }
 
-class Test extends $pb.GeneratedMessage {
-  factory Test({
-    $core.int? test,
+class Filters extends $pb.GeneratedMessage {
+  factory Filters({
+    $core.String? query,
+    $core.Iterable<$fixnum.Int64>? sourceIds,
+    $core.Iterable<MediaType>? mediaTypes,
+    ViewType? viewType,
+    $core.int? page,
+    $fixnum.Int64? seriesId,
+    $fixnum.Int64? groupId,
+    $core.bool? useKeywords,
+    $core.int? sort,
+    $fixnum.Int64? season,
   }) {
     final result = create();
-    if (test != null) result.test = test;
+    if (query != null) result.query = query;
+    if (sourceIds != null) result.sourceIds.addAll(sourceIds);
+    if (mediaTypes != null) result.mediaTypes.addAll(mediaTypes);
+    if (viewType != null) result.viewType = viewType;
+    if (page != null) result.page = page;
+    if (seriesId != null) result.seriesId = seriesId;
+    if (groupId != null) result.groupId = groupId;
+    if (useKeywords != null) result.useKeywords = useKeywords;
+    if (sort != null) result.sort = sort;
+    if (season != null) result.season = season;
     return result;
   }
 
-  Test._();
+  Filters._();
 
-  factory Test.fromBuffer($core.List<$core.int> data,
+  factory Filters.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(data, registry);
-  factory Test.fromJson($core.String json,
+  factory Filters.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'Test',
+      _omitMessageNames ? '' : 'Filters',
       package:
           const $pb.PackageName(_omitMessageNames ? '' : 'generated_proto'),
       createEmptyInstance: create)
-    ..aI(1, _omitFieldNames ? '' : 'test', fieldType: $pb.PbFieldType.OU3)
+    ..aOS(1, _omitFieldNames ? '' : 'query')
+    ..p<$fixnum.Int64>(
+        2, _omitFieldNames ? '' : 'sourceIds', $pb.PbFieldType.K6)
+    ..pc<MediaType>(3, _omitFieldNames ? '' : 'mediaTypes', $pb.PbFieldType.KE,
+        valueOf: MediaType.valueOf,
+        enumValues: MediaType.values,
+        defaultEnumValue: MediaType.MEDIA_TYPE_LIVESTREAM)
+    ..aE<ViewType>(4, _omitFieldNames ? '' : 'viewType',
+        enumValues: ViewType.values)
+    ..aI(5, _omitFieldNames ? '' : 'page', fieldType: $pb.PbFieldType.OU3)
+    ..aInt64(6, _omitFieldNames ? '' : 'seriesId')
+    ..aInt64(7, _omitFieldNames ? '' : 'groupId')
+    ..aOB(8, _omitFieldNames ? '' : 'useKeywords')
+    ..aI(9, _omitFieldNames ? '' : 'sort', fieldType: $pb.PbFieldType.OU3)
+    ..aInt64(10, _omitFieldNames ? '' : 'season')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Test clone() => deepCopy();
+  Filters clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Test copyWith(void Function(Test) updates) =>
-      super.copyWith((message) => updates(message as Test)) as Test;
+  Filters copyWith(void Function(Filters) updates) =>
+      super.copyWith((message) => updates(message as Filters)) as Filters;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
-  static Test create() => Test._();
+  static Filters create() => Filters._();
   @$core.override
-  Test createEmptyInstance() => create();
+  Filters createEmptyInstance() => create();
   @$core.pragma('dart2js:noInline')
-  static Test getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Test>(create);
-  static Test? _defaultInstance;
+  static Filters getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Filters>(create);
+  static Filters? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.int get test => $_getIZ(0);
+  $core.String get query => $_getSZ(0);
   @$pb.TagNumber(1)
-  set test($core.int value) => $_setUnsignedInt32(0, value);
+  set query($core.String value) => $_setString(0, value);
   @$pb.TagNumber(1)
-  $core.bool hasTest() => $_has(0);
+  $core.bool hasQuery() => $_has(0);
   @$pb.TagNumber(1)
-  void clearTest() => $_clearField(1);
+  void clearQuery() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $pb.PbList<$fixnum.Int64> get sourceIds => $_getList(1);
+
+  @$pb.TagNumber(3)
+  $pb.PbList<MediaType> get mediaTypes => $_getList(2);
+
+  @$pb.TagNumber(4)
+  ViewType get viewType => $_getN(3);
+  @$pb.TagNumber(4)
+  set viewType(ViewType value) => $_setField(4, value);
+  @$pb.TagNumber(4)
+  $core.bool hasViewType() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearViewType() => $_clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.int get page => $_getIZ(4);
+  @$pb.TagNumber(5)
+  set page($core.int value) => $_setUnsignedInt32(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasPage() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearPage() => $_clearField(5);
+
+  @$pb.TagNumber(6)
+  $fixnum.Int64 get seriesId => $_getI64(5);
+  @$pb.TagNumber(6)
+  set seriesId($fixnum.Int64 value) => $_setInt64(5, value);
+  @$pb.TagNumber(6)
+  $core.bool hasSeriesId() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearSeriesId() => $_clearField(6);
+
+  @$pb.TagNumber(7)
+  $fixnum.Int64 get groupId => $_getI64(6);
+  @$pb.TagNumber(7)
+  set groupId($fixnum.Int64 value) => $_setInt64(6, value);
+  @$pb.TagNumber(7)
+  $core.bool hasGroupId() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearGroupId() => $_clearField(7);
+
+  @$pb.TagNumber(8)
+  $core.bool get useKeywords => $_getBF(7);
+  @$pb.TagNumber(8)
+  set useKeywords($core.bool value) => $_setBool(7, value);
+  @$pb.TagNumber(8)
+  $core.bool hasUseKeywords() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearUseKeywords() => $_clearField(8);
+
+  @$pb.TagNumber(9)
+  $core.int get sort => $_getIZ(8);
+  @$pb.TagNumber(9)
+  set sort($core.int value) => $_setUnsignedInt32(8, value);
+  @$pb.TagNumber(9)
+  $core.bool hasSort() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearSort() => $_clearField(9);
+
+  @$pb.TagNumber(10)
+  $fixnum.Int64 get season => $_getI64(9);
+  @$pb.TagNumber(10)
+  set season($fixnum.Int64 value) => $_setInt64(9, value);
+  @$pb.TagNumber(10)
+  $core.bool hasSeason() => $_has(9);
+  @$pb.TagNumber(10)
+  void clearSeason() => $_clearField(10);
 }
 
-enum FFIResult_Data { settings, source, test, notSet }
+class toggle_favorite extends $pb.GeneratedMessage {
+  factory toggle_favorite({
+    $fixnum.Int64? channelId,
+    $core.bool? favorite,
+  }) {
+    final result = create();
+    if (channelId != null) result.channelId = channelId;
+    if (favorite != null) result.favorite = favorite;
+    return result;
+  }
+
+  toggle_favorite._();
+
+  factory toggle_favorite.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory toggle_favorite.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'toggle_favorite',
+      package:
+          const $pb.PackageName(_omitMessageNames ? '' : 'generated_proto'),
+      createEmptyInstance: create)
+    ..aInt64(1, _omitFieldNames ? '' : 'channelId')
+    ..aOB(2, _omitFieldNames ? '' : 'favorite')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  toggle_favorite clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  toggle_favorite copyWith(void Function(toggle_favorite) updates) =>
+      super.copyWith((message) => updates(message as toggle_favorite))
+          as toggle_favorite;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static toggle_favorite create() => toggle_favorite._();
+  @$core.override
+  toggle_favorite createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static toggle_favorite getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<toggle_favorite>(create);
+  static toggle_favorite? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get channelId => $_getI64(0);
+  @$pb.TagNumber(1)
+  set channelId($fixnum.Int64 value) => $_setInt64(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasChannelId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearChannelId() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.bool get favorite => $_getBF(1);
+  @$pb.TagNumber(2)
+  set favorite($core.bool value) => $_setBool(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasFavorite() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearFavorite() => $_clearField(2);
+}
+
+class id_message extends $pb.GeneratedMessage {
+  factory id_message({
+    $fixnum.Int64? value,
+  }) {
+    final result = create();
+    if (value != null) result.value = value;
+    return result;
+  }
+
+  id_message._();
+
+  factory id_message.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory id_message.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'id_message',
+      package:
+          const $pb.PackageName(_omitMessageNames ? '' : 'generated_proto'),
+      createEmptyInstance: create)
+    ..aInt64(1, _omitFieldNames ? '' : 'value')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  id_message clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  id_message copyWith(void Function(id_message) updates) =>
+      super.copyWith((message) => updates(message as id_message)) as id_message;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static id_message create() => id_message._();
+  @$core.override
+  id_message createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static id_message getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<id_message>(create);
+  static id_message? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get value => $_getI64(0);
+  @$pb.TagNumber(1)
+  set value($fixnum.Int64 value) => $_setInt64(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasValue() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearValue() => $_clearField(1);
+}
+
+class movie_position extends $pb.GeneratedMessage {
+  factory movie_position({
+    $fixnum.Int64? channelId,
+    $fixnum.Int64? position,
+  }) {
+    final result = create();
+    if (channelId != null) result.channelId = channelId;
+    if (position != null) result.position = position;
+    return result;
+  }
+
+  movie_position._();
+
+  factory movie_position.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory movie_position.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'movie_position',
+      package:
+          const $pb.PackageName(_omitMessageNames ? '' : 'generated_proto'),
+      createEmptyInstance: create)
+    ..aInt64(1, _omitFieldNames ? '' : 'channelId')
+    ..aInt64(2, _omitFieldNames ? '' : 'position')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  movie_position clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  movie_position copyWith(void Function(movie_position) updates) =>
+      super.copyWith((message) => updates(message as movie_position))
+          as movie_position;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static movie_position create() => movie_position._();
+  @$core.override
+  movie_position createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static movie_position getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<movie_position>(create);
+  static movie_position? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get channelId => $_getI64(0);
+  @$pb.TagNumber(1)
+  set channelId($fixnum.Int64 value) => $_setInt64(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasChannelId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearChannelId() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $fixnum.Int64 get position => $_getI64(1);
+  @$pb.TagNumber(2)
+  set position($fixnum.Int64 value) => $_setInt64(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasPosition() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearPosition() => $_clearField(2);
+}
+
+class StrMessage extends $pb.GeneratedMessage {
+  factory StrMessage({
+    $core.String? value,
+  }) {
+    final result = create();
+    if (value != null) result.value = value;
+    return result;
+  }
+
+  StrMessage._();
+
+  factory StrMessage.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory StrMessage.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'StrMessage',
+      package:
+          const $pb.PackageName(_omitMessageNames ? '' : 'generated_proto'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'value')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  StrMessage clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  StrMessage copyWith(void Function(StrMessage) updates) =>
+      super.copyWith((message) => updates(message as StrMessage)) as StrMessage;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static StrMessage create() => StrMessage._();
+  @$core.override
+  StrMessage createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static StrMessage getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<StrMessage>(create);
+  static StrMessage? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get value => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set value($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasValue() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearValue() => $_clearField(1);
+}
+
+class BoolMessage extends $pb.GeneratedMessage {
+  factory BoolMessage({
+    $core.bool? value,
+  }) {
+    final result = create();
+    if (value != null) result.value = value;
+    return result;
+  }
+
+  BoolMessage._();
+
+  factory BoolMessage.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory BoolMessage.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'BoolMessage',
+      package:
+          const $pb.PackageName(_omitMessageNames ? '' : 'generated_proto'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'value')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  BoolMessage clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  BoolMessage copyWith(void Function(BoolMessage) updates) =>
+      super.copyWith((message) => updates(message as BoolMessage))
+          as BoolMessage;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static BoolMessage create() => BoolMessage._();
+  @$core.override
+  BoolMessage createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static BoolMessage getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<BoolMessage>(create);
+  static BoolMessage? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.bool get value => $_getBF(0);
+  @$pb.TagNumber(1)
+  set value($core.bool value) => $_setBool(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasValue() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearValue() => $_clearField(1);
+}
+
+class GetMoviePosition extends $pb.GeneratedMessage {
+  factory GetMoviePosition({
+    $fixnum.Int64? position,
+  }) {
+    final result = create();
+    if (position != null) result.position = position;
+    return result;
+  }
+
+  GetMoviePosition._();
+
+  factory GetMoviePosition.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory GetMoviePosition.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'GetMoviePosition',
+      package:
+          const $pb.PackageName(_omitMessageNames ? '' : 'generated_proto'),
+      createEmptyInstance: create)
+    ..aInt64(1, _omitFieldNames ? '' : 'position')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetMoviePosition clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetMoviePosition copyWith(void Function(GetMoviePosition) updates) =>
+      super.copyWith((message) => updates(message as GetMoviePosition))
+          as GetMoviePosition;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static GetMoviePosition create() => GetMoviePosition._();
+  @$core.override
+  GetMoviePosition createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static GetMoviePosition getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<GetMoviePosition>(create);
+  static GetMoviePosition? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get position => $_getI64(0);
+  @$pb.TagNumber(1)
+  set position($fixnum.Int64 value) => $_setInt64(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasPosition() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearPosition() => $_clearField(1);
+}
+
+class InitMessage extends $pb.GeneratedMessage {
+  factory InitMessage({
+    $core.String? path,
+  }) {
+    final result = create();
+    if (path != null) result.path = path;
+    return result;
+  }
+
+  InitMessage._();
+
+  factory InitMessage.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory InitMessage.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'InitMessage',
+      package:
+          const $pb.PackageName(_omitMessageNames ? '' : 'generated_proto'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'path')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  InitMessage clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  InitMessage copyWith(void Function(InitMessage) updates) =>
+      super.copyWith((message) => updates(message as InitMessage))
+          as InitMessage;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static InitMessage create() => InitMessage._();
+  @$core.override
+  InitMessage createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static InitMessage getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<InitMessage>(create);
+  static InitMessage? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get path => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set path($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasPath() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearPath() => $_clearField(1);
+}
+
+enum FFIResult_Data {
+  settings,
+  source,
+  channelList,
+  boolMessage,
+  moviePosition,
+  notSet
+}
 
 class FFIResult extends $pb.GeneratedMessage {
   factory FFIResult({
@@ -645,14 +1140,18 @@ class FFIResult extends $pb.GeneratedMessage {
     $core.String? errorMessage,
     Settings? settings,
     Source? source,
-    Test? test,
+    ChannelList? channelList,
+    BoolMessage? boolMessage,
+    GetMoviePosition? moviePosition,
   }) {
     final result = create();
     if (success != null) result.success = success;
     if (errorMessage != null) result.errorMessage = errorMessage;
     if (settings != null) result.settings = settings;
     if (source != null) result.source = source;
-    if (test != null) result.test = test;
+    if (channelList != null) result.channelList = channelList;
+    if (boolMessage != null) result.boolMessage = boolMessage;
+    if (moviePosition != null) result.moviePosition = moviePosition;
     return result;
   }
 
@@ -668,7 +1167,9 @@ class FFIResult extends $pb.GeneratedMessage {
   static const $core.Map<$core.int, FFIResult_Data> _FFIResult_DataByTag = {
     3: FFIResult_Data.settings,
     4: FFIResult_Data.source,
-    5: FFIResult_Data.test,
+    6: FFIResult_Data.channelList,
+    7: FFIResult_Data.boolMessage,
+    8: FFIResult_Data.moviePosition,
     0: FFIResult_Data.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
@@ -676,13 +1177,18 @@ class FFIResult extends $pb.GeneratedMessage {
       package:
           const $pb.PackageName(_omitMessageNames ? '' : 'generated_proto'),
       createEmptyInstance: create)
-    ..oo(0, [3, 4, 5])
+    ..oo(0, [3, 4, 6, 7, 8])
     ..aOB(1, _omitFieldNames ? '' : 'success')
     ..aOS(2, _omitFieldNames ? '' : 'errorMessage')
     ..aOM<Settings>(3, _omitFieldNames ? '' : 'settings',
         subBuilder: Settings.create)
     ..aOM<Source>(4, _omitFieldNames ? '' : 'source', subBuilder: Source.create)
-    ..aOM<Test>(5, _omitFieldNames ? '' : 'test', subBuilder: Test.create)
+    ..aOM<ChannelList>(6, _omitFieldNames ? '' : 'channelList',
+        subBuilder: ChannelList.create)
+    ..aOM<BoolMessage>(7, _omitFieldNames ? '' : 'boolMessage',
+        subBuilder: BoolMessage.create)
+    ..aOM<GetMoviePosition>(8, _omitFieldNames ? '' : 'moviePosition',
+        subBuilder: GetMoviePosition.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -705,11 +1211,15 @@ class FFIResult extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(3)
   @$pb.TagNumber(4)
-  @$pb.TagNumber(5)
+  @$pb.TagNumber(6)
+  @$pb.TagNumber(7)
+  @$pb.TagNumber(8)
   FFIResult_Data whichData() => _FFIResult_DataByTag[$_whichOneof(0)]!;
   @$pb.TagNumber(3)
   @$pb.TagNumber(4)
-  @$pb.TagNumber(5)
+  @$pb.TagNumber(6)
+  @$pb.TagNumber(7)
+  @$pb.TagNumber(8)
   void clearData() => $_clearField($_whichOneof(0));
 
   @$pb.TagNumber(1)
@@ -752,16 +1262,38 @@ class FFIResult extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   Source ensureSource() => $_ensure(3);
 
-  @$pb.TagNumber(5)
-  Test get test => $_getN(4);
-  @$pb.TagNumber(5)
-  set test(Test value) => $_setField(5, value);
-  @$pb.TagNumber(5)
-  $core.bool hasTest() => $_has(4);
-  @$pb.TagNumber(5)
-  void clearTest() => $_clearField(5);
-  @$pb.TagNumber(5)
-  Test ensureTest() => $_ensure(4);
+  @$pb.TagNumber(6)
+  ChannelList get channelList => $_getN(4);
+  @$pb.TagNumber(6)
+  set channelList(ChannelList value) => $_setField(6, value);
+  @$pb.TagNumber(6)
+  $core.bool hasChannelList() => $_has(4);
+  @$pb.TagNumber(6)
+  void clearChannelList() => $_clearField(6);
+  @$pb.TagNumber(6)
+  ChannelList ensureChannelList() => $_ensure(4);
+
+  @$pb.TagNumber(7)
+  BoolMessage get boolMessage => $_getN(5);
+  @$pb.TagNumber(7)
+  set boolMessage(BoolMessage value) => $_setField(7, value);
+  @$pb.TagNumber(7)
+  $core.bool hasBoolMessage() => $_has(5);
+  @$pb.TagNumber(7)
+  void clearBoolMessage() => $_clearField(7);
+  @$pb.TagNumber(7)
+  BoolMessage ensureBoolMessage() => $_ensure(5);
+
+  @$pb.TagNumber(8)
+  GetMoviePosition get moviePosition => $_getN(6);
+  @$pb.TagNumber(8)
+  set moviePosition(GetMoviePosition value) => $_setField(8, value);
+  @$pb.TagNumber(8)
+  $core.bool hasMoviePosition() => $_has(6);
+  @$pb.TagNumber(8)
+  void clearMoviePosition() => $_clearField(8);
+  @$pb.TagNumber(8)
+  GetMoviePosition ensureMoviePosition() => $_ensure(6);
 }
 
 const $core.bool _omitFieldNames =

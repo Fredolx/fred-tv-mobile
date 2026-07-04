@@ -77,8 +77,8 @@ message toggle_favorite {
   bool favorite = 2;
 }
 
-message id {
-  int64 id = 1;
+message id_message {
+  int64 value = 1;
 }
 
 message movie_position {
@@ -96,6 +96,10 @@ message BoolMessage {
 
 message GetMoviePosition {
   optional int64 position = 1; 
+}
+
+message InitMessage {
+  optional string path = 1;
 }
 
 message FFIResult {

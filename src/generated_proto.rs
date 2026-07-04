@@ -105,9 +105,9 @@ pub struct ToggleFavorite {
     pub favorite: bool,
 }
 #[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
-pub struct Id {
+pub struct IdMessage {
     #[prost(int64, tag = "1")]
-    pub id: i64,
+    pub value: i64,
 }
 #[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct MoviePosition {
@@ -130,6 +130,11 @@ pub struct BoolMessage {
 pub struct GetMoviePosition {
     #[prost(int64, optional, tag = "1")]
     pub position: ::core::option::Option<i64>,
+}
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct InitMessage {
+    #[prost(string, optional, tag = "1")]
+    pub path: ::core::option::Option<::prost::alloc::string::String>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct FfiResult {

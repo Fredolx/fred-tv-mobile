@@ -1626,6 +1626,50 @@ class RustLibBindings {
   late final _getloadavg = _getloadavgPtr
       .asFunction<int Function(ffi.Pointer<ffi.Double>, int)>();
 
+  void add_last_watched(int task_id, FfiCallback callback, Bytes message) {
+    return _add_last_watched(task_id, callback, message);
+  }
+
+  late final _add_last_watchedPtr =
+      _lookup<
+        ffi.NativeFunction<ffi.Void Function(ffi.Uint64, FfiCallback, Bytes)>
+      >('add_last_watched');
+  late final _add_last_watched = _add_last_watchedPtr
+      .asFunction<void Function(int, FfiCallback, Bytes)>();
+
+  void clear_history(int task_id, FfiCallback callback) {
+    return _clear_history(task_id, callback);
+  }
+
+  late final _clear_historyPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Uint64, FfiCallback)>>(
+        'clear_history',
+      );
+  late final _clear_history = _clear_historyPtr
+      .asFunction<void Function(int, FfiCallback)>();
+
+  void delete_source(int task_id, FfiCallback callback, Bytes message) {
+    return _delete_source(task_id, callback, message);
+  }
+
+  late final _delete_sourcePtr =
+      _lookup<
+        ffi.NativeFunction<ffi.Void Function(ffi.Uint64, FfiCallback, Bytes)>
+      >('delete_source');
+  late final _delete_source = _delete_sourcePtr
+      .asFunction<void Function(int, FfiCallback, Bytes)>();
+
+  void favorite(int task_id, FfiCallback callback, Bytes message) {
+    return _favorite(task_id, callback, message);
+  }
+
+  late final _favoritePtr =
+      _lookup<
+        ffi.NativeFunction<ffi.Void Function(ffi.Uint64, FfiCallback, Bytes)>
+      >('favorite');
+  late final _favorite = _favoritePtr
+      .asFunction<void Function(int, FfiCallback, Bytes)>();
+
   void free_message(Bytes bytes) {
     return _free_message(bytes);
   }
@@ -1635,16 +1679,49 @@ class RustLibBindings {
   late final _free_message = _free_messagePtr
       .asFunction<void Function(Bytes)>();
 
-  void initialize(int task_id, FfiCallback callback) {
-    return _initialize(task_id, callback);
+  void get_channels(int task_id, FfiCallback callback, Bytes message) {
+    return _get_channels(task_id, callback, message);
+  }
+
+  late final _get_channelsPtr =
+      _lookup<
+        ffi.NativeFunction<ffi.Void Function(ffi.Uint64, FfiCallback, Bytes)>
+      >('get_channels');
+  late final _get_channels = _get_channelsPtr
+      .asFunction<void Function(int, FfiCallback, Bytes)>();
+
+  void get_movie_position(int task_id, FfiCallback callback, Bytes message) {
+    return _get_movie_position(task_id, callback, message);
+  }
+
+  late final _get_movie_positionPtr =
+      _lookup<
+        ffi.NativeFunction<ffi.Void Function(ffi.Uint64, FfiCallback, Bytes)>
+      >('get_movie_position');
+  late final _get_movie_position = _get_movie_positionPtr
+      .asFunction<void Function(int, FfiCallback, Bytes)>();
+
+  void get_settings(int task_id, FfiCallback callback) {
+    return _get_settings(task_id, callback);
+  }
+
+  late final _get_settingsPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Uint64, FfiCallback)>>(
+        'get_settings',
+      );
+  late final _get_settings = _get_settingsPtr
+      .asFunction<void Function(int, FfiCallback)>();
+
+  void initialize(int task_id, FfiCallback callback, Bytes message) {
+    return _initialize(task_id, callback, message);
   }
 
   late final _initializePtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Uint64, FfiCallback)>>(
-        'initialize',
-      );
+      _lookup<
+        ffi.NativeFunction<ffi.Void Function(ffi.Uint64, FfiCallback, Bytes)>
+      >('initialize');
   late final _initialize = _initializePtr
-      .asFunction<void Function(int, FfiCallback)>();
+      .asFunction<void Function(int, FfiCallback, Bytes)>();
 
   void process_source(int task_id, FfiCallback callback, Bytes message) {
     return _process_source(task_id, callback, message);
@@ -1668,15 +1745,38 @@ class RustLibBindings {
   late final _refresh_source = _refresh_sourcePtr
       .asFunction<void Function(int, FfiCallback, Bytes)>();
 
-  void test(int task_id, FfiCallback callback) {
-    return _test(task_id, callback);
+  void set_movie_position(int task_id, FfiCallback callback, Bytes message) {
+    return _set_movie_position(task_id, callback, message);
   }
 
-  late final _testPtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Uint64, FfiCallback)>>(
-        'test',
-      );
-  late final _test = _testPtr.asFunction<void Function(int, FfiCallback)>();
+  late final _set_movie_positionPtr =
+      _lookup<
+        ffi.NativeFunction<ffi.Void Function(ffi.Uint64, FfiCallback, Bytes)>
+      >('set_movie_position');
+  late final _set_movie_position = _set_movie_positionPtr
+      .asFunction<void Function(int, FfiCallback, Bytes)>();
+
+  void source_name_exists(int task_id, FfiCallback callback, Bytes message) {
+    return _source_name_exists(task_id, callback, message);
+  }
+
+  late final _source_name_existsPtr =
+      _lookup<
+        ffi.NativeFunction<ffi.Void Function(ffi.Uint64, FfiCallback, Bytes)>
+      >('source_name_exists');
+  late final _source_name_exists = _source_name_existsPtr
+      .asFunction<void Function(int, FfiCallback, Bytes)>();
+
+  void update_settings(int task_id, FfiCallback callback, Bytes message) {
+    return _update_settings(task_id, callback, message);
+  }
+
+  late final _update_settingsPtr =
+      _lookup<
+        ffi.NativeFunction<ffi.Void Function(ffi.Uint64, FfiCallback, Bytes)>
+      >('update_settings');
+  late final _update_settings = _update_settingsPtr
+      .asFunction<void Function(int, FfiCallback, Bytes)>();
 }
 
 typedef ptrdiff_t = ffi.Long;
