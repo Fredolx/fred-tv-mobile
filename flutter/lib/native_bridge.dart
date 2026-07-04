@@ -202,6 +202,19 @@ class NativeBridge {
     return result.boolMessage.value;
   }
 
+  Future<bool> shouldShowWhatsNew(String? currentVersion) async {
+    final result = await _executeWithMsg(pb.OptStrMessage(value: currentVersion), (id, msg, cb) {
+      _bindings.should_show_whats_new(id, cb, msg);
+    });
+    return result.boolMessage.value;
+  }
+
+  Future<void> updateLastSeenVersion(String version) async {
+    await _executeWithMsg(pb.StrMessage(value: version), (id, msg, cb) {
+      _bindings.update_last_seen_version(id, cb, msg);
+    });
+  }
+
   void dispose() {
     _globalCallback.close();
     for (final completer in _pendingRequests.values) {

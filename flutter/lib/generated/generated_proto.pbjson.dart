@@ -455,6 +455,21 @@ const StrMessage$json = {
 final $typed_data.Uint8List strMessageDescriptor =
     $convert.base64Decode('CgpTdHJNZXNzYWdlEhQKBXZhbHVlGAEgASgJUgV2YWx1ZQ==');
 
+@$core.Deprecated('Use optStrMessageDescriptor instead')
+const OptStrMessage$json = {
+  '1': 'OptStrMessage',
+  '2': [
+    {'1': 'value', '3': 1, '4': 1, '5': 9, '9': 0, '10': 'value', '17': true},
+  ],
+  '8': [
+    {'1': '_value'},
+  ],
+};
+
+/// Descriptor for `OptStrMessage`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List optStrMessageDescriptor = $convert.base64Decode(
+    'Cg1PcHRTdHJNZXNzYWdlEhkKBXZhbHVlGAEgASgJSABSBXZhbHVliAEBQggKBl92YWx1ZQ==');
+
 @$core.Deprecated('Use boolMessageDescriptor instead')
 const BoolMessage$json = {
   '1': 'BoolMessage',

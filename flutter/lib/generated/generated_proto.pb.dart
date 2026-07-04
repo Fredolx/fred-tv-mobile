@@ -960,6 +960,61 @@ class StrMessage extends $pb.GeneratedMessage {
   void clearValue() => $_clearField(1);
 }
 
+class OptStrMessage extends $pb.GeneratedMessage {
+  factory OptStrMessage({
+    $core.String? value,
+  }) {
+    final result = create();
+    if (value != null) result.value = value;
+    return result;
+  }
+
+  OptStrMessage._();
+
+  factory OptStrMessage.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory OptStrMessage.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'OptStrMessage',
+      package:
+          const $pb.PackageName(_omitMessageNames ? '' : 'generated_proto'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'value')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  OptStrMessage clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  OptStrMessage copyWith(void Function(OptStrMessage) updates) =>
+      super.copyWith((message) => updates(message as OptStrMessage))
+          as OptStrMessage;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static OptStrMessage create() => OptStrMessage._();
+  @$core.override
+  OptStrMessage createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static OptStrMessage getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<OptStrMessage>(create);
+  static OptStrMessage? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get value => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set value($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasValue() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearValue() => $_clearField(1);
+}
+
 class BoolMessage extends $pb.GeneratedMessage {
   factory BoolMessage({
     $core.bool? value,
