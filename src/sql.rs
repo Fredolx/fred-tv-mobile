@@ -18,6 +18,7 @@ use rusqlite_migration::{M, Migrations};
 
 const PAGE_SIZE: u8 = 36;
 pub const DB_NAME: &str = "db_rust.sqlite";
+pub const LAST_SEEN_VERSION_KEY: &str = "last_seen_version";
 pub static DB_PATH_OVERRIDE: OnceLock<String> = OnceLock::new();
 static CONN: LazyLock<Pool<SqliteConnectionManager>> = LazyLock::new(|| create_connection_pool());
 
@@ -1054,4 +1055,21 @@ pub fn get_movie_position(channel_id: i64) -> Result<Option<i64>> {
         )
         .optional()?;
     Ok(position)
+}
+
+pub fn get_whats_new() -> Result<Option<String>> {
+    let sql = get_conn()?;
+    let version: Option<String> = sql
+        .query_row(
+            r#"
+        SELECT value 
+        FROM settings
+        WHERE key = ?
+        LIMIT 1
+    "#,
+            params![LAST_SEEN_VERSION_KEY],
+            |row| row.get(0),
+        )
+        .optional()?;
+    Ok(version)
 }

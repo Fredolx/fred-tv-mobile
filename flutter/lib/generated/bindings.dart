@@ -1767,6 +1767,17 @@ class RustLibBindings {
   late final _set_movie_position = _set_movie_positionPtr
       .asFunction<void Function(int, FfiCallback, Bytes)>();
 
+  void should_show_whats_new(int task_id, FfiCallback callback, Bytes message) {
+    return _should_show_whats_new(task_id, callback, message);
+  }
+
+  late final _should_show_whats_newPtr =
+      _lookup<
+        ffi.NativeFunction<ffi.Void Function(ffi.Uint64, FfiCallback, Bytes)>
+      >('should_show_whats_new');
+  late final _should_show_whats_new = _should_show_whats_newPtr
+      .asFunction<void Function(int, FfiCallback, Bytes)>();
+
   void source_name_exists(int task_id, FfiCallback callback, Bytes message) {
     return _source_name_exists(task_id, callback, message);
   }
@@ -1776,6 +1787,21 @@ class RustLibBindings {
         ffi.NativeFunction<ffi.Void Function(ffi.Uint64, FfiCallback, Bytes)>
       >('source_name_exists');
   late final _source_name_exists = _source_name_existsPtr
+      .asFunction<void Function(int, FfiCallback, Bytes)>();
+
+  void update_last_seen_version(
+    int task_id,
+    FfiCallback callback,
+    Bytes message,
+  ) {
+    return _update_last_seen_version(task_id, callback, message);
+  }
+
+  late final _update_last_seen_versionPtr =
+      _lookup<
+        ffi.NativeFunction<ffi.Void Function(ffi.Uint64, FfiCallback, Bytes)>
+      >('update_last_seen_version');
+  late final _update_last_seen_version = _update_last_seen_versionPtr
       .asFunction<void Function(int, FfiCallback, Bytes)>();
 
   void update_settings(int task_id, FfiCallback callback, Bytes message) {

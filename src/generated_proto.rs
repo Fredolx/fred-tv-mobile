@@ -121,6 +121,11 @@ pub struct StrMessage {
     #[prost(string, tag = "1")]
     pub value: ::prost::alloc::string::String,
 }
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct OptStrMessage {
+    #[prost(string, optional, tag = "1")]
+    pub value: ::core::option::Option<::prost::alloc::string::String>,
+}
 #[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct BoolMessage {
     #[prost(bool, tag = "1")]

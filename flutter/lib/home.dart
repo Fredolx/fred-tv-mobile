@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:open_tv/native_bridge.dart';
 import 'package:open_tv/utils.dart';
 import 'package:open_tv/bottom_nav.dart';
 import 'package:open_tv/channel_tile.dart';
@@ -14,6 +15,7 @@ import 'package:open_tv/models/node_type.dart';
 import 'package:open_tv/models/view_type.dart';
 import 'package:open_tv/error.dart';
 import 'package:open_tv/whats_new_modal.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class Home extends StatefulWidget {
   final HomeManager home;
@@ -60,8 +62,9 @@ class _HomeState extends State<Home> {
           .getMediaTypes();
     }
     await load();
-    final String? version = await SettingsService.shouldShowWhatsNew();
-    if (widget.firstLaunch && version != null) {
+    var version = (await PackageInfo.fromPlatform()).version;
+    if (widget.firstLaunch &&
+        await NativeBridge.instance.shouldShowWhatsNew(version)) {
       await showWhatsNew(version);
     }
     if (widget.refresh) {

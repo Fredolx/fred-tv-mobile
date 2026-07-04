@@ -91,6 +91,10 @@ message StrMessage {
   string value = 1;
 }
 
+message OptStrMessage {
+  optional string value = 1;
+}
+
 message BoolMessage {
   bool value = 1;
 }

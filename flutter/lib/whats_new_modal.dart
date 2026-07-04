@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:open_tv/native_bridge.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class WhatsNewModal extends StatelessWidget {
@@ -24,7 +26,9 @@ class WhatsNewModal extends StatelessWidget {
         ),
         TextButton(
           onPressed: () async {
-            await SettingsService.updateLastSeenVersion();
+            await NativeBridge.instance.updateLastSeenVersion(
+              (await PackageInfo.fromPlatform()).version,
+            );
             Navigator.pop(context, true);
           },
           child: const Text("Don't show again"),

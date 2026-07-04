@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::c::{Bytes, FfiCallback};
 use crate::generated_proto::ToggleFavorite;
 use anyhow::Ok;
@@ -273,6 +275,36 @@ pub extern "C" fn get_episodes(task_id: u64, callback: FfiCallback, message: Byt
                 get_episodes_msg.fallback_image,
             )
             .await
+        },
+    )
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn should_show_whats_new(task_id: u64, callback: FfiCallback, message: Bytes) {
+    c::queue_blocking_with_message(
+        task_id,
+        callback,
+        message,
+        |opt_str_message: generated_proto::OptStrMessage| {
+            Ok(generated_proto::ffi_result::Data::BoolMessage(
+                crate::generated_proto::BoolMessage {
+                    value: utils::should_show_whats_new(opt_str_message.value)?,
+                },
+            ))
+        },
+    )
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn update_last_seen_version(task_id: u64, callback: FfiCallback, message: Bytes) {
+    c::queue_blocking_with_message(
+        task_id,
+        callback,
+        message,
+        |str_msg: crate::generated_proto::StrMessage| {
+            let mut map: HashMap<String, Option<String>> = HashMap::new();
+            map.insert(sql::LAST_SEEN_VERSION_KEY.to_string(), Some(str_msg.value));
+            sql::update_settings(map)
         },
     )
 }

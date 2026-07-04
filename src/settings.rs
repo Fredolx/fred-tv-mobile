@@ -10,6 +10,7 @@ pub const DEFAULT_VIEW: &str = "defaultView";
 pub const VOLUME: &str = "volume";
 pub const REFRESH_ON_START: &str = "refreshOnStart";
 pub const DEFAULT_SORT: &str = "defaultSort";
+pub const LAST_SEEN_VERSION: &str = "lastSeenVersion";
 
 pub fn get_settings() -> Result<Settings> {
     let map = sql::get_settings()?;
@@ -46,7 +47,7 @@ pub fn update_settings(settings: Settings) -> Result<()> {
     }
     if let Some(sort) = settings.default_sort {
         map.insert(DEFAULT_SORT.to_string(), Some(sort.to_string()));
-    }   
+    }
     sql::update_settings(map)?;
     Ok(())
 }

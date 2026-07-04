@@ -135,6 +135,10 @@ pub fn get_user_agent_from_source(source: &Source) -> Result<String> {
     Ok(user_agent.to_string())
 }
 
+pub fn should_show_whats_new(version: Option<String>) -> Result<bool> {
+    Ok(sql::get_whats_new()? != version)
+}
+
 #[cfg(test)]
 mod test_utils {
     use super::sanitize;
