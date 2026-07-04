@@ -38,16 +38,18 @@ const ViewType$json = {
   '1': 'ViewType',
   '2': [
     {'1': 'VIEW_TYPE_ALL', '2': 0},
-    {'1': 'VIEW_TYPE_FAVORITES', '2': 1},
-    {'1': 'VIEW_TYPE_CATEGORIES', '2': 2},
+    {'1': 'VIEW_TYPE_CATEGORIES', '2': 1},
+    {'1': 'VIEW_TYPE_FAVORITES', '2': 2},
     {'1': 'VIEW_TYPE_HISTORY', '2': 3},
+    {'1': 'VIEW_TYPE_SETTINGS', '2': 4},
   ],
 };
 
 /// Descriptor for `ViewType`. Decode as a `google.protobuf.EnumDescriptorProto`.
 final $typed_data.Uint8List viewTypeDescriptor = $convert.base64Decode(
-    'CghWaWV3VHlwZRIRCg1WSUVXX1RZUEVfQUxMEAASFwoTVklFV19UWVBFX0ZBVk9SSVRFUxABEh'
-    'gKFFZJRVdfVFlQRV9DQVRFR09SSUVTEAISFQoRVklFV19UWVBFX0hJU1RPUlkQAw==');
+    'CghWaWV3VHlwZRIRCg1WSUVXX1RZUEVfQUxMEAASGAoUVklFV19UWVBFX0NBVEVHT1JJRVMQAR'
+    'IXChNWSUVXX1RZUEVfRkFWT1JJVEVTEAISFQoRVklFV19UWVBFX0hJU1RPUlkQAxIWChJWSUVX'
+    'X1RZUEVfU0VUVElOR1MQBA==');
 
 @$core.Deprecated('Use channelDescriptor instead')
 const Channel$json = {
@@ -503,6 +505,33 @@ const InitMessage$json = {
 /// Descriptor for `InitMessage`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List initMessageDescriptor = $convert.base64Decode(
     'CgtJbml0TWVzc2FnZRIXCgRwYXRoGAEgASgJSABSBHBhdGiIAQFCBwoFX3BhdGg=');
+
+@$core.Deprecated('Use getEpisodesDescriptor instead')
+const GetEpisodes$json = {
+  '1': 'GetEpisodes',
+  '2': [
+    {'1': 'series_id', '3': 1, '4': 1, '5': 3, '10': 'seriesId'},
+    {'1': 'source_id', '3': 2, '4': 1, '5': 3, '10': 'sourceId'},
+    {
+      '1': 'fallback_image',
+      '3': 3,
+      '4': 1,
+      '5': 9,
+      '9': 0,
+      '10': 'fallbackImage',
+      '17': true
+    },
+  ],
+  '8': [
+    {'1': '_fallback_image'},
+  ],
+};
+
+/// Descriptor for `GetEpisodes`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List getEpisodesDescriptor = $convert.base64Decode(
+    'CgtHZXRFcGlzb2RlcxIbCglzZXJpZXNfaWQYASABKANSCHNlcmllc0lkEhsKCXNvdXJjZV9pZB'
+    'gCIAEoA1IIc291cmNlSWQSKgoOZmFsbGJhY2tfaW1hZ2UYAyABKAlIAFINZmFsbGJhY2tJbWFn'
+    'ZYgBAUIRCg9fZmFsbGJhY2tfaW1hZ2U=');
 
 @$core.Deprecated('Use fFIResultDescriptor instead')
 const FFIResult$json = {

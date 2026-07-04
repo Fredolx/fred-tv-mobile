@@ -136,6 +136,15 @@ pub struct InitMessage {
     #[prost(string, optional, tag = "1")]
     pub path: ::core::option::Option<::prost::alloc::string::String>,
 }
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct GetEpisodes {
+    #[prost(int64, tag = "1")]
+    pub series_id: i64,
+    #[prost(int64, tag = "2")]
+    pub source_id: i64,
+    #[prost(string, optional, tag = "3")]
+    pub fallback_image: ::core::option::Option<::prost::alloc::string::String>,
+}
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct FfiResult {
     #[prost(bool, tag = "1")]
@@ -200,9 +209,10 @@ impl MediaType {
 #[repr(i32)]
 pub enum ViewType {
     All = 0,
-    Favorites = 1,
-    Categories = 2,
+    Categories = 1,
+    Favorites = 2,
     History = 3,
+    Settings = 4,
 }
 impl ViewType {
     /// String value of the enum field names used in the ProtoBuf definition.
@@ -212,18 +222,20 @@ impl ViewType {
     pub fn as_str_name(&self) -> &'static str {
         match self {
             Self::All => "VIEW_TYPE_ALL",
-            Self::Favorites => "VIEW_TYPE_FAVORITES",
             Self::Categories => "VIEW_TYPE_CATEGORIES",
+            Self::Favorites => "VIEW_TYPE_FAVORITES",
             Self::History => "VIEW_TYPE_HISTORY",
+            Self::Settings => "VIEW_TYPE_SETTINGS",
         }
     }
     /// Creates an enum from field names used in the ProtoBuf definition.
     pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
         match value {
             "VIEW_TYPE_ALL" => Some(Self::All),
-            "VIEW_TYPE_FAVORITES" => Some(Self::Favorites),
             "VIEW_TYPE_CATEGORIES" => Some(Self::Categories),
+            "VIEW_TYPE_FAVORITES" => Some(Self::Favorites),
             "VIEW_TYPE_HISTORY" => Some(Self::History),
+            "VIEW_TYPE_SETTINGS" => Some(Self::Settings),
             _ => None,
         }
     }

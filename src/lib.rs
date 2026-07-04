@@ -261,6 +261,23 @@ pub extern "C" fn source_name_exists(task_id: u64, callback: FfiCallback, messag
 }
 
 #[unsafe(no_mangle)]
+pub extern "C" fn get_episodes(task_id: u64, callback: FfiCallback, message: Bytes) {
+    c::queue_async_with_message(
+        task_id,
+        callback,
+        message,
+        async move |get_episodes_msg: crate::generated_proto::GetEpisodes| {
+            xtream::get_episodes(
+                get_episodes_msg.series_id,
+                get_episodes_msg.source_id,
+                get_episodes_msg.fallback_image,
+            )
+            .await
+        },
+    )
+}
+
+#[unsafe(no_mangle)]
 pub extern "C" fn free_message(bytes: Bytes) {
     unsafe {
         bytes.free();

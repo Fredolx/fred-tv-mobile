@@ -1,9 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:open_tv/backend/settings_service.dart';
-import 'package:open_tv/backend/sql.dart';
-import 'package:open_tv/backend/utils.dart';
+import 'package:open_tv/utils.dart';
 import 'package:open_tv/bottom_nav.dart';
 import 'package:open_tv/channel_tile.dart';
 import 'package:open_tv/loading.dart';

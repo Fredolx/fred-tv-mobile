@@ -1690,6 +1690,17 @@ class RustLibBindings {
   late final _get_channels = _get_channelsPtr
       .asFunction<void Function(int, FfiCallback, Bytes)>();
 
+  void get_episodes(int task_id, FfiCallback callback, Bytes message) {
+    return _get_episodes(task_id, callback, message);
+  }
+
+  late final _get_episodesPtr =
+      _lookup<
+        ffi.NativeFunction<ffi.Void Function(ffi.Uint64, FfiCallback, Bytes)>
+      >('get_episodes');
+  late final _get_episodes = _get_episodesPtr
+      .asFunction<void Function(int, FfiCallback, Bytes)>();
+
   void get_movie_position(int task_id, FfiCallback callback, Bytes message) {
     return _get_movie_position(task_id, callback, message);
   }
@@ -2703,9 +2714,9 @@ const int ALPHABETICAL_ASC = 0;
 
 const int ALPHABETICAL_DESC = 1;
 
-const int CATEGORIES = 2;
+const int CATEGORIES = 1;
 
-const int FAVORITES = 1;
+const int FAVORITES = 2;
 
 const int GROUP = 3;
 
@@ -2724,5 +2735,7 @@ const int PROVIDER = 2;
 const int SEASON = 4;
 
 const int SERIE = 2;
+
+const int SETTINGS = 4;
 
 const int XTREAM = 2;
