@@ -72,16 +72,16 @@ message Filters {
   optional int64 season = 10;
 }
 
-message toggle_favorite {
+message ToggleFavorite {
   int64 channel_id = 1;
   bool favorite = 2;
 }
 
-message id_message {
+message IdMessage {
   int64 value = 1;
 }
 
-message movie_position {
+message MoviePosition {
   int64 channel_id = 1;
   int64 position = 2;
 }

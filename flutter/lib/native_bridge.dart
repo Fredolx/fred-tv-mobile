@@ -109,6 +109,66 @@ class NativeBridge {
     });
   }
 
+  Future<pb.FFIResult> deleteSource(pb.IdMessage id) {
+    return _executeWithMsg(id, (id, msg, cb) {
+      _bindings.delete_source(id, cb, msg);
+    });
+  }
+
+  Future<pb.FFIResult> getChannels(pb.Filters filters) {
+    return _executeWithMsg(filters, (id, msg, cb) {
+      _bindings.get_channels(id, cb, msg);
+    });
+  }
+
+  Future<pb.FFIResult> favorite(pb.ToggleFavorite toggle) {
+    return _executeWithMsg(toggle, (id, msg, cb) {
+      _bindings.favorite(id, cb, msg);
+    });
+  }
+
+  Future<pb.FFIResult> getSettings() {
+    return _executeAsync((id, cb) {
+      _bindings.get_settings(id, cb);
+    });
+  }
+
+  Future<pb.FFIResult> updateSettings(pb.Settings settings) {
+    return _executeWithMsg(settings, (id, msg, cb) {
+      _bindings.update_settings(id, cb, msg);
+    });
+  }
+
+  Future<pb.FFIResult> addLastWatched(pb.IdMessage id) {
+    return _executeWithMsg(id, (id, msg, cb) {
+      _bindings.add_last_watched(id, cb, msg);
+    });
+  }
+
+  Future<pb.FFIResult> setMoviePosition(pb.MoviePosition position) {
+    return _executeWithMsg(position, (id, msg, cb) {
+      _bindings.set_movie_position(id, cb, msg);
+    });
+  }
+
+  Future<pb.FFIResult> getMoviePosition(pb.IdMessage id) {
+    return _executeWithMsg(id, (id, msg, cb) {
+      _bindings.get_movie_position(id, cb, msg);
+    });
+  }
+
+  Future<pb.FFIResult> clearHistory() {
+    return _executeAsync((id, cb) {
+      _bindings.clear_history(id, cb);
+    });
+  }
+
+  Future<pb.FFIResult> sourceNameExists(pb.StrMessage str) {
+    return _executeWithMsg(str, (id, msg, cb) {
+      _bindings.source_name_exists(id, cb, msg);
+    });
+  }
+
   void dispose() {
     _globalCallback.close();
     for (final completer in _pendingRequests.values) {

@@ -401,45 +401,45 @@ final $typed_data.Uint8List filtersDescriptor = $convert.base64Decode(
     'b24YCiABKANIA1IGc2Vhc29uiAEBQggKBl9xdWVyeUIMCgpfc2VyaWVzX2lkQgsKCV9ncm91cF'
     '9pZEIJCgdfc2Vhc29u');
 
-@$core.Deprecated('Use toggle_favoriteDescriptor instead')
-const toggle_favorite$json = {
-  '1': 'toggle_favorite',
+@$core.Deprecated('Use toggleFavoriteDescriptor instead')
+const ToggleFavorite$json = {
+  '1': 'ToggleFavorite',
   '2': [
     {'1': 'channel_id', '3': 1, '4': 1, '5': 3, '10': 'channelId'},
     {'1': 'favorite', '3': 2, '4': 1, '5': 8, '10': 'favorite'},
   ],
 };
 
-/// Descriptor for `toggle_favorite`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List toggle_favoriteDescriptor = $convert.base64Decode(
-    'Cg90b2dnbGVfZmF2b3JpdGUSHQoKY2hhbm5lbF9pZBgBIAEoA1IJY2hhbm5lbElkEhoKCGZhdm'
-    '9yaXRlGAIgASgIUghmYXZvcml0ZQ==');
+/// Descriptor for `ToggleFavorite`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List toggleFavoriteDescriptor = $convert.base64Decode(
+    'Cg5Ub2dnbGVGYXZvcml0ZRIdCgpjaGFubmVsX2lkGAEgASgDUgljaGFubmVsSWQSGgoIZmF2b3'
+    'JpdGUYAiABKAhSCGZhdm9yaXRl');
 
-@$core.Deprecated('Use id_messageDescriptor instead')
-const id_message$json = {
-  '1': 'id_message',
+@$core.Deprecated('Use idMessageDescriptor instead')
+const IdMessage$json = {
+  '1': 'IdMessage',
   '2': [
     {'1': 'value', '3': 1, '4': 1, '5': 3, '10': 'value'},
   ],
 };
 
-/// Descriptor for `id_message`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List id_messageDescriptor =
-    $convert.base64Decode('CgppZF9tZXNzYWdlEhQKBXZhbHVlGAEgASgDUgV2YWx1ZQ==');
+/// Descriptor for `IdMessage`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List idMessageDescriptor =
+    $convert.base64Decode('CglJZE1lc3NhZ2USFAoFdmFsdWUYASABKANSBXZhbHVl');
 
-@$core.Deprecated('Use movie_positionDescriptor instead')
-const movie_position$json = {
-  '1': 'movie_position',
+@$core.Deprecated('Use moviePositionDescriptor instead')
+const MoviePosition$json = {
+  '1': 'MoviePosition',
   '2': [
     {'1': 'channel_id', '3': 1, '4': 1, '5': 3, '10': 'channelId'},
     {'1': 'position', '3': 2, '4': 1, '5': 3, '10': 'position'},
   ],
 };
 
-/// Descriptor for `movie_position`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List movie_positionDescriptor = $convert.base64Decode(
-    'Cg5tb3ZpZV9wb3NpdGlvbhIdCgpjaGFubmVsX2lkGAEgASgDUgljaGFubmVsSWQSGgoIcG9zaX'
-    'Rpb24YAiABKANSCHBvc2l0aW9u');
+/// Descriptor for `MoviePosition`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List moviePositionDescriptor = $convert.base64Decode(
+    'Cg1Nb3ZpZVBvc2l0aW9uEh0KCmNoYW5uZWxfaWQYASABKANSCWNoYW5uZWxJZBIaCghwb3NpdG'
+    'lvbhgCIAEoA1IIcG9zaXRpb24=');
 
 @$core.Deprecated('Use strMessageDescriptor instead')
 const StrMessage$json = {
