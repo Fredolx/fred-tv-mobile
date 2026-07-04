@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:open_tv/backend/settings_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class WhatsNewModal extends StatelessWidget {

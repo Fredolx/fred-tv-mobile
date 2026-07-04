@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:open_tv/backend/settings_service.dart';
-import 'package:open_tv/backend/sql.dart';
-import 'package:open_tv/backend/utils.dart';
+import 'package:open_tv/utils.dart';
 import 'package:open_tv/bottom_nav.dart';
 import 'package:open_tv/confirm_delete.dart';
 import 'package:open_tv/models/filters.dart';

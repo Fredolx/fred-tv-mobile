@@ -1,9 +1,7 @@
-import 'dart:ffi';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:open_tv/generated/generated_proto.pb.dart' as pb;
 import 'package:open_tv/memory.dart';
 import 'package:open_tv/models/channel.dart';
 import 'package:open_tv/error.dart';
@@ -12,7 +10,6 @@ import 'package:open_tv/models/node.dart';
 import 'package:open_tv/models/node_type.dart';
 import 'package:open_tv/native_bridge.dart';
 import 'package:open_tv/player.dart';
-import 'package:fixnum/fixnum.dart';
 
 class ChannelTile extends StatefulWidget {
   final Channel channel;
@@ -63,7 +60,8 @@ class _ChannelTileState extends State<ChannelTile> {
     if (widget.channel.mediaType == MediaType.group) return;
     await Error.tryAsyncNoLoading(() async {
       await NativeBridge.instance.favorite(
-        pb.ToggleFavorite(channelId: Int64(widget.channel.id!)),
+        widget.channel.id!,
+        !widget.channel.favorite,
       );
       setState(() {
         widget.channel.favorite = !widget.channel.favorite;
@@ -84,7 +82,11 @@ class _ChannelTileState extends State<ChannelTile> {
           !refreshedSeries.contains(widget.channel.id)) {
         await Error.tryAsync(
           () async {
-            await getEpisodes(widget.channel);
+            await NativeBridge.instance.getEpisodes(
+              widget.channel.id!,
+              widget.channel.sourceId,
+              widget.channel.image,
+            );
             refreshedSeries.add(widget.channel.id!);
           },
           widget.parentContext,
@@ -103,8 +105,8 @@ class _ChannelTileState extends State<ChannelTile> {
         ),
       );
     } else {
-      var settings = await SettingsService.getSettings();
-      Sql.addToHistory(widget.channel.id!);
+      var settings = await NativeBridge.instance.getSettings();
+      NativeBridge.instance.addLastWatched(widget.channel.id!);
       Navigator.push(
         context,
         MaterialPageRoute(

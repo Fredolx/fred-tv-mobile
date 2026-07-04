@@ -45,22 +45,25 @@ class MediaType extends $pb.ProtobufEnum {
 class ViewType extends $pb.ProtobufEnum {
   static const ViewType VIEW_TYPE_ALL =
       ViewType._(0, _omitEnumNames ? '' : 'VIEW_TYPE_ALL');
-  static const ViewType VIEW_TYPE_FAVORITES =
-      ViewType._(1, _omitEnumNames ? '' : 'VIEW_TYPE_FAVORITES');
   static const ViewType VIEW_TYPE_CATEGORIES =
-      ViewType._(2, _omitEnumNames ? '' : 'VIEW_TYPE_CATEGORIES');
+      ViewType._(1, _omitEnumNames ? '' : 'VIEW_TYPE_CATEGORIES');
+  static const ViewType VIEW_TYPE_FAVORITES =
+      ViewType._(2, _omitEnumNames ? '' : 'VIEW_TYPE_FAVORITES');
   static const ViewType VIEW_TYPE_HISTORY =
       ViewType._(3, _omitEnumNames ? '' : 'VIEW_TYPE_HISTORY');
+  static const ViewType VIEW_TYPE_SETTINGS =
+      ViewType._(4, _omitEnumNames ? '' : 'VIEW_TYPE_SETTINGS');
 
   static const $core.List<ViewType> values = <ViewType>[
     VIEW_TYPE_ALL,
-    VIEW_TYPE_FAVORITES,
     VIEW_TYPE_CATEGORIES,
+    VIEW_TYPE_FAVORITES,
     VIEW_TYPE_HISTORY,
+    VIEW_TYPE_SETTINGS,
   ];
 
   static final $core.List<ViewType?> _byValue =
-      $pb.ProtobufEnum.$_initByValueList(values, 3);
+      $pb.ProtobufEnum.$_initByValueList(values, 4);
   static ViewType? valueOf($core.int value) =>
       value < 0 || value >= _byValue.length ? null : _byValue[value];
 

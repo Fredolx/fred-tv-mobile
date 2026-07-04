@@ -283,17 +283,18 @@ fn get_media_type_string(stream_type: u8) -> Result<String> {
     }
 }
 
-pub async fn get_episodes(channel: Channel) -> Result<()> {
-    let series_id = channel.url.context("no url")?.parse()?;
-    if sql::series_has_episodes(series_id, channel.source_id.context("no source id")?)
-        .unwrap_or_else(|e| {
-            log::log(format!("{:?}", e));
-            return false;
-        })
-    {
+pub async fn get_episodes(
+    series_id: i64,
+    source_id: i64,
+    fallback_image: Option<String>,
+) -> Result<()> {
+    if sql::series_has_episodes(series_id, source_id).unwrap_or_else(|e| {
+        log::log(format!("{:?}", e));
+        return false;
+    }) {
         return Ok(());
     }
-    let mut source = sql::get_source_from_id(channel.source_id.context("no source id")?)?;
+    let mut source = sql::get_source_from_id(source_id)?;
     let mut url = build_xtream_url(&mut source)?;
     let user_agent = get_user_agent_from_source(&source)?;
     url.query_pairs_mut()
@@ -320,7 +321,7 @@ pub async fn get_episodes(channel: Channel) -> Result<()> {
                 get_serde_json_i64(&a.episode_num).cmp(&get_serde_json_i64(&b.episode_num))
             })
     });
-    insert_episodes(&source, seasons, episodes, series_id, channel.image)?;
+    insert_episodes(&source, seasons, episodes, series_id, fallback_image)?;
     Ok(())
 }
 

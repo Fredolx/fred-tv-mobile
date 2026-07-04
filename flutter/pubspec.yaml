@@ -65,6 +65,7 @@ dependencies:
   device_info_plus: ^12.3.0
   ffi: ^2.2.0
   protobuf: ^6.0.0
+  fixnum: ^1.1.0
 
 dev_dependencies:
   flutter_test:

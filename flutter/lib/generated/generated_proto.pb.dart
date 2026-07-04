@@ -1125,6 +1125,85 @@ class InitMessage extends $pb.GeneratedMessage {
   void clearPath() => $_clearField(1);
 }
 
+class GetEpisodes extends $pb.GeneratedMessage {
+  factory GetEpisodes({
+    $fixnum.Int64? seriesId,
+    $fixnum.Int64? sourceId,
+    $core.String? fallbackImage,
+  }) {
+    final result = create();
+    if (seriesId != null) result.seriesId = seriesId;
+    if (sourceId != null) result.sourceId = sourceId;
+    if (fallbackImage != null) result.fallbackImage = fallbackImage;
+    return result;
+  }
+
+  GetEpisodes._();
+
+  factory GetEpisodes.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory GetEpisodes.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'GetEpisodes',
+      package:
+          const $pb.PackageName(_omitMessageNames ? '' : 'generated_proto'),
+      createEmptyInstance: create)
+    ..aInt64(1, _omitFieldNames ? '' : 'seriesId')
+    ..aInt64(2, _omitFieldNames ? '' : 'sourceId')
+    ..aOS(3, _omitFieldNames ? '' : 'fallbackImage')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetEpisodes clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetEpisodes copyWith(void Function(GetEpisodes) updates) =>
+      super.copyWith((message) => updates(message as GetEpisodes))
+          as GetEpisodes;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static GetEpisodes create() => GetEpisodes._();
+  @$core.override
+  GetEpisodes createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static GetEpisodes getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<GetEpisodes>(create);
+  static GetEpisodes? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get seriesId => $_getI64(0);
+  @$pb.TagNumber(1)
+  set seriesId($fixnum.Int64 value) => $_setInt64(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSeriesId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSeriesId() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $fixnum.Int64 get sourceId => $_getI64(1);
+  @$pb.TagNumber(2)
+  set sourceId($fixnum.Int64 value) => $_setInt64(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasSourceId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearSourceId() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get fallbackImage => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set fallbackImage($core.String value) => $_setString(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasFallbackImage() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearFallbackImage() => $_clearField(3);
+}
+
 enum FFIResult_Data {
   settings,
   source,

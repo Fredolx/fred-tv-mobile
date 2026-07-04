@@ -54,9 +54,10 @@ enum MediaType {
 
 enum ViewType {
   VIEW_TYPE_ALL = 0;
-  VIEW_TYPE_FAVORITES = 1;
-  VIEW_TYPE_CATEGORIES = 2;
+  VIEW_TYPE_CATEGORIES = 1;
+  VIEW_TYPE_FAVORITES = 2;
   VIEW_TYPE_HISTORY = 3;
+  VIEW_TYPE_SETTINGS = 4;
 }
 
 message Filters {
@@ -100,6 +101,12 @@ message GetMoviePosition {
 
 message InitMessage {
   optional string path = 1;
+}
+
+message GetEpisodes {
+  int64 series_id = 1;
+  int64 source_id = 2;
+  optional string fallback_image = 3;
 }
 
 message FFIResult {

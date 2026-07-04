@@ -3,10 +3,16 @@ import 'dart:ffi';
 import 'dart:io' show Platform;
 import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
+import 'package:fixnum/fixnum.dart';
 import 'package:protobuf/protobuf.dart' as $pb;
 
 import 'generated/generated_proto.pb.dart' as pb;
 import 'generated/bindings.dart' as ffi;
+import 'package:open_tv/models/channel.dart';
+import 'package:open_tv/models/source.dart';
+import 'package:open_tv/models/filters.dart';
+import 'package:open_tv/models/settings.dart';
+import 'package:open_tv/models/proto_extensions.dart';
 
 class NativeBridge {
   static NativeBridge? _instance;
@@ -58,19 +64,23 @@ class NativeBridge {
 
   Future<pb.FFIResult> _executeAsync(
     void Function(int taskId, ffi.FfiCallback callback) ffiAction,
-  ) {
+  ) async {
     final taskId = _nextTaskId++;
     final completer = Completer<pb.FFIResult>();
     _pendingRequests[taskId] = completer;
     ffiAction(taskId, _globalCallback.nativeFunction);
-    return completer.future;
+    final result = await completer.future;
+    if (!result.success) {
+      throw Exception(result.hasErrorMessage() ? result.errorMessage : "Unknown FFI error");
+    }
+    return result;
   }
 
   Future<pb.FFIResult> _executeWithMsg<T extends $pb.GeneratedMessage>(
     T request,
     void Function(int taskId, ffi.Bytes message, ffi.FfiCallback callback)
     ffiAction,
-  ) {
+  ) async {
     final pbBytes = request.writeToBuffer();
     final nativeBuffer = malloc.allocate<Uint8>(pbBytes.length);
     final requestBytes = malloc.allocate<ffi.Bytes>(1);
@@ -82,7 +92,7 @@ class NativeBridge {
       requestBytes.ref.ptr = nativeBuffer;
       requestBytes.ref.len = pbBytes.length;
 
-      return _executeAsync((id, cb) {
+      return await _executeAsync((id, cb) {
         ffiAction(id, requestBytes.ref, cb);
       });
     } finally {
@@ -91,82 +101,105 @@ class NativeBridge {
     }
   }
 
-  Future<pb.FFIResult> initialize(pb.InitMessage init) {
-    return _executeWithMsg(init, (id, msg, cb) {
+  Future<void> initialize(pb.InitMessage init) async {
+    await _executeWithMsg(init, (id, msg, cb) {
       _bindings.initialize(id, cb, msg);
     });
   }
 
-  Future<pb.FFIResult> processSource(pb.Source source) {
-    return _executeWithMsg(source, (id, msg, cb) {
+  Future<void> processSource(Source source) async {
+    await _executeWithMsg(source.toProto(), (id, msg, cb) {
       _bindings.process_source(id, cb, msg);
     });
   }
 
-  Future<pb.FFIResult> refreshSource(pb.Source source) {
-    return _executeWithMsg(source, (id, msg, cb) {
+  Future<void> refreshSource(Source source) async {
+    await _executeWithMsg(source.toProto(), (id, msg, cb) {
       _bindings.refresh_source(id, cb, msg);
     });
   }
 
-  Future<pb.FFIResult> deleteSource(pb.IdMessage id) {
-    return _executeWithMsg(id, (id, msg, cb) {
+  Future<void> deleteSource(int id) async {
+    await _executeWithMsg(pb.IdMessage(value: Int64(id)), (id, msg, cb) {
       _bindings.delete_source(id, cb, msg);
     });
   }
 
-  Future<pb.FFIResult> getChannels(pb.Filters filters) {
-    return _executeWithMsg(filters, (id, msg, cb) {
+  Future<List<Channel>> getChannels(Filters filters) async {
+    final result = await _executeWithMsg(filters.toProto(), (id, msg, cb) {
       _bindings.get_channels(id, cb, msg);
     });
+    return result.channelList.channels.map((c) => c.toDomain()).toList();
   }
 
-  Future<pb.FFIResult> favorite(pb.ToggleFavorite toggle) {
-    return _executeWithMsg(toggle, (id, msg, cb) {
-      _bindings.favorite(id, cb, msg);
-    });
+  Future<void> favorite(int channelId, bool isFavorite) async {
+    await _executeWithMsg(
+      pb.ToggleFavorite(channelId: Int64(channelId), favorite: isFavorite),
+      (id, msg, cb) {
+        _bindings.favorite(id, cb, msg);
+      },
+    );
   }
 
-  Future<pb.FFIResult> getSettings() {
-    return _executeAsync((id, cb) {
+  Future<Settings> getSettings() async {
+    final result = await _executeAsync((id, cb) {
       _bindings.get_settings(id, cb);
     });
+    return result.settings.toDomain();
   }
 
-  Future<pb.FFIResult> updateSettings(pb.Settings settings) {
-    return _executeWithMsg(settings, (id, msg, cb) {
+  Future<void> updateSettings(Settings settings) async {
+    await _executeWithMsg(settings.toProto(), (id, msg, cb) {
       _bindings.update_settings(id, cb, msg);
     });
   }
 
-  Future<pb.FFIResult> addLastWatched(pb.IdMessage id) {
-    return _executeWithMsg(id, (id, msg, cb) {
+  Future<void> addLastWatched(int id) async {
+    await _executeWithMsg(pb.IdMessage(value: Int64(id)), (id, msg, cb) {
       _bindings.add_last_watched(id, cb, msg);
     });
   }
 
-  Future<pb.FFIResult> setMoviePosition(pb.MoviePosition position) {
-    return _executeWithMsg(position, (id, msg, cb) {
-      _bindings.set_movie_position(id, cb, msg);
-    });
+  Future<void> setMoviePosition(int channelId, int position) async {
+    await _executeWithMsg(
+      pb.MoviePosition(channelId: Int64(channelId), position: Int64(position)),
+      (id, msg, cb) {
+        _bindings.set_movie_position(id, cb, msg);
+      },
+    );
   }
 
-  Future<pb.FFIResult> getMoviePosition(pb.IdMessage id) {
-    return _executeWithMsg(id, (id, msg, cb) {
+  Future<int?> getMoviePosition(int id) async {
+    final result = await _executeWithMsg(pb.IdMessage(value: Int64(id)), (id, msg, cb) {
       _bindings.get_movie_position(id, cb, msg);
     });
+    return result.hasMoviePosition() && result.moviePosition.hasPosition()
+        ? result.moviePosition.position.toInt()
+        : null;
   }
 
-  Future<pb.FFIResult> clearHistory() {
-    return _executeAsync((id, cb) {
+  Future<void> getEpisodes(int seriesId, int sourceId, String? fallbackImage) async {
+    final msg = pb.GetEpisodes(
+      seriesId: Int64(seriesId),
+      sourceId: Int64(sourceId),
+      fallbackImage: fallbackImage,
+    );
+    await _executeWithMsg(msg, (id, msg, cb) {
+      _bindings.get_episodes(id, cb, msg);
+    });
+  }
+
+  Future<void> clearHistory() async {
+    await _executeAsync((id, cb) {
       _bindings.clear_history(id, cb);
     });
   }
 
-  Future<pb.FFIResult> sourceNameExists(pb.StrMessage str) {
-    return _executeWithMsg(str, (id, msg, cb) {
+  Future<bool> sourceNameExists(String name) async {
+    final result = await _executeWithMsg(pb.StrMessage(value: name), (id, msg, cb) {
       _bindings.source_name_exists(id, cb, msg);
     });
+    return result.boolMessage.value;
   }
 
   void dispose() {
