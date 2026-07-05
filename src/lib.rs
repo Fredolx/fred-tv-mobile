@@ -60,6 +60,32 @@ impl From<crate::generated_proto::Source> for crate::types::Source {
     }
 }
 
+impl From<crate::types::Source> for crate::generated_proto::Source {
+    fn from(source: crate::types::Source) -> Self {
+        crate::generated_proto::Source {
+            id: source.id,
+            name: source.name,
+            url: source.url,
+            url_origin: source.url_origin,
+            username: source.username,
+            password: source.password,
+            source_type: source.source_type as u32,
+            enabled: source.enabled,
+            user_agent: source.user_agent,
+            stream_user_agent: source.stream_user_agent,
+            last_updated: source.last_updated,
+        }
+    }
+}
+
+impl From<Vec<crate::types::Source>> for crate::generated_proto::SourceList {
+    fn from(sources: Vec<crate::types::Source>) -> Self {
+        crate::generated_proto::SourceList {
+            sources: sources.into_iter().map(Into::into).collect(),
+        }
+    }
+}
+
 impl From<crate::generated_proto::Filters> for crate::types::Filters {
     fn from(filters: crate::generated_proto::Filters) -> Self {
         crate::types::Filters {
@@ -102,6 +128,19 @@ impl From<Vec<crate::types::Channel>> for crate::generated_proto::ChannelList {
     fn from(channels: Vec<crate::types::Channel>) -> Self {
         crate::generated_proto::ChannelList {
             channels: channels.into_iter().map(Into::into).collect(),
+        }
+    }
+}
+
+impl From<crate::types::ChannelHttpHeaders> for crate::generated_proto::ChannelHttpHeaders {
+    fn from(headers: crate::types::ChannelHttpHeaders) -> Self {
+        crate::generated_proto::ChannelHttpHeaders {
+            id: headers.id,
+            channel_id: headers.channel_id,
+            referrer: headers.referrer,
+            user_agent: headers.user_agent,
+            http_origin: headers.http_origin,
+            ignore_ssl: headers.ignore_ssl,
         }
     }
 }
@@ -305,6 +344,88 @@ pub extern "C" fn update_last_seen_version(task_id: u64, callback: FfiCallback, 
             let mut map: HashMap<String, Option<String>> = HashMap::new();
             map.insert(sql::LAST_SEEN_VERSION_KEY.to_string(), Some(str_msg.value));
             sql::update_settings(map)
+        },
+    )
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn refresh_all(task_id: u64, callback: FfiCallback) {
+    c::queue_async(task_id, callback, async move { utils::refresh_all().await })
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn get_channel_headers(task_id: u64, callback: FfiCallback, message: Bytes) {
+    c::queue_blocking_with_message(
+        task_id,
+        callback,
+        message,
+        |id: crate::generated_proto::IdMessage| {
+            let headers = sql::get_channel_headers_by_id(id.value)?;
+            Ok(headers.map(|f| {
+                generated_proto::ffi_result::Data::Headers(
+                    generated_proto::ChannelHttpHeaders::from(f),
+                )
+            }))
+        },
+    )
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn update_source(task_id: u64, callback: FfiCallback, message: Bytes) {
+    c::queue_blocking_with_message(
+        task_id,
+        callback,
+        message,
+        |source_msg: crate::generated_proto::Source| {
+            sql::update_source(crate::types::Source::from(source_msg))
+        },
+    );
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn get_enabled_sources_minimal(task_id: u64, callback: FfiCallback) {
+    c::queue_blocking(task_id, callback, || {
+        Ok(
+            crate::generated_proto::ffi_result::Data::EnabledSourcesMinimal(
+                crate::generated_proto::GetEnabledSourcesMinimal {
+                    list_id: sql::get_enabled_sources_minimal()?,
+                },
+            ),
+        )
+    })
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn has_sources(task_id: u64, callback: FfiCallback) {
+    c::queue_blocking(task_id, callback, || {
+        Ok(crate::generated_proto::ffi_result::Data::BoolMessage(
+            crate::generated_proto::BoolMessage {
+                value: sql::has_sources()?,
+            },
+        ))
+    })
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn get_sources(task_id: u64, callback: FfiCallback) {
+    c::queue_blocking(task_id, callback, || {
+        Ok(crate::generated_proto::ffi_result::Data::SourceList(
+            crate::generated_proto::SourceList::from(sql::get_sources()?),
+        ))
+    })
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn set_source_enabled(task_id: u64, callback: FfiCallback, message: Bytes) {
+    c::queue_blocking_with_message(
+        task_id,
+        callback,
+        message,
+        |set_source_enabled_msg: crate::generated_proto::SetSourceEnabled| {
+            sql::set_source_enabled(
+                set_source_enabled_msg.enabled,
+                set_source_enabled_msg.source_id,
+            )
         },
     )
 }

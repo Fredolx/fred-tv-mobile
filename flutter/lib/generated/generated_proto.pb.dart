@@ -1259,12 +1259,296 @@ class GetEpisodes extends $pb.GeneratedMessage {
   void clearFallbackImage() => $_clearField(3);
 }
 
+class ChannelHttpHeaders extends $pb.GeneratedMessage {
+  factory ChannelHttpHeaders({
+    $fixnum.Int64? id,
+    $fixnum.Int64? channelId,
+    $core.String? referrer,
+    $core.String? userAgent,
+    $core.String? httpOrigin,
+    $core.bool? ignoreSsl,
+  }) {
+    final result = create();
+    if (id != null) result.id = id;
+    if (channelId != null) result.channelId = channelId;
+    if (referrer != null) result.referrer = referrer;
+    if (userAgent != null) result.userAgent = userAgent;
+    if (httpOrigin != null) result.httpOrigin = httpOrigin;
+    if (ignoreSsl != null) result.ignoreSsl = ignoreSsl;
+    return result;
+  }
+
+  ChannelHttpHeaders._();
+
+  factory ChannelHttpHeaders.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory ChannelHttpHeaders.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ChannelHttpHeaders',
+      package:
+          const $pb.PackageName(_omitMessageNames ? '' : 'generated_proto'),
+      createEmptyInstance: create)
+    ..aInt64(1, _omitFieldNames ? '' : 'id')
+    ..aInt64(2, _omitFieldNames ? '' : 'channelId')
+    ..aOS(3, _omitFieldNames ? '' : 'referrer')
+    ..aOS(4, _omitFieldNames ? '' : 'userAgent')
+    ..aOS(5, _omitFieldNames ? '' : 'httpOrigin')
+    ..aOB(6, _omitFieldNames ? '' : 'ignoreSsl')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ChannelHttpHeaders clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ChannelHttpHeaders copyWith(void Function(ChannelHttpHeaders) updates) =>
+      super.copyWith((message) => updates(message as ChannelHttpHeaders))
+          as ChannelHttpHeaders;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static ChannelHttpHeaders create() => ChannelHttpHeaders._();
+  @$core.override
+  ChannelHttpHeaders createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static ChannelHttpHeaders getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ChannelHttpHeaders>(create);
+  static ChannelHttpHeaders? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get id => $_getI64(0);
+  @$pb.TagNumber(1)
+  set id($fixnum.Int64 value) => $_setInt64(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearId() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $fixnum.Int64 get channelId => $_getI64(1);
+  @$pb.TagNumber(2)
+  set channelId($fixnum.Int64 value) => $_setInt64(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasChannelId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearChannelId() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get referrer => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set referrer($core.String value) => $_setString(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasReferrer() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearReferrer() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.String get userAgent => $_getSZ(3);
+  @$pb.TagNumber(4)
+  set userAgent($core.String value) => $_setString(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasUserAgent() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearUserAgent() => $_clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.String get httpOrigin => $_getSZ(4);
+  @$pb.TagNumber(5)
+  set httpOrigin($core.String value) => $_setString(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasHttpOrigin() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearHttpOrigin() => $_clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.bool get ignoreSsl => $_getBF(5);
+  @$pb.TagNumber(6)
+  set ignoreSsl($core.bool value) => $_setBool(5, value);
+  @$pb.TagNumber(6)
+  $core.bool hasIgnoreSsl() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearIgnoreSsl() => $_clearField(6);
+}
+
+class GetEnabledSourcesMinimal extends $pb.GeneratedMessage {
+  factory GetEnabledSourcesMinimal({
+    $core.Iterable<$fixnum.Int64>? listId,
+  }) {
+    final result = create();
+    if (listId != null) result.listId.addAll(listId);
+    return result;
+  }
+
+  GetEnabledSourcesMinimal._();
+
+  factory GetEnabledSourcesMinimal.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory GetEnabledSourcesMinimal.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'GetEnabledSourcesMinimal',
+      package:
+          const $pb.PackageName(_omitMessageNames ? '' : 'generated_proto'),
+      createEmptyInstance: create)
+    ..p<$fixnum.Int64>(1, _omitFieldNames ? '' : 'listId', $pb.PbFieldType.K6)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetEnabledSourcesMinimal clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetEnabledSourcesMinimal copyWith(
+          void Function(GetEnabledSourcesMinimal) updates) =>
+      super.copyWith((message) => updates(message as GetEnabledSourcesMinimal))
+          as GetEnabledSourcesMinimal;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static GetEnabledSourcesMinimal create() => GetEnabledSourcesMinimal._();
+  @$core.override
+  GetEnabledSourcesMinimal createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static GetEnabledSourcesMinimal getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<GetEnabledSourcesMinimal>(create);
+  static GetEnabledSourcesMinimal? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $pb.PbList<$fixnum.Int64> get listId => $_getList(0);
+}
+
+class SourceList extends $pb.GeneratedMessage {
+  factory SourceList({
+    $core.Iterable<Source>? sources,
+  }) {
+    final result = create();
+    if (sources != null) result.sources.addAll(sources);
+    return result;
+  }
+
+  SourceList._();
+
+  factory SourceList.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory SourceList.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'SourceList',
+      package:
+          const $pb.PackageName(_omitMessageNames ? '' : 'generated_proto'),
+      createEmptyInstance: create)
+    ..pPM<Source>(1, _omitFieldNames ? '' : 'sources',
+        subBuilder: Source.create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SourceList clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SourceList copyWith(void Function(SourceList) updates) =>
+      super.copyWith((message) => updates(message as SourceList)) as SourceList;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static SourceList create() => SourceList._();
+  @$core.override
+  SourceList createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static SourceList getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SourceList>(create);
+  static SourceList? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $pb.PbList<Source> get sources => $_getList(0);
+}
+
+class SetSourceEnabled extends $pb.GeneratedMessage {
+  factory SetSourceEnabled({
+    $fixnum.Int64? sourceId,
+    $core.bool? enabled,
+  }) {
+    final result = create();
+    if (sourceId != null) result.sourceId = sourceId;
+    if (enabled != null) result.enabled = enabled;
+    return result;
+  }
+
+  SetSourceEnabled._();
+
+  factory SetSourceEnabled.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory SetSourceEnabled.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'SetSourceEnabled',
+      package:
+          const $pb.PackageName(_omitMessageNames ? '' : 'generated_proto'),
+      createEmptyInstance: create)
+    ..aInt64(1, _omitFieldNames ? '' : 'sourceId')
+    ..aOB(2, _omitFieldNames ? '' : 'enabled')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetSourceEnabled clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetSourceEnabled copyWith(void Function(SetSourceEnabled) updates) =>
+      super.copyWith((message) => updates(message as SetSourceEnabled))
+          as SetSourceEnabled;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static SetSourceEnabled create() => SetSourceEnabled._();
+  @$core.override
+  SetSourceEnabled createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static SetSourceEnabled getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SetSourceEnabled>(create);
+  static SetSourceEnabled? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get sourceId => $_getI64(0);
+  @$pb.TagNumber(1)
+  set sourceId($fixnum.Int64 value) => $_setInt64(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSourceId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSourceId() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.bool get enabled => $_getBF(1);
+  @$pb.TagNumber(2)
+  set enabled($core.bool value) => $_setBool(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasEnabled() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearEnabled() => $_clearField(2);
+}
+
 enum FFIResult_Data {
   settings,
   source,
   channelList,
   boolMessage,
   moviePosition,
+  headers,
+  enabledSourcesMinimal,
+  sourceList,
   notSet
 }
 
@@ -1277,6 +1561,9 @@ class FFIResult extends $pb.GeneratedMessage {
     ChannelList? channelList,
     BoolMessage? boolMessage,
     GetMoviePosition? moviePosition,
+    ChannelHttpHeaders? headers,
+    GetEnabledSourcesMinimal? enabledSourcesMinimal,
+    SourceList? sourceList,
   }) {
     final result = create();
     if (success != null) result.success = success;
@@ -1286,6 +1573,10 @@ class FFIResult extends $pb.GeneratedMessage {
     if (channelList != null) result.channelList = channelList;
     if (boolMessage != null) result.boolMessage = boolMessage;
     if (moviePosition != null) result.moviePosition = moviePosition;
+    if (headers != null) result.headers = headers;
+    if (enabledSourcesMinimal != null)
+      result.enabledSourcesMinimal = enabledSourcesMinimal;
+    if (sourceList != null) result.sourceList = sourceList;
     return result;
   }
 
@@ -1304,6 +1595,9 @@ class FFIResult extends $pb.GeneratedMessage {
     6: FFIResult_Data.channelList,
     7: FFIResult_Data.boolMessage,
     8: FFIResult_Data.moviePosition,
+    9: FFIResult_Data.headers,
+    10: FFIResult_Data.enabledSourcesMinimal,
+    11: FFIResult_Data.sourceList,
     0: FFIResult_Data.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
@@ -1311,7 +1605,7 @@ class FFIResult extends $pb.GeneratedMessage {
       package:
           const $pb.PackageName(_omitMessageNames ? '' : 'generated_proto'),
       createEmptyInstance: create)
-    ..oo(0, [3, 4, 6, 7, 8])
+    ..oo(0, [3, 4, 6, 7, 8, 9, 10, 11])
     ..aOB(1, _omitFieldNames ? '' : 'success')
     ..aOS(2, _omitFieldNames ? '' : 'errorMessage')
     ..aOM<Settings>(3, _omitFieldNames ? '' : 'settings',
@@ -1323,6 +1617,13 @@ class FFIResult extends $pb.GeneratedMessage {
         subBuilder: BoolMessage.create)
     ..aOM<GetMoviePosition>(8, _omitFieldNames ? '' : 'moviePosition',
         subBuilder: GetMoviePosition.create)
+    ..aOM<ChannelHttpHeaders>(9, _omitFieldNames ? '' : 'headers',
+        subBuilder: ChannelHttpHeaders.create)
+    ..aOM<GetEnabledSourcesMinimal>(
+        10, _omitFieldNames ? '' : 'enabledSourcesMinimal',
+        subBuilder: GetEnabledSourcesMinimal.create)
+    ..aOM<SourceList>(11, _omitFieldNames ? '' : 'sourceList',
+        subBuilder: SourceList.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1348,12 +1649,18 @@ class FFIResult extends $pb.GeneratedMessage {
   @$pb.TagNumber(6)
   @$pb.TagNumber(7)
   @$pb.TagNumber(8)
+  @$pb.TagNumber(9)
+  @$pb.TagNumber(10)
+  @$pb.TagNumber(11)
   FFIResult_Data whichData() => _FFIResult_DataByTag[$_whichOneof(0)]!;
   @$pb.TagNumber(3)
   @$pb.TagNumber(4)
   @$pb.TagNumber(6)
   @$pb.TagNumber(7)
   @$pb.TagNumber(8)
+  @$pb.TagNumber(9)
+  @$pb.TagNumber(10)
+  @$pb.TagNumber(11)
   void clearData() => $_clearField($_whichOneof(0));
 
   @$pb.TagNumber(1)
@@ -1428,6 +1735,40 @@ class FFIResult extends $pb.GeneratedMessage {
   void clearMoviePosition() => $_clearField(8);
   @$pb.TagNumber(8)
   GetMoviePosition ensureMoviePosition() => $_ensure(6);
+
+  @$pb.TagNumber(9)
+  ChannelHttpHeaders get headers => $_getN(7);
+  @$pb.TagNumber(9)
+  set headers(ChannelHttpHeaders value) => $_setField(9, value);
+  @$pb.TagNumber(9)
+  $core.bool hasHeaders() => $_has(7);
+  @$pb.TagNumber(9)
+  void clearHeaders() => $_clearField(9);
+  @$pb.TagNumber(9)
+  ChannelHttpHeaders ensureHeaders() => $_ensure(7);
+
+  @$pb.TagNumber(10)
+  GetEnabledSourcesMinimal get enabledSourcesMinimal => $_getN(8);
+  @$pb.TagNumber(10)
+  set enabledSourcesMinimal(GetEnabledSourcesMinimal value) =>
+      $_setField(10, value);
+  @$pb.TagNumber(10)
+  $core.bool hasEnabledSourcesMinimal() => $_has(8);
+  @$pb.TagNumber(10)
+  void clearEnabledSourcesMinimal() => $_clearField(10);
+  @$pb.TagNumber(10)
+  GetEnabledSourcesMinimal ensureEnabledSourcesMinimal() => $_ensure(8);
+
+  @$pb.TagNumber(11)
+  SourceList get sourceList => $_getN(9);
+  @$pb.TagNumber(11)
+  set sourceList(SourceList value) => $_setField(11, value);
+  @$pb.TagNumber(11)
+  $core.bool hasSourceList() => $_has(9);
+  @$pb.TagNumber(11)
+  void clearSourceList() => $_clearField(11);
+  @$pb.TagNumber(11)
+  SourceList ensureSourceList() => $_ensure(9);
 }
 
 const $core.bool _omitFieldNames =

@@ -55,7 +55,7 @@ class _SetupState extends State<Setup> {
   Future<void> finish() async {
     var result = await Error.tryAsync(
       () async {
-        await Utils.processSource(
+        await NativeBridge.instance.processSource(
           Source(
             name: formValues[Steps.name]!,
             sourceType: selectedSourceType,
@@ -154,7 +154,7 @@ class _SetupState extends State<Setup> {
     }
     if (step == Steps.name) {
       var sourceName = formValues[step]!;
-      if (await Sql.sourceNameExists(sourceName)) {
+      if (await NativeBridge.instance.sourceNameExists(sourceName)) {
         existingSourceNames.add(sourceName);
         _formKeys[step]?.currentState?.validate();
         return;

@@ -113,6 +113,28 @@ message GetEpisodes {
   optional string fallback_image = 3;
 }
 
+message ChannelHttpHeaders {
+  optional int64 id = 1;
+  optional int64 channel_id = 2;
+  optional string referrer = 3;
+  optional string user_agent = 4;
+  optional string http_origin = 5;
+  optional bool ignore_ssl = 6;
+}
+
+message GetEnabledSourcesMinimal {
+  repeated int64 list_id = 1;
+}
+
+message SourceList {
+  repeated Source sources = 1;
+}
+
+message SetSourceEnabled {
+  int64 source_id = 1;
+  bool enabled = 2;
+}
+
 message FFIResult {
   bool success = 1;
   optional string error_message = 2;
@@ -122,6 +144,9 @@ message FFIResult {
     ChannelList channel_list = 6;
     BoolMessage bool_message = 7;
     GetMoviePosition movie_position = 8;
+    ChannelHttpHeaders headers = 9;
+    GetEnabledSourcesMinimal enabled_sources_minimal = 10;
+    SourceList source_list = 11;
   }
 }
 
