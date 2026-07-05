@@ -1,6 +1,9 @@
+use anyhow::Context;
+use anyhow::Result;
 use chrono::Local;
-use directories::ProjectDirs;
-use std::{fs, sync::LazyLock};
+use std::{fs, path::PathBuf, str::FromStr, sync::LazyLock};
+
+use crate::utils;
 
 static USE_LOGGER: LazyLock<bool> = LazyLock::new(|| init_logger());
 
@@ -13,7 +16,9 @@ pub fn log(message: String) {
 }
 
 fn init_logger() -> bool {
-    let file = match fs::File::create(get_and_create_log_path()) {
+    let file = match get_and_create_log_path()
+        .and_then(|s| fs::File::create(s).context("failed to create file"))
+    {
         Ok(val) => val,
         Err(e) => {
             eprint!("Failed to create file for logger, {:?}", e);
@@ -33,17 +38,13 @@ fn init_logger() -> bool {
     }
 }
 
-fn get_and_create_log_path() -> String {
-    let mut path = ProjectDirs::from("dev", "fredol", "open-tv")
-        .unwrap()
-        .cache_dir()
-        .to_owned();
-    path.push("logs");
+fn get_and_create_log_path() -> Result<String> {
+    let mut path = PathBuf::from_str(utils::TEMP_PATH.get().context("temp path undefined")?)?;
     if !path.exists() {
-        std::fs::create_dir_all(&path).unwrap();
+        std::fs::create_dir_all(&path)?;
     }
     path.push(get_log_name());
-    return path.to_string_lossy().to_string();
+    Ok(path.to_string_lossy().to_string())
 }
 
 fn get_log_name() -> String {

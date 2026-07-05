@@ -510,16 +510,15 @@ final $typed_data.Uint8List getMoviePositionDescriptor = $convert.base64Decode(
 const InitMessage$json = {
   '1': 'InitMessage',
   '2': [
-    {'1': 'path', '3': 1, '4': 1, '5': 9, '9': 0, '10': 'path', '17': true},
-  ],
-  '8': [
-    {'1': '_path'},
+    {'1': 'db_path', '3': 1, '4': 1, '5': 9, '10': 'dbPath'},
+    {'1': 'temp_path', '3': 2, '4': 1, '5': 9, '10': 'tempPath'},
   ],
 };
 
 /// Descriptor for `InitMessage`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List initMessageDescriptor = $convert.base64Decode(
-    'CgtJbml0TWVzc2FnZRIXCgRwYXRoGAEgASgJSABSBHBhdGiIAQFCBwoFX3BhdGg=');
+    'CgtJbml0TWVzc2FnZRIXCgdkYl9wYXRoGAEgASgJUgZkYlBhdGgSGwoJdGVtcF9wYXRoGAIgAS'
+    'gJUgh0ZW1wUGF0aA==');
 
 @$core.Deprecated('Use getEpisodesDescriptor instead')
 const GetEpisodes$json = {

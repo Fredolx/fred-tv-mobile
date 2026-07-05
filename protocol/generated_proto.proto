@@ -104,7 +104,8 @@ message GetMoviePosition {
 }
 
 message InitMessage {
-  optional string path = 1;
+  string db_path = 1;
+  string temp_path = 2;
 }
 
 message GetEpisodes {

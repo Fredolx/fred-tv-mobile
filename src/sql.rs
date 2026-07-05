@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+use std::str::FromStr;
 use std::sync::OnceLock;
 use std::vec;
 use std::{collections::HashMap, sync::LazyLock};
@@ -10,7 +12,6 @@ use crate::{
     view_type,
 };
 use anyhow::{Context, Result, anyhow};
-use directories::ProjectDirs;
 use r2d2::{Pool, PooledConnection};
 use r2d2_sqlite::SqliteConnectionManager;
 use rusqlite::{OptionalExtension, Row, Transaction, params, params_from_iter};
@@ -32,13 +33,7 @@ fn create_connection_pool() -> Pool<SqliteConnectionManager> {
 }
 
 fn get_and_create_sqlite_db_path() -> String {
-    let mut path = match DB_PATH_OVERRIDE.get() {
-        Some(path) => std::path::PathBuf::from(path),
-        None => ProjectDirs::from("dev", "fredol", "open-tv")
-            .unwrap()
-            .data_dir()
-            .to_owned(),
-    };
+    let mut path = PathBuf::from_str(DB_PATH_OVERRIDE.get().unwrap()).unwrap();
     if !path.exists() {
         std::fs::create_dir_all(&path).unwrap();
     }
@@ -399,8 +394,7 @@ pub fn search(filters: Filters) -> Result<Vec<Channel>> {
         WHERE ({})
         AND media_type IN ({})
         AND source_id IN ({})
-        AND url IS NOT NULL
-        AND hidden = 0"#,
+        AND url IS NOT NULL"#,
         get_keywords_sql(keywords.len()),
         generate_placeholders(media_types.len()),
         generate_placeholders(filters.source_ids.len()),
@@ -516,7 +510,6 @@ fn season_row_to_channel(row: &Row) -> std::result::Result<Channel, rusqlite::Er
         tv_archive: None,
         url: None,
         episode_num: None,
-        hidden: Some(false),
     })
 }
 
@@ -585,7 +578,6 @@ pub fn search_group(filters: Filters) -> Result<Vec<Channel>> {
         generate_placeholders(filters.source_ids.len()),
         generate_placeholders(media_types.len())
     );
-    sql_query += "\nAND hidden = 0";
     if filters.sort != sort_type::PROVIDER {
         let order = match filters.sort {
             sort_type::ALPHABETICAL_ASC => "ASC",
@@ -624,7 +616,6 @@ fn row_to_group(row: &Row) -> std::result::Result<Channel, rusqlite::Error> {
         tv_archive: None,
         season_id: None,
         episode_num: None,
-        hidden: row.get("hidden")?,
     };
     Ok(channel)
 }
@@ -645,7 +636,6 @@ fn row_to_channel(row: &Row) -> std::result::Result<Channel, rusqlite::Error> {
         stream_id: row.get("stream_id")?,
         tv_archive: row.get("tv_archive")?,
         season_id: row.get("season_id")?,
-        hidden: row.get("hidden")?,
     };
     Ok(channel)
 }
@@ -878,9 +868,9 @@ pub fn get_preserve(tx: &Transaction, source_id: i64) -> Result<Vec<ChannelPrese
     let mut channels: Vec<ChannelPreserve> = tx
         .prepare(
             r#"
-              SELECT name, favorite, last_watched, hidden
+              SELECT name, favorite, last_watched
               FROM channels
-              WHERE (favorite = 1 OR last_watched IS NOT NULL OR hidden = 1)
+              WHERE (favorite = 1 OR last_watched IS NOT NULL)
               AND series_id IS NULL
               AND source_id = ?
             "#,
@@ -889,20 +879,6 @@ pub fn get_preserve(tx: &Transaction, source_id: i64) -> Result<Vec<ChannelPrese
         .filter_map(Result::ok)
         .collect();
 
-    let groups: Vec<ChannelPreserve> = tx
-        .prepare(
-            r#"
-              SELECT name, hidden
-              FROM groups
-              WHERE hidden = 1
-              AND source_id = ?
-            "#,
-        )?
-        .query_map(params![source_id], row_to_group_preserve)?
-        .filter_map(Result::ok)
-        .collect();
-
-    channels.extend(groups);
     Ok(channels)
 }
 
@@ -911,7 +887,6 @@ fn row_to_channel_preserve(row: &Row) -> Result<ChannelPreserve, rusqlite::Error
         name: row.get("name")?,
         favorite: row.get("favorite")?,
         last_watched: row.get("last_watched")?,
-        hidden: row.get("hidden")?,
         is_group: false,
     })
 }
@@ -919,7 +894,6 @@ fn row_to_channel_preserve(row: &Row) -> Result<ChannelPreserve, rusqlite::Error
 fn row_to_group_preserve(row: &Row) -> Result<ChannelPreserve, rusqlite::Error> {
     Ok(ChannelPreserve {
         name: row.get("name")?,
-        hidden: row.get("hidden")?,
         favorite: false,
         last_watched: None,
         is_group: true,
@@ -936,27 +910,20 @@ pub fn restore_preserve(
             tx.execute(
                 r#"
                   UPDATE groups
-                  SET hidden = ?
                   WHERE name = ?
                   AND source_id = ?
                 "#,
-                params![item.hidden, item.name, source_id],
+                params![item.name, source_id],
             )?;
         } else {
             tx.execute(
                 r#"
                   UPDATE channels
-                  SET favorite = ?, last_watched = ?, hidden = ?
+                  SET favorite = ?, last_watched = ?
                   WHERE name = ?
                   AND source_id = ?
                 "#,
-                params![
-                    item.favorite,
-                    item.last_watched,
-                    item.hidden,
-                    item.name,
-                    source_id
-                ],
+                params![item.favorite, item.last_watched, item.name, source_id],
             )?;
         }
     }

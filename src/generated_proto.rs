@@ -138,8 +138,10 @@ pub struct GetMoviePosition {
 }
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct InitMessage {
-    #[prost(string, optional, tag = "1")]
-    pub path: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, tag = "1")]
+    pub db_path: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub temp_path: ::prost::alloc::string::String,
 }
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct GetEpisodes {

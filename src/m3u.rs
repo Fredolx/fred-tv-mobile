@@ -1,4 +1,6 @@
 use std::io::Write;
+use std::path::PathBuf;
+use std::str::FromStr;
 use std::sync::LazyLock;
 use std::{
     collections::HashMap,
@@ -12,6 +14,7 @@ use rusqlite::Transaction;
 use types::{Channel, Source};
 
 use crate::types::ChannelPreserve;
+use crate::utils;
 use crate::{
     log, media_type, source_type,
     sql::{self, set_channel_group_id},
@@ -49,7 +52,7 @@ struct M3UProcessing {
 
 pub fn read_m3u8(mut source: Source, wipe: bool) -> Result<()> {
     let path = match source.source_type {
-        source_type::M3U_LINK => get_tmp_path(),
+        source_type::M3U_LINK => get_tmp_path()?,
         _ => source.url.clone().context("no file path found")?,
     };
     let file = File::open(path).context("Failed to open m3u8 file")?;
@@ -180,23 +183,20 @@ pub async fn get_m3u8_from_link(source: Source, wipe: bool) -> Result<()> {
             response.status()
         );
     }
-    let mut file = std::fs::File::create(get_tmp_path())?;
+    let mut file = std::fs::File::create(get_tmp_path()?)?;
     while let Some(chunk) = response.chunk().await? {
-        file.write(&chunk)?;
+        file.write_all(&chunk)?;
     }
     read_m3u8(source, wipe)
 }
 
-fn get_tmp_path() -> String {
-    let mut path = directories::ProjectDirs::from("dev", "fredol", "open-tv")
-        .unwrap()
-        .cache_dir()
-        .to_owned();
+fn get_tmp_path() -> Result<String> {
+    let mut path = PathBuf::from_str(utils::TEMP_PATH.get().context("no temp path")?)?;
     if !path.exists() {
-        std::fs::create_dir_all(&path).unwrap();
+        std::fs::create_dir_all(&path)?;
     }
     path.push("get.m3u");
-    return path.to_string_lossy().to_string();
+    Ok(path.to_string_lossy().to_string())
 }
 
 fn extract_non_empty_capture(caps: Captures) -> Option<String> {
@@ -271,7 +271,6 @@ fn get_channel_from_lines(first: String, mut second: String, source_id: i64) -> 
         tv_archive: None,
         season_id: None,
         episode_num: None,
-        hidden: Some(false),
     };
     Ok(channel)
 }
@@ -287,14 +286,8 @@ fn get_media_type(url: String) -> u8 {
 
 #[cfg(test)]
 mod test_m3u {
-    use std::{env, time::Instant};
 
-    use crate::{
-        m3u::{get_channel_from_lines, get_m3u8_from_link},
-        types::Source,
-    };
-
-    use super::read_m3u8;
+    use crate::m3u::get_channel_from_lines;
 
     #[test]
     fn test_get_channel_from_lines() {

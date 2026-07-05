@@ -1,4 +1,4 @@
-enum SourceType { xtream, m3uUrl, m3u }
+enum SourceType { m3u, m3uUrl, xtream }
 
 extension SourceTypeExtension on SourceType {
   String get label {
