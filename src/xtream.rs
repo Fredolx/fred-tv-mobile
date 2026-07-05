@@ -85,20 +85,16 @@ struct XtreamCategory {
 }
 
 fn build_xtream_url(source: &mut Source) -> Result<Url> {
-    let mut url = Url::parse(&source.url.clone().context("Missing URL")?)?;
-    source.url_origin = Some(
-        Url::from_str(&source.url.clone().unwrap())?
-            .origin()
-            .ascii_serialization(),
-    );
+    let mut url = Url::parse(source.url.as_ref().context("Missing URL")?)?;
+    source.url_origin = Some(url.origin().ascii_serialization());
     url.query_pairs_mut()
         .append_pair(
             "username",
-            &source.username.clone().context("Missing username")?,
+            source.username.as_ref().context("Missing username")?,
         )
         .append_pair(
             "password",
-            &source.password.clone().context("Missing password")?,
+            source.password.as_ref().context("Missing password")?,
         );
     Ok(url)
 }
@@ -253,7 +249,6 @@ fn convert_xtream_live_to_channel(
         tv_archive: get_serde_json_i64(&stream.tv_archive).map(|x| x == 1),
         season_id: None,
         episode_num: None,
-        hidden: Some(false),
     })
 }
 
@@ -265,12 +260,21 @@ fn get_url(
 ) -> Result<String> {
     Ok(format!(
         "{}/{}/{}/{}/{}.{}",
-        source.url_origin.clone().unwrap(),
+        source
+            .url_origin
+            .as_deref()
+            .ok_or_else(|| anyhow::anyhow!("missing url_origin"))?,
         get_media_type_string(stream_type)?,
-        source.username.clone().unwrap(),
-        source.password.clone().unwrap(),
+        source
+            .username
+            .as_deref()
+            .ok_or_else(|| anyhow::anyhow!("missing username"))?,
+        source
+            .password
+            .as_deref()
+            .ok_or_else(|| anyhow::anyhow!("missing password"))?,
         stream_id,
-        extension.unwrap_or(LIVE_STREAM_EXTENSION.to_string())
+        extension.unwrap_or_else(|| LIVE_STREAM_EXTENSION.to_string())
     ))
 }
 
@@ -471,6 +475,5 @@ fn episode_to_channel(
         group_id: None,
         favorite: false,
         tv_archive: None,
-        hidden: Some(false),
     })
 }

@@ -1127,10 +1127,12 @@ class GetMoviePosition extends $pb.GeneratedMessage {
 
 class InitMessage extends $pb.GeneratedMessage {
   factory InitMessage({
-    $core.String? path,
+    $core.String? dbPath,
+    $core.String? tempPath,
   }) {
     final result = create();
-    if (path != null) result.path = path;
+    if (dbPath != null) result.dbPath = dbPath;
+    if (tempPath != null) result.tempPath = tempPath;
     return result;
   }
 
@@ -1148,7 +1150,8 @@ class InitMessage extends $pb.GeneratedMessage {
       package:
           const $pb.PackageName(_omitMessageNames ? '' : 'generated_proto'),
       createEmptyInstance: create)
-    ..aOS(1, _omitFieldNames ? '' : 'path')
+    ..aOS(1, _omitFieldNames ? '' : 'dbPath')
+    ..aOS(2, _omitFieldNames ? '' : 'tempPath')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1171,13 +1174,22 @@ class InitMessage extends $pb.GeneratedMessage {
   static InitMessage? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.String get path => $_getSZ(0);
+  $core.String get dbPath => $_getSZ(0);
   @$pb.TagNumber(1)
-  set path($core.String value) => $_setString(0, value);
+  set dbPath($core.String value) => $_setString(0, value);
   @$pb.TagNumber(1)
-  $core.bool hasPath() => $_has(0);
+  $core.bool hasDbPath() => $_has(0);
   @$pb.TagNumber(1)
-  void clearPath() => $_clearField(1);
+  void clearDbPath() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get tempPath => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set tempPath($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasTempPath() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearTempPath() => $_clearField(2);
 }
 
 class GetEpisodes extends $pb.GeneratedMessage {

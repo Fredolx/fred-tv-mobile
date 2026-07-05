@@ -152,11 +152,12 @@ pub extern "C" fn initialize(task_id: u64, callback: FfiCallback, message: Bytes
         callback,
         message,
         |init_msg: generated_proto::InitMessage| {
-            if let Some(path) = init_msg.path {
-                sql::DB_PATH_OVERRIDE
-                    .set(path)
-                    .map_err(|e| anyhow::anyhow!(e))?;
-            }
+            sql::DB_PATH_OVERRIDE
+                .set(init_msg.db_path)
+                .map_err(|e| anyhow::anyhow!(e))?;
+            utils::TEMP_PATH
+                .set(init_msg.temp_path)
+                .map_err(|e| anyhow::anyhow!(e))?;
             sql::apply_migrations()
         },
     )

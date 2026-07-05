@@ -18,7 +18,11 @@ import 'package:path_provider/path_provider.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final appDir = await getApplicationSupportDirectory();
-  await nb.NativeBridge.instance.initialize(gen.InitMessage(path: appDir.path));
+  final tempDir = await getTemporaryDirectory();
+  print(tempDir);
+  await nb.NativeBridge.instance.initialize(
+    gen.InitMessage(dbPath: appDir.path, tempPath: tempDir.path),
+  );
   final hasSources = await nb.NativeBridge.instance.hasSources();
   final settings = await nb.NativeBridge.instance.getSettings();
   final hasTouchScreen = await Utils.hasTouchScreen();
