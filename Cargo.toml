@@ -17,12 +17,6 @@ prost-types = "0.14.4"
 r2d2 = "0.8.10"
 r2d2_sqlite = "0.34.0"
 regex = "1.12.4"
-reqwest = { version = "0.13", default-features = false, features = [
-    "json",
-    "rustls",
-    "charset",
-    "http2",
-] }
 rusqlite = { version = "0.39.0", features = ["bundled"] }
 rusqlite_migration = "2.5.0"
 serde = { version = "1", features = ["derive"] }
@@ -30,6 +24,22 @@ serde_json = "1"
 simplelog = "0.12.2"
 sysdirs = "0.9.4"
 tokio = { version = "1.52", features = ["full"] }
+
+[target.'cfg(target_os = "android")'.dependencies]
+reqwest = { version = "0.13", default-features = false, features = [
+    "json",
+    "native-tls-vendored",
+    "charset",
+    "http2",
+] }
+
+[target.'cfg(not(target_os = "android"))'.dependencies]
+reqwest = { version = "0.13", default-features = false, features = [
+    "json",
+    "rustls",
+    "charset",
+    "http2",
+] }
 
 # Install cargo-cmd:
 # cargo install cargo-cmd
