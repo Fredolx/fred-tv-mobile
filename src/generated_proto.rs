@@ -150,13 +150,45 @@ pub struct GetEpisodes {
     #[prost(string, optional, tag = "3")]
     pub fallback_image: ::core::option::Option<::prost::alloc::string::String>,
 }
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct ChannelHttpHeaders {
+    #[prost(int64, optional, tag = "1")]
+    pub id: ::core::option::Option<i64>,
+    #[prost(int64, optional, tag = "2")]
+    pub channel_id: ::core::option::Option<i64>,
+    #[prost(string, optional, tag = "3")]
+    pub referrer: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, optional, tag = "4")]
+    pub user_agent: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, optional, tag = "5")]
+    pub http_origin: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(bool, optional, tag = "6")]
+    pub ignore_ssl: ::core::option::Option<bool>,
+}
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct GetEnabledSourcesMinimal {
+    #[prost(int64, repeated, tag = "1")]
+    pub list_id: ::prost::alloc::vec::Vec<i64>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct SourceList {
+    #[prost(message, repeated, tag = "1")]
+    pub sources: ::prost::alloc::vec::Vec<Source>,
+}
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct SetSourceEnabled {
+    #[prost(int64, tag = "1")]
+    pub source_id: i64,
+    #[prost(bool, tag = "2")]
+    pub enabled: bool,
+}
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct FfiResult {
     #[prost(bool, tag = "1")]
     pub success: bool,
     #[prost(string, optional, tag = "2")]
     pub error_message: ::core::option::Option<::prost::alloc::string::String>,
-    #[prost(oneof = "ffi_result::Data", tags = "3, 4, 6, 7, 8")]
+    #[prost(oneof = "ffi_result::Data", tags = "3, 4, 6, 7, 8, 9, 10, 11")]
     pub data: ::core::option::Option<ffi_result::Data>,
 }
 /// Nested message and enum types in `FFIResult`.
@@ -173,6 +205,12 @@ pub mod ffi_result {
         BoolMessage(super::BoolMessage),
         #[prost(message, tag = "8")]
         MoviePosition(super::GetMoviePosition),
+        #[prost(message, tag = "9")]
+        Headers(super::ChannelHttpHeaders),
+        #[prost(message, tag = "10")]
+        EnabledSourcesMinimal(super::GetEnabledSourcesMinimal),
+        #[prost(message, tag = "11")]
+        SourceList(super::SourceList),
     }
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]

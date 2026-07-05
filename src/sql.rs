@@ -789,6 +789,15 @@ pub fn get_enabled_sources() -> Result<Vec<Source>> {
     Ok(sources)
 }
 
+pub fn get_enabled_sources_minimal() -> Result<Vec<i64>> {
+    let sql = get_conn()?;
+    Ok(sql
+        .prepare("SELECT id FROM sources where enabled = 1")?
+        .query_map([], |row| row.get(0))?
+        .filter_map(Result::ok)
+        .collect())
+}
+
 fn row_to_source(row: &Row) -> std::result::Result<Source, rusqlite::Error> {
     Ok(Source {
         id: row.get("id")?,
@@ -1072,4 +1081,14 @@ pub fn get_whats_new() -> Result<Option<String>> {
         )
         .optional()?;
     Ok(version)
+}
+
+pub fn has_sources() -> Result<bool> {
+    let sql = get_conn()?;
+    Ok(sql
+        .query_row("SELECT 1 FROM sources LIMIT 1", [], |row| {
+            row.get::<_, u8>(0)
+        })
+        .optional()?
+        .is_some())
 }

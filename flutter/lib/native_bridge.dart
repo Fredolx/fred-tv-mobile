@@ -13,6 +13,7 @@ import 'package:open_tv/models/source.dart';
 import 'package:open_tv/models/filters.dart';
 import 'package:open_tv/models/settings.dart';
 import 'package:open_tv/models/proto_extensions.dart';
+import 'package:open_tv/models/channel_http_headers.dart';
 
 class NativeBridge {
   static NativeBridge? _instance;
@@ -119,10 +120,46 @@ class NativeBridge {
     });
   }
 
+  Future<void> updateSource(Source source) async {
+    await _executeWithMsg(source.toProto(), (id, msg, cb) {
+      _bindings.update_source(id, cb, msg);
+    });
+  }
+
+  Future<void> setSourceEnabled(int sourceId, bool enabled) async {
+    await _executeWithMsg(
+      pb.SetSourceEnabled(sourceId: Int64(sourceId), enabled: enabled),
+      (id, msg, cb) {
+        _bindings.set_source_enabled(id, cb, msg);
+      },
+    );
+  }
+
   Future<void> deleteSource(int id) async {
     await _executeWithMsg(pb.IdMessage(value: Int64(id)), (id, msg, cb) {
       _bindings.delete_source(id, cb, msg);
     });
+  }
+
+  Future<List<Source>> getSources() async {
+    final result = await _executeAsync((id, cb) {
+      _bindings.get_sources(id, cb);
+    });
+    return result.sourceList.sources.map((s) => s.toDomain()).toList();
+  }
+
+  Future<List<int>> getEnabledSourcesMinimal() async {
+    final result = await _executeAsync((id, cb) {
+      _bindings.get_enabled_sources_minimal(id, cb);
+    });
+    return result.enabledSourcesMinimal.listId.map((e) => e.toInt()).toList();
+  }
+
+  Future<bool> hasSources() async {
+    final result = await _executeAsync((id, cb) {
+      _bindings.has_sources(id, cb);
+    });
+    return result.boolMessage.value;
   }
 
   Future<List<Channel>> getChannels(Filters filters) async {
@@ -178,6 +215,13 @@ class NativeBridge {
         : null;
   }
 
+  Future<ChannelHttpHeaders?> getChannelHeaders(int id) async {
+    final result = await _executeWithMsg(pb.IdMessage(value: Int64(id)), (id, msg, cb) {
+      _bindings.get_channel_headers(id, cb, msg);
+    });
+    return result.hasHeaders() ? result.headers.toDomain() : null;
+  }
+
   Future<void> getEpisodes(int seriesId, int sourceId, String? fallbackImage) async {
     final msg = pb.GetEpisodes(
       seriesId: Int64(seriesId),
@@ -192,6 +236,12 @@ class NativeBridge {
   Future<void> clearHistory() async {
     await _executeAsync((id, cb) {
       _bindings.clear_history(id, cb);
+    });
+  }
+
+  Future<void> refreshAll() async {
+    await _executeAsync((id, cb) {
+      _bindings.refresh_all(id, cb);
     });
   }
 

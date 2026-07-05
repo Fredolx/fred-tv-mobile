@@ -19,8 +19,8 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final appDir = await getApplicationSupportDirectory();
   await nb.NativeBridge.instance.initialize(gen.InitMessage(path: appDir.path));
-  final hasSources = await Sql.hasSources();
-  final settings = await SettingsService.getSettings();
+  final hasSources = await nb.NativeBridge.instance.hasSources();
+  final settings = await nb.NativeBridge.instance.getSettings();
   final hasTouchScreen = await Utils.hasTouchScreen();
   final isTV = await DeviceDetector.isTV();
   runApp(

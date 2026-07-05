@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:open_tv/native_bridge.dart';
 import 'package:open_tv/utils.dart';
 import 'package:open_tv/bottom_nav.dart';
 import 'package:open_tv/confirm_delete.dart';
@@ -38,8 +39,8 @@ class _SettingsState extends State<SettingsView> {
 
   Future<void> initAsync() async {
     var results = await Future.wait([
-      SettingsService.getSettings(),
-      Sql.getSources(),
+      NativeBridge.instance.getSettings(),
+      NativeBridge.instance.getSources(),
     ]);
     setState(() {
       settings = results[0] as Settings;
@@ -100,7 +101,10 @@ class _SettingsState extends State<SettingsView> {
 
   Future<void> toggleSource(Source source) async {
     await Error.tryAsyncNoLoading(
-      () async => await Sql.setSourceEnabled(!source.enabled, source.id!),
+      () async => await NativeBridge.instance.setSourceEnabled(
+        source.id!,
+        !source.enabled,
+      ),
       context,
     );
     await reloadSources();
@@ -138,7 +142,7 @@ class _SettingsState extends State<SettingsView> {
                 onPressed: () async {
                   await Error.tryAsync(
                     () async {
-                      await Utils.refreshSource(source);
+                      await NativeBridge.instance.refreshSource(source);
                     },
                     context,
                     "Source has been refreshed successfully",
@@ -172,7 +176,7 @@ class _SettingsState extends State<SettingsView> {
         name: source.name,
         confirm: () async {
           await Error.tryAsync(
-            () async => await Sql.deleteSource(source.id!),
+            () async => await NativeBridge.instance.deleteSource(source.id!),
             context,
             "Successfully deleted source",
           );
@@ -191,7 +195,7 @@ class _SettingsState extends State<SettingsView> {
 
   Future<void> reloadSources() async {
     await Error.tryAsyncNoLoading(
-      () async => sources = await Sql.getSources(),
+      () async => sources = await NativeBridge.instance.getSources(),
       context,
     );
     setState(() {
@@ -201,7 +205,7 @@ class _SettingsState extends State<SettingsView> {
 
   Future<void> updateSettings() async {
     await Error.tryAsyncNoLoading(
-      () async => await SettingsService.updateSettings(settings),
+      () async => await NativeBridge.instance.updateSettings(settings),
       context,
     );
   }
@@ -366,7 +370,8 @@ class _SettingsState extends State<SettingsView> {
                         children: [
                           IconButton(
                             onPressed: () async => await Error.tryAsync(
-                              () async => await Utils.refreshAllSources(),
+                              () async =>
+                                  await NativeBridge.instance.refreshAll(),
                               context,
                               "Successfully refreshed all sources",
                             ),

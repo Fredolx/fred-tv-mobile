@@ -54,12 +54,12 @@ class _HomeState extends State<Home> {
 
   Future<void> initializeAsync() async {
     if (widget.home.filters.sourceIds == null) {
-      final sources = await Sql.getEnabledSourcesMinimal();
-      widget.home.filters.sourceIds = sources.map((x) => x.id).toList();
+      final sources = await NativeBridge.instance.getEnabledSourcesMinimal();
+      widget.home.filters.sourceIds = sources;
     }
     if (widget.home.filters.mediaTypes == null) {
-      widget.home.filters.mediaTypes = (await SettingsService.getSettings())
-          .getMediaTypes();
+      widget.home.filters.mediaTypes =
+          (await NativeBridge.instance.getSettings()).getMediaTypes();
     }
     await load();
     var version = (await PackageInfo.fromPlatform()).version;
@@ -73,7 +73,7 @@ class _HomeState extends State<Home> {
           setState(() {
             blockSettings = true;
           });
-          await Utils.refreshAllSources();
+          await NativeBridge.instance.refreshAll();
         },
         context,
         true,
@@ -107,7 +107,9 @@ class _HomeState extends State<Home> {
       widget.home.filters.page = 1;
     }
     await Error.tryAsyncNoLoading(() async {
-      List<Channel> channels = await Sql.search(widget.home.filters);
+      List<Channel> channels = await NativeBridge.instance.getChannels(
+        widget.home.filters,
+      );
       if (!more) {
         setState(() {
           this.channels = channels;

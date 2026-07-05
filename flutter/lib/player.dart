@@ -3,13 +3,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:media_kit_video/media_kit_video.dart';
-import 'package:open_tv/backend/sql.dart';
 import 'package:open_tv/models/channel.dart';
 import 'package:open_tv/models/id_data.dart';
 import 'package:open_tv/models/media_type.dart';
 import 'package:media_kit/media_kit.dart' as mk;
 import 'package:media_kit_video/media_kit_video.dart' as mkvideo;
 import 'package:open_tv/models/settings.dart';
+import 'package:open_tv/native_bridge.dart';
 import 'package:open_tv/select_dialog.dart';
 
 class Player extends StatefulWidget {
@@ -41,7 +41,7 @@ class _PlayerState extends State<Player> {
     player.setPlaylistMode(mk.PlaylistMode.none);
     await setMpvOptions();
     final seconds = widget.channel.mediaType == MediaType.movie
-        ? await Sql.getPosition(widget.channel.id!)
+        ? await NativeBridge.instance.getMoviePosition(widget.channel.id!)
         : null;
     await _startPlayback(seconds != null ? Duration(seconds: seconds) : null);
     subscriptions.add(
@@ -76,7 +76,9 @@ class _PlayerState extends State<Player> {
     while (true) {
       if (!mounted || exiting) return;
       try {
-        final headers = await Sql.getChannelHeaders(widget.channel.id!);
+        final headers = await NativeBridge.instance.getChannelHeaders(
+          widget.channel.id!,
+        );
         await player.open(
           mk.Media(
             widget.channel.url!,
@@ -185,7 +187,10 @@ class _PlayerState extends State<Player> {
     if (exiting) return;
     exiting = true;
     if (widget.channel.mediaType == MediaType.movie) {
-      Sql.setPosition(widget.channel.id!, player.state.position.inSeconds);
+      NativeBridge.instance.setMoviePosition(
+        widget.channel.id!,
+        player.state.position.inSeconds,
+      );
     }
     if (key.currentState!.isFullscreen()) {
       await key.currentState!.exitFullscreen();

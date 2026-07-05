@@ -548,6 +548,123 @@ final $typed_data.Uint8List getEpisodesDescriptor = $convert.base64Decode(
     'gCIAEoA1IIc291cmNlSWQSKgoOZmFsbGJhY2tfaW1hZ2UYAyABKAlIAFINZmFsbGJhY2tJbWFn'
     'ZYgBAUIRCg9fZmFsbGJhY2tfaW1hZ2U=');
 
+@$core.Deprecated('Use channelHttpHeadersDescriptor instead')
+const ChannelHttpHeaders$json = {
+  '1': 'ChannelHttpHeaders',
+  '2': [
+    {'1': 'id', '3': 1, '4': 1, '5': 3, '9': 0, '10': 'id', '17': true},
+    {
+      '1': 'channel_id',
+      '3': 2,
+      '4': 1,
+      '5': 3,
+      '9': 1,
+      '10': 'channelId',
+      '17': true
+    },
+    {
+      '1': 'referrer',
+      '3': 3,
+      '4': 1,
+      '5': 9,
+      '9': 2,
+      '10': 'referrer',
+      '17': true
+    },
+    {
+      '1': 'user_agent',
+      '3': 4,
+      '4': 1,
+      '5': 9,
+      '9': 3,
+      '10': 'userAgent',
+      '17': true
+    },
+    {
+      '1': 'http_origin',
+      '3': 5,
+      '4': 1,
+      '5': 9,
+      '9': 4,
+      '10': 'httpOrigin',
+      '17': true
+    },
+    {
+      '1': 'ignore_ssl',
+      '3': 6,
+      '4': 1,
+      '5': 8,
+      '9': 5,
+      '10': 'ignoreSsl',
+      '17': true
+    },
+  ],
+  '8': [
+    {'1': '_id'},
+    {'1': '_channel_id'},
+    {'1': '_referrer'},
+    {'1': '_user_agent'},
+    {'1': '_http_origin'},
+    {'1': '_ignore_ssl'},
+  ],
+};
+
+/// Descriptor for `ChannelHttpHeaders`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List channelHttpHeadersDescriptor = $convert.base64Decode(
+    'ChJDaGFubmVsSHR0cEhlYWRlcnMSEwoCaWQYASABKANIAFICaWSIAQESIgoKY2hhbm5lbF9pZB'
+    'gCIAEoA0gBUgljaGFubmVsSWSIAQESHwoIcmVmZXJyZXIYAyABKAlIAlIIcmVmZXJyZXKIAQES'
+    'IgoKdXNlcl9hZ2VudBgEIAEoCUgDUgl1c2VyQWdlbnSIAQESJAoLaHR0cF9vcmlnaW4YBSABKA'
+    'lIBFIKaHR0cE9yaWdpbogBARIiCgppZ25vcmVfc3NsGAYgASgISAVSCWlnbm9yZVNzbIgBAUIF'
+    'CgNfaWRCDQoLX2NoYW5uZWxfaWRCCwoJX3JlZmVycmVyQg0KC191c2VyX2FnZW50Qg4KDF9odH'
+    'RwX29yaWdpbkINCgtfaWdub3JlX3NzbA==');
+
+@$core.Deprecated('Use getEnabledSourcesMinimalDescriptor instead')
+const GetEnabledSourcesMinimal$json = {
+  '1': 'GetEnabledSourcesMinimal',
+  '2': [
+    {'1': 'list_id', '3': 1, '4': 3, '5': 3, '10': 'listId'},
+  ],
+};
+
+/// Descriptor for `GetEnabledSourcesMinimal`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List getEnabledSourcesMinimalDescriptor =
+    $convert.base64Decode(
+        'ChhHZXRFbmFibGVkU291cmNlc01pbmltYWwSFwoHbGlzdF9pZBgBIAMoA1IGbGlzdElk');
+
+@$core.Deprecated('Use sourceListDescriptor instead')
+const SourceList$json = {
+  '1': 'SourceList',
+  '2': [
+    {
+      '1': 'sources',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.generated_proto.Source',
+      '10': 'sources'
+    },
+  ],
+};
+
+/// Descriptor for `SourceList`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List sourceListDescriptor = $convert.base64Decode(
+    'CgpTb3VyY2VMaXN0EjEKB3NvdXJjZXMYASADKAsyFy5nZW5lcmF0ZWRfcHJvdG8uU291cmNlUg'
+    'dzb3VyY2Vz');
+
+@$core.Deprecated('Use setSourceEnabledDescriptor instead')
+const SetSourceEnabled$json = {
+  '1': 'SetSourceEnabled',
+  '2': [
+    {'1': 'source_id', '3': 1, '4': 1, '5': 3, '10': 'sourceId'},
+    {'1': 'enabled', '3': 2, '4': 1, '5': 8, '10': 'enabled'},
+  ],
+};
+
+/// Descriptor for `SetSourceEnabled`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List setSourceEnabledDescriptor = $convert.base64Decode(
+    'ChBTZXRTb3VyY2VFbmFibGVkEhsKCXNvdXJjZV9pZBgBIAEoA1IIc291cmNlSWQSGAoHZW5hYm'
+    'xlZBgCIAEoCFIHZW5hYmxlZA==');
+
 @$core.Deprecated('Use fFIResultDescriptor instead')
 const FFIResult$json = {
   '1': 'FFIResult',
@@ -607,6 +724,33 @@ const FFIResult$json = {
       '9': 0,
       '10': 'moviePosition'
     },
+    {
+      '1': 'headers',
+      '3': 9,
+      '4': 1,
+      '5': 11,
+      '6': '.generated_proto.ChannelHttpHeaders',
+      '9': 0,
+      '10': 'headers'
+    },
+    {
+      '1': 'enabled_sources_minimal',
+      '3': 10,
+      '4': 1,
+      '5': 11,
+      '6': '.generated_proto.GetEnabledSourcesMinimal',
+      '9': 0,
+      '10': 'enabledSourcesMinimal'
+    },
+    {
+      '1': 'source_list',
+      '3': 11,
+      '4': 1,
+      '5': 11,
+      '6': '.generated_proto.SourceList',
+      '9': 0,
+      '10': 'sourceList'
+    },
   ],
   '8': [
     {'1': 'data'},
@@ -623,4 +767,8 @@ final $typed_data.Uint8List fFIResultDescriptor = $convert.base64Decode(
     'cHJvdG8uQ2hhbm5lbExpc3RIAFILY2hhbm5lbExpc3QSQQoMYm9vbF9tZXNzYWdlGAcgASgLMh'
     'wuZ2VuZXJhdGVkX3Byb3RvLkJvb2xNZXNzYWdlSABSC2Jvb2xNZXNzYWdlEkoKDm1vdmllX3Bv'
     'c2l0aW9uGAggASgLMiEuZ2VuZXJhdGVkX3Byb3RvLkdldE1vdmllUG9zaXRpb25IAFINbW92aW'
-    'VQb3NpdGlvbkIGCgRkYXRhQhAKDl9lcnJvcl9tZXNzYWdl');
+    'VQb3NpdGlvbhI/CgdoZWFkZXJzGAkgASgLMiMuZ2VuZXJhdGVkX3Byb3RvLkNoYW5uZWxIdHRw'
+    'SGVhZGVyc0gAUgdoZWFkZXJzEmMKF2VuYWJsZWRfc291cmNlc19taW5pbWFsGAogASgLMikuZ2'
+    'VuZXJhdGVkX3Byb3RvLkdldEVuYWJsZWRTb3VyY2VzTWluaW1hbEgAUhVlbmFibGVkU291cmNl'
+    'c01pbmltYWwSPgoLc291cmNlX2xpc3QYCyABKAsyGy5nZW5lcmF0ZWRfcHJvdG8uU291cmNlTG'
+    'lzdEgAUgpzb3VyY2VMaXN0QgYKBGRhdGFCEAoOX2Vycm9yX21lc3NhZ2U=');

@@ -6,6 +6,8 @@ import 'package:open_tv/models/filters.dart';
 import 'package:open_tv/models/settings.dart';
 import 'package:open_tv/models/media_type.dart';
 import 'package:open_tv/models/view_type.dart';
+import 'package:open_tv/models/channel_http_headers.dart';
+import 'package:open_tv/models/source_type.dart';
 
 extension ChannelProtoExtension on pb.Channel {
   Channel toDomain() => Channel(
@@ -20,6 +22,19 @@ extension ChannelProtoExtension on pb.Channel {
         favorite: favorite,
         seriesId: hasSeriesId() ? seriesId.toInt() : null,
         streamId: hasStreamId() ? streamId.toInt() : null,
+      );
+}
+
+extension SourceProtoExtension on pb.Source {
+  Source toDomain() => Source(
+        id: hasId() ? id.toInt() : null,
+        name: name,
+        url: hasUrl() ? url : null,
+        urlOrigin: hasUrlOrigin() ? urlOrigin : null,
+        username: hasUsername() ? username : null,
+        password: hasPassword() ? password : null,
+        sourceType: SourceType.values[sourceType],
+        enabled: enabled,
       );
 }
 
@@ -60,5 +75,16 @@ extension SettingsDomainExtension on Settings {
   pb.Settings toProto() => pb.Settings(
         defaultView: defaultView.index,
         refreshOnStart: refreshOnStart,
+      );
+}
+
+extension ChannelHttpHeadersProtoExtension on pb.ChannelHttpHeaders {
+  ChannelHttpHeaders toDomain() => ChannelHttpHeaders(
+        id: hasId() ? id.toInt() : null,
+        channelId: hasChannelId() ? channelId.toInt() : null,
+        referrer: hasReferrer() ? referrer : null,
+        userAgent: hasUserAgent() ? userAgent : null,
+        httpOrigin: hasHttpOrigin() ? httpOrigin : null,
+        ignoreSSL: hasIgnoreSsl() ? ignoreSsl.toString() : null,
       );
 }

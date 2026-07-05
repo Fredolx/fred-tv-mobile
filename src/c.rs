@@ -77,6 +77,22 @@ where
     }
 }
 
+impl<E> ResultFfiExt for Result<Option<generated_proto::ffi_result::Data>, E>
+where
+    E: std::fmt::Debug,
+{
+    fn into_ffi(self) -> FfiResult {
+        FfiResult {
+            success: self.is_ok(),
+            error_message: self.as_ref().err().map(|f| format!("{:#?}", f)),
+            data: match self {
+                Ok(opt) => opt,
+                Err(_) => None,
+            },
+        }
+    }
+}
+
 pub type FfiCallback = extern "C" fn(task_id: u64, response: Bytes);
 
 pub fn queue_blocking<R>(
@@ -91,11 +107,8 @@ pub fn queue_blocking<R>(
     });
 }
 
-pub fn queue_async<Fut, R>(
-    task_id: u64,
-    callback: FfiCallback,
-    fut: Fut,
-) where
+pub fn queue_async<Fut, R>(task_id: u64, callback: FfiCallback, fut: Fut)
+where
     Fut: Future<Output = R> + Send + 'static,
     R: ResultFfiExt,
 {
