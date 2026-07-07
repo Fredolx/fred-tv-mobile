@@ -164,6 +164,7 @@ pub extern "C" fn initialize(task_id: u64, callback: FfiCallback, message: Bytes
             utils::TEMP_PATH
                 .set(init_msg.temp_path)
                 .map_err(|e| anyhow::anyhow!(e))?;
+            log::init_logger();
             sql::apply_migrations()
         },
     )

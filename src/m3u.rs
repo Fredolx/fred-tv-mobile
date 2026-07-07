@@ -16,7 +16,7 @@ use types::{Channel, Source};
 use crate::types::ChannelPreserve;
 use crate::utils;
 use crate::{
-    log, media_type, source_type,
+    media_type, source_type,
     sql::{self, set_channel_group_id},
     types::{self, ChannelHttpHeaders},
     utils::get_user_agent_from_source,
@@ -82,7 +82,7 @@ pub fn read_m3u8(mut source: Source, wipe: bool) -> Result<()> {
         let l1 = match l1.with_context(|| format!("Failed to process line {c1}")) {
             Ok(r) => r,
             Err(e) => {
-                log::log(format!("{:?}", e));
+                tracing::error!("{:?}", e);
                 continue;
             }
         };
@@ -136,7 +136,7 @@ fn try_commit_channel(processing: &mut M3UProcessing, tx: &Transaction) {
             )
         })
         .unwrap_or_else(|e| {
-            log::log(format!("{:?}", e));
+            tracing::error!("{:?}", e);
         });
     }
 }
@@ -155,10 +155,11 @@ fn commit_channel(
         source_id,
     )?;
     set_channel_group_id(groups, &mut channel, tx, &source_id).unwrap_or_else(|e| {
-        log::log(format!(
+        tracing::error!(
             "Failed to set group id for channel: {}, Error: {:?}",
-            channel.name, e
-        ))
+            channel.name,
+            e
+        )
     });
     sql::insert_channel(tx, channel)?;
     if let Some(mut headers) = headers {
@@ -174,10 +175,10 @@ pub async fn get_m3u8_from_link(source: Source, wipe: bool) -> Result<()> {
     let url = source.url.clone().context("Invalid source")?;
     let mut response = client.get(&url).send().await?;
     if !response.status().is_success() {
-        log::log(format!(
+        tracing::error!(
             "Failed to get m3u8 from link, status: {}",
             response.status()
-        ));
+        );
         bail!(
             "Failed to get m3u8 from link, status: {}",
             response.status()

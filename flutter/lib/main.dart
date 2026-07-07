@@ -18,8 +18,8 @@ import 'package:path_provider/path_provider.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final appDir = await getApplicationSupportDirectory();
+  print(appDir);
   final tempDir = await getTemporaryDirectory();
-  print(tempDir);
   await nb.NativeBridge.instance.initialize(
     gen.InitMessage(dbPath: appDir.path, tempPath: tempDir.path),
   );

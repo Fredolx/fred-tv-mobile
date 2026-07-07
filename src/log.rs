@@ -1,45 +1,56 @@
-use anyhow::Context;
-use anyhow::Result;
+use anyhow::{Context, Result};
 use chrono::Local;
-use std::{fs, path::PathBuf, str::FromStr, sync::LazyLock};
+use std::{path::PathBuf, str::FromStr};
+use tracing_subscriber::prelude::*;
 
-use crate::utils;
+pub fn init_logger() {
+    let _ = tracing_log::LogTracer::init();
 
-static USE_LOGGER: LazyLock<bool> = LazyLock::new(|| init_logger());
+    let file_layer = get_and_create_log_path()
+        .and_then(|path| std::fs::File::create(path).map_err(Into::into))
+        .map(|file| {
+            tracing_subscriber::fmt::layer()
+                .with_writer(file)
+                .with_ansi(false)
+        })
+        .map_err(|e| {
+            eprintln!("Failed to initialize file logger: {:?}", e);
+        })
+        .ok();
 
-pub fn log(message: String) {
-    if *USE_LOGGER {
-        log::error!("{message}");
-    } else {
-        eprintln!("{message}");
-    }
-}
+    let registry = tracing_subscriber::registry().with(file_layer);
 
-fn init_logger() -> bool {
-    let file = match get_and_create_log_path()
-        .and_then(|s| fs::File::create(s).context("failed to create file"))
+    #[cfg(target_os = "android")]
     {
-        Ok(val) => val,
-        Err(e) => {
-            eprint!("Failed to create file for logger, {:?}", e);
-            return false;
+        if let Ok(android_layer) = tracing_android::layer("fred-tv-lib") {
+            let subscriber = registry.with(android_layer);
+            let _ = tracing::subscriber::set_global_default(subscriber);
+        } else {
+            let _ = tracing::subscriber::set_global_default(registry);
         }
-    };
-    match simplelog::WriteLogger::init(
-        simplelog::LevelFilter::Error,
-        simplelog::Config::default(),
-        file,
-    ) {
-        Ok(_) => true,
-        Err(e) => {
-            eprint!("Failed to init logger, {:?}", e);
-            return false;
-        }
+    }
+
+    #[cfg(target_os = "ios")]
+    {
+        let ios_layer = tracing_oslog::OsLogger::new("dev.fredol.open-tv", "default");
+        let subscriber = registry.with(ios_layer);
+        let _ = tracing::subscriber::set_global_default(subscriber);
+    }
+
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
+    {
+        let stderr_layer = tracing_subscriber::fmt::layer();
+        let subscriber = registry.with(stderr_layer);
+        let _ = tracing::subscriber::set_global_default(subscriber);
     }
 }
 
 fn get_and_create_log_path() -> Result<String> {
-    let mut path = PathBuf::from_str(utils::TEMP_PATH.get().context("temp path undefined")?)?;
+    let mut path = PathBuf::from_str(
+        crate::utils::TEMP_PATH
+            .get()
+            .context("temp path is not defined")?,
+    )?;
     if !path.exists() {
         std::fs::create_dir_all(&path)?;
     }

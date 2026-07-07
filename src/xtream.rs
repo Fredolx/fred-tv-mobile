@@ -1,4 +1,3 @@
-use crate::log;
 use crate::media_type;
 use crate::sql;
 use crate::sql::insert_season;
@@ -15,7 +14,6 @@ use rusqlite::Transaction;
 use serde::Deserialize;
 use serde::Serialize;
 use std::collections::HashMap;
-use std::str::FromStr;
 use tokio::join;
 
 const GET_LIVE_STREAMS: &str = "get_live_streams";
@@ -131,14 +129,14 @@ pub async fn get_xtream(mut source: Source, wipe: bool) -> Result<()> {
     let mut fail_count = 0;
     live.and_then(|live| process_xtream(&tx, live, live_cats?, &source, media_type::LIVESTREAM))
         .unwrap_or_else(|e| {
-            log::log(format!("{:?}", e.context("Failed to process live")));
+            tracing::error!("{:?}", e.context("Failed to process live"));
             fail_count += 1;
         });
     vods.and_then(|vods: Vec<XtreamStream>| {
         process_xtream(&tx, vods, vods_cats?, &source, media_type::MOVIE)
     })
     .unwrap_or_else(|e| {
-        log::log(format!("{:?}", e.context("Failed to process vods")));
+        tracing::error!("{:?}", e.context("Failed to process vods"));
         fail_count += 1;
     });
     series
@@ -146,13 +144,13 @@ pub async fn get_xtream(mut source: Source, wipe: bool) -> Result<()> {
             process_xtream(&tx, series, series_cats?, &source, media_type::SERIE)
         })
         .unwrap_or_else(|e| {
-            log::log(format!("{:?}", e.context("Failed to process series")));
+            tracing::error!("{:?}", e.context("Failed to process series"));
             fail_count += 1;
         });
     if fail_count > 2 {
         match tx.rollback() {
             Ok(_) => {}
-            Err(e) => log::log(format!("Failed to rollback tx: {:?}", e)),
+            Err(e) => tracing::error!("Failed to rollback tx: {:?}", e),
         }
         return Err(anyhow::anyhow!("Too many Xtream requests failed"));
     }
@@ -199,11 +197,11 @@ fn process_xtream(
                     &tx,
                     source.id.as_ref().unwrap(),
                 )
-                .unwrap_or_else(|e| log::log(format!("{:?}", e)));
+                .unwrap_or_else(|e| tracing::error!("{:?}", e));
                 sql::insert_channel(&tx, channel)?;
                 Ok(())
             })
-            .unwrap_or_else(|e| log::log(format!("{:?}", e)));
+            .unwrap_or_else(|e| tracing::error!("{:?}", e));
     }
     Ok(())
 }
@@ -293,7 +291,7 @@ pub async fn get_episodes(
     fallback_image: Option<String>,
 ) -> Result<()> {
     if sql::series_has_episodes(series_id, source_id).unwrap_or_else(|e| {
-        log::log(format!("{:?}", e));
+        tracing::error!("{:?}", e);
         return false;
     }) {
         return Ok(());
@@ -352,7 +350,7 @@ fn insert_episodes(
             {
                 Ok(_) => (),
                 Err(e) => {
-                    log::log(format!("{:?}", e));
+                    tracing::error!("{:?}", e);
                     continue;
                 }
             }
@@ -380,7 +378,7 @@ fn insert_episode(
                 .and_then(|f| {
                     xtream_season_to_season(f.clone(), source.id.unwrap(), series_id)
                         .with_context(|| "Failed to convert XtreamSeason to Season")
-                        .inspect_err(|e| log::log(format!("{}", e)))
+                        .inspect_err(|e| tracing::error!("{}", e))
                         .ok()
                 })
                 .unwrap_or_else(|| {
