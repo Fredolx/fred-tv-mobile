@@ -378,7 +378,7 @@ pub fn search(filters: Filters) -> Result<Vec<Channel>> {
     let offset: u16 = filters.page as u16 * PAGE_SIZE as u16 - PAGE_SIZE as u16;
     let media_types = match filters.series_id.is_some() {
         true => vec![1],
-        false => filters.media_types.clone().unwrap(),
+        false => filters.media_types.clone().unwrap_or(vec![]),
     };
     let query = filters.query.unwrap_or("".to_string());
     let keywords: Vec<String> = match filters.use_keywords {
@@ -557,7 +557,7 @@ pub fn search_group(filters: Filters) -> Result<Vec<Channel>> {
     let sql = get_conn()?;
     let offset: u16 = filters.page as u16 * PAGE_SIZE as u16 - PAGE_SIZE as u16;
     let query = filters.query.unwrap_or("".to_string());
-    let media_types = filters.media_types.context("no media types")?;
+    let media_types = filters.media_types.unwrap_or_else(|| vec![]);
     let keywords: Vec<String> = match filters.use_keywords {
         true => query
             .split(" ")
@@ -753,26 +753,6 @@ pub fn get_sources() -> Result<Vec<Source>> {
     let sql = get_conn()?;
     let sources: Vec<Source> = sql
         .prepare("SELECT * FROM sources")?
-        .query_map([], row_to_source)?
-        .filter_map(Result::ok)
-        .collect();
-    Ok(sources)
-}
-
-pub fn get_sources_by_type(source_type: u8) -> Result<Vec<Source>> {
-    let sql = get_conn()?;
-    let sources: Vec<Source> = sql
-        .prepare("SELECT * FROM sources WHERE source_type = ?")?
-        .query_map([source_type], row_to_source)?
-        .filter_map(Result::ok)
-        .collect();
-    Ok(sources)
-}
-
-pub fn get_enabled_sources() -> Result<Vec<Source>> {
-    let sql = get_conn()?;
-    let sources: Vec<Source> = sql
-        .prepare("SELECT * FROM sources WHERE enabled = 1")?
         .query_map([], row_to_source)?
         .filter_map(Result::ok)
         .collect();

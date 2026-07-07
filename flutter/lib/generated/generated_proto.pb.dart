@@ -463,16 +463,22 @@ class Settings extends $pb.GeneratedMessage {
   factory Settings({
     $core.bool? useStreamCaching,
     $core.int? defaultView,
-    $core.int? volume,
     $core.bool? refreshOnStart,
     $core.int? defaultSort,
+    $core.bool? forceTvMode,
+    $core.bool? showLivestreams,
+    $core.bool? showMovies,
+    $core.bool? showSeries,
   }) {
     final result = create();
     if (useStreamCaching != null) result.useStreamCaching = useStreamCaching;
     if (defaultView != null) result.defaultView = defaultView;
-    if (volume != null) result.volume = volume;
     if (refreshOnStart != null) result.refreshOnStart = refreshOnStart;
     if (defaultSort != null) result.defaultSort = defaultSort;
+    if (forceTvMode != null) result.forceTvMode = forceTvMode;
+    if (showLivestreams != null) result.showLivestreams = showLivestreams;
+    if (showMovies != null) result.showMovies = showMovies;
+    if (showSeries != null) result.showSeries = showSeries;
     return result;
   }
 
@@ -490,13 +496,16 @@ class Settings extends $pb.GeneratedMessage {
       package:
           const $pb.PackageName(_omitMessageNames ? '' : 'generated_proto'),
       createEmptyInstance: create)
-    ..aOB(3, _omitFieldNames ? '' : 'useStreamCaching')
-    ..aI(4, _omitFieldNames ? '' : 'defaultView',
+    ..aOB(1, _omitFieldNames ? '' : 'useStreamCaching')
+    ..aI(2, _omitFieldNames ? '' : 'defaultView',
         fieldType: $pb.PbFieldType.OU3)
-    ..aI(5, _omitFieldNames ? '' : 'volume', fieldType: $pb.PbFieldType.OU3)
-    ..aOB(6, _omitFieldNames ? '' : 'refreshOnStart')
-    ..aI(10, _omitFieldNames ? '' : 'defaultSort',
+    ..aOB(3, _omitFieldNames ? '' : 'refreshOnStart')
+    ..aI(4, _omitFieldNames ? '' : 'defaultSort',
         fieldType: $pb.PbFieldType.OU3)
+    ..aOB(5, _omitFieldNames ? '' : 'forceTvMode')
+    ..aOB(6, _omitFieldNames ? '' : 'showLivestreams')
+    ..aOB(7, _omitFieldNames ? '' : 'showMovies')
+    ..aOB(8, _omitFieldNames ? '' : 'showSeries')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -517,50 +526,77 @@ class Settings extends $pb.GeneratedMessage {
       _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Settings>(create);
   static Settings? _defaultInstance;
 
-  @$pb.TagNumber(3)
+  @$pb.TagNumber(1)
   $core.bool get useStreamCaching => $_getBF(0);
-  @$pb.TagNumber(3)
+  @$pb.TagNumber(1)
   set useStreamCaching($core.bool value) => $_setBool(0, value);
-  @$pb.TagNumber(3)
+  @$pb.TagNumber(1)
   $core.bool hasUseStreamCaching() => $_has(0);
-  @$pb.TagNumber(3)
-  void clearUseStreamCaching() => $_clearField(3);
+  @$pb.TagNumber(1)
+  void clearUseStreamCaching() => $_clearField(1);
 
-  @$pb.TagNumber(4)
+  @$pb.TagNumber(2)
   $core.int get defaultView => $_getIZ(1);
-  @$pb.TagNumber(4)
+  @$pb.TagNumber(2)
   set defaultView($core.int value) => $_setUnsignedInt32(1, value);
-  @$pb.TagNumber(4)
+  @$pb.TagNumber(2)
   $core.bool hasDefaultView() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearDefaultView() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.bool get refreshOnStart => $_getBF(2);
+  @$pb.TagNumber(3)
+  set refreshOnStart($core.bool value) => $_setBool(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasRefreshOnStart() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearRefreshOnStart() => $_clearField(3);
+
   @$pb.TagNumber(4)
-  void clearDefaultView() => $_clearField(4);
+  $core.int get defaultSort => $_getIZ(3);
+  @$pb.TagNumber(4)
+  set defaultSort($core.int value) => $_setUnsignedInt32(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasDefaultSort() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearDefaultSort() => $_clearField(4);
 
   @$pb.TagNumber(5)
-  $core.int get volume => $_getIZ(2);
+  $core.bool get forceTvMode => $_getBF(4);
   @$pb.TagNumber(5)
-  set volume($core.int value) => $_setUnsignedInt32(2, value);
+  set forceTvMode($core.bool value) => $_setBool(4, value);
   @$pb.TagNumber(5)
-  $core.bool hasVolume() => $_has(2);
+  $core.bool hasForceTvMode() => $_has(4);
   @$pb.TagNumber(5)
-  void clearVolume() => $_clearField(5);
+  void clearForceTvMode() => $_clearField(5);
 
   @$pb.TagNumber(6)
-  $core.bool get refreshOnStart => $_getBF(3);
+  $core.bool get showLivestreams => $_getBF(5);
   @$pb.TagNumber(6)
-  set refreshOnStart($core.bool value) => $_setBool(3, value);
+  set showLivestreams($core.bool value) => $_setBool(5, value);
   @$pb.TagNumber(6)
-  $core.bool hasRefreshOnStart() => $_has(3);
+  $core.bool hasShowLivestreams() => $_has(5);
   @$pb.TagNumber(6)
-  void clearRefreshOnStart() => $_clearField(6);
+  void clearShowLivestreams() => $_clearField(6);
 
-  @$pb.TagNumber(10)
-  $core.int get defaultSort => $_getIZ(4);
-  @$pb.TagNumber(10)
-  set defaultSort($core.int value) => $_setUnsignedInt32(4, value);
-  @$pb.TagNumber(10)
-  $core.bool hasDefaultSort() => $_has(4);
-  @$pb.TagNumber(10)
-  void clearDefaultSort() => $_clearField(10);
+  @$pb.TagNumber(7)
+  $core.bool get showMovies => $_getBF(6);
+  @$pb.TagNumber(7)
+  set showMovies($core.bool value) => $_setBool(6, value);
+  @$pb.TagNumber(7)
+  $core.bool hasShowMovies() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearShowMovies() => $_clearField(7);
+
+  @$pb.TagNumber(8)
+  $core.bool get showSeries => $_getBF(7);
+  @$pb.TagNumber(8)
+  set showSeries($core.bool value) => $_setBool(7, value);
+  @$pb.TagNumber(8)
+  $core.bool hasShowSeries() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearShowSeries() => $_clearField(8);
 }
 
 class Filters extends $pb.GeneratedMessage {

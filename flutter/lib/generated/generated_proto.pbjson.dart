@@ -269,7 +269,7 @@ const Settings$json = {
   '2': [
     {
       '1': 'use_stream_caching',
-      '3': 3,
+      '3': 1,
       '4': 1,
       '5': 8,
       '9': 0,
@@ -278,7 +278,7 @@ const Settings$json = {
     },
     {
       '1': 'default_view',
-      '3': 4,
+      '3': 2,
       '4': 1,
       '5': 13,
       '9': 1,
@@ -286,50 +286,84 @@ const Settings$json = {
       '17': true
     },
     {
-      '1': 'volume',
-      '3': 5,
-      '4': 1,
-      '5': 13,
-      '9': 2,
-      '10': 'volume',
-      '17': true
-    },
-    {
       '1': 'refresh_on_start',
-      '3': 6,
+      '3': 3,
       '4': 1,
       '5': 8,
-      '9': 3,
+      '9': 2,
       '10': 'refreshOnStart',
       '17': true
     },
     {
       '1': 'default_sort',
-      '3': 10,
+      '3': 4,
       '4': 1,
       '5': 13,
-      '9': 4,
+      '9': 3,
       '10': 'defaultSort',
+      '17': true
+    },
+    {
+      '1': 'force_tv_mode',
+      '3': 5,
+      '4': 1,
+      '5': 8,
+      '9': 4,
+      '10': 'forceTvMode',
+      '17': true
+    },
+    {
+      '1': 'show_livestreams',
+      '3': 6,
+      '4': 1,
+      '5': 8,
+      '9': 5,
+      '10': 'showLivestreams',
+      '17': true
+    },
+    {
+      '1': 'show_movies',
+      '3': 7,
+      '4': 1,
+      '5': 8,
+      '9': 6,
+      '10': 'showMovies',
+      '17': true
+    },
+    {
+      '1': 'show_series',
+      '3': 8,
+      '4': 1,
+      '5': 8,
+      '9': 7,
+      '10': 'showSeries',
       '17': true
     },
   ],
   '8': [
     {'1': '_use_stream_caching'},
     {'1': '_default_view'},
-    {'1': '_volume'},
     {'1': '_refresh_on_start'},
     {'1': '_default_sort'},
+    {'1': '_force_tv_mode'},
+    {'1': '_show_livestreams'},
+    {'1': '_show_movies'},
+    {'1': '_show_series'},
   ],
 };
 
 /// Descriptor for `Settings`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List settingsDescriptor = $convert.base64Decode(
-    'CghTZXR0aW5ncxIxChJ1c2Vfc3RyZWFtX2NhY2hpbmcYAyABKAhIAFIQdXNlU3RyZWFtQ2FjaG'
-    'luZ4gBARImCgxkZWZhdWx0X3ZpZXcYBCABKA1IAVILZGVmYXVsdFZpZXeIAQESGwoGdm9sdW1l'
-    'GAUgASgNSAJSBnZvbHVtZYgBARItChByZWZyZXNoX29uX3N0YXJ0GAYgASgISANSDnJlZnJlc2'
-    'hPblN0YXJ0iAEBEiYKDGRlZmF1bHRfc29ydBgKIAEoDUgEUgtkZWZhdWx0U29ydIgBAUIVChNf'
-    'dXNlX3N0cmVhbV9jYWNoaW5nQg8KDV9kZWZhdWx0X3ZpZXdCCQoHX3ZvbHVtZUITChFfcmVmcm'
-    'VzaF9vbl9zdGFydEIPCg1fZGVmYXVsdF9zb3J0');
+    'CghTZXR0aW5ncxIxChJ1c2Vfc3RyZWFtX2NhY2hpbmcYASABKAhIAFIQdXNlU3RyZWFtQ2FjaG'
+    'luZ4gBARImCgxkZWZhdWx0X3ZpZXcYAiABKA1IAVILZGVmYXVsdFZpZXeIAQESLQoQcmVmcmVz'
+    'aF9vbl9zdGFydBgDIAEoCEgCUg5yZWZyZXNoT25TdGFydIgBARImCgxkZWZhdWx0X3NvcnQYBC'
+    'ABKA1IA1ILZGVmYXVsdFNvcnSIAQESJwoNZm9yY2VfdHZfbW9kZRgFIAEoCEgEUgtmb3JjZVR2'
+    'TW9kZYgBARIuChBzaG93X2xpdmVzdHJlYW1zGAYgASgISAVSD3Nob3dMaXZlc3RyZWFtc4gBAR'
+    'IkCgtzaG93X21vdmllcxgHIAEoCEgGUgpzaG93TW92aWVziAEBEiQKC3Nob3dfc2VyaWVzGAgg'
+    'ASgISAdSCnNob3dTZXJpZXOIAQFCFQoTX3VzZV9zdHJlYW1fY2FjaGluZ0IPCg1fZGVmYXVsdF'
+    '92aWV3QhMKEV9yZWZyZXNoX29uX3N0YXJ0Qg8KDV9kZWZhdWx0X3NvcnRCEAoOX2ZvcmNlX3R2'
+    'X21vZGVCEwoRX3Nob3dfbGl2ZXN0cmVhbXNCDgoMX3Nob3dfbW92aWVzQg4KDF9zaG93X3Nlcm'
+    'llcw==');
 
 @$core.Deprecated('Use filtersDescriptor instead')
 const Filters$json = {

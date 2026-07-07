@@ -11,80 +11,90 @@ import 'package:open_tv/models/source_type.dart';
 
 extension ChannelProtoExtension on pb.Channel {
   Channel toDomain() => Channel(
-        id: hasId() ? id.toInt() : null,
-        name: name,
-        group: hasGroup() ? group : null,
-        groupId: hasGroupId() ? groupId.toInt() : null,
-        image: hasImage() ? image : null,
-        url: hasUrl() ? url : null,
-        mediaType: MediaType.values[mediaType],
-        sourceId: sourceId.toInt(),
-        favorite: favorite,
-        seriesId: hasSeriesId() ? seriesId.toInt() : null,
-        streamId: hasStreamId() ? streamId.toInt() : null,
-      );
+    id: hasId() ? id.toInt() : null,
+    name: name,
+    group: hasGroup() ? group : null,
+    groupId: hasGroupId() ? groupId.toInt() : null,
+    image: hasImage() ? image : null,
+    url: hasUrl() ? url : null,
+    mediaType: MediaType.values[mediaType],
+    sourceId: sourceId.toInt(),
+    favorite: favorite,
+    seriesId: hasSeriesId() ? seriesId.toInt() : null,
+    streamId: hasStreamId() ? streamId.toInt() : null,
+  );
 }
 
 extension SourceProtoExtension on pb.Source {
   Source toDomain() => Source(
-        id: hasId() ? id.toInt() : null,
-        name: name,
-        url: hasUrl() ? url : null,
-        urlOrigin: hasUrlOrigin() ? urlOrigin : null,
-        username: hasUsername() ? username : null,
-        password: hasPassword() ? password : null,
-        sourceType: SourceType.values[sourceType],
-        enabled: enabled,
-      );
+    id: hasId() ? id.toInt() : null,
+    name: name,
+    url: hasUrl() ? url : null,
+    urlOrigin: hasUrlOrigin() ? urlOrigin : null,
+    username: hasUsername() ? username : null,
+    password: hasPassword() ? password : null,
+    sourceType: SourceType.values[sourceType],
+    enabled: enabled,
+  );
 }
 
 extension SourceDomainExtension on Source {
   pb.Source toProto() => pb.Source(
-        id: id != null ? Int64(id!) : null,
-        name: name,
-        url: url,
-        urlOrigin: urlOrigin,
-        username: username,
-        password: password,
-        sourceType: sourceType.index,
-        enabled: enabled,
-      );
+    id: id != null ? Int64(id!) : null,
+    name: name,
+    url: url,
+    urlOrigin: urlOrigin,
+    username: username,
+    password: password,
+    sourceType: sourceType.index,
+    enabled: enabled,
+  );
 }
 
 extension FiltersDomainExtension on Filters {
   pb.Filters toProto() => pb.Filters(
-        query: query,
-        sourceIds: sourceIds?.map(Int64.new) ?? [],
-        mediaTypes: mediaTypes?.map((m) => pb.MediaType.valueOf(m.index)!) ?? [],
-        viewType: pb.ViewType.valueOf(viewType.index),
-        page: page,
-        seriesId: seriesId != null ? Int64(seriesId!) : null,
-        groupId: groupId != null ? Int64(groupId!) : null,
-        useKeywords: useKeywords,
-      );
+    query: query,
+    sourceIds: sourceIds?.map(Int64.new) ?? [],
+    mediaTypes: mediaTypes?.map((m) => pb.MediaType.valueOf(m.index)!) ?? [],
+    viewType: pb.ViewType.valueOf(viewType.index),
+    page: page,
+    seriesId: seriesId != null ? Int64(seriesId!) : null,
+    groupId: groupId != null ? Int64(groupId!) : null,
+    useKeywords: useKeywords,
+  );
 }
 
 extension SettingsProtoExtension on pb.Settings {
   Settings toDomain() => Settings(
-        defaultView: ViewType.values[defaultView],
-        refreshOnStart: refreshOnStart,
-      );
+    defaultView: ViewType.values[defaultView],
+    refreshOnStart: refreshOnStart,
+    lowLatency: !useStreamCaching,
+    forceTVMode: forceTvMode,
+    showLivestreams: showLivestreams,
+    showMovies: showMovies,
+    showSeries: showSeries,
+  );
 }
 
 extension SettingsDomainExtension on Settings {
   pb.Settings toProto() => pb.Settings(
-        defaultView: defaultView.index,
-        refreshOnStart: refreshOnStart,
-      );
+    defaultView: defaultView.index,
+    refreshOnStart: refreshOnStart,
+    useStreamCaching: !lowLatency,
+    forceTvMode: forceTVMode,
+    showLivestreams: showLivestreams,
+    showMovies: showMovies,
+    showSeries: showSeries,
+  );
 }
 
 extension ChannelHttpHeadersProtoExtension on pb.ChannelHttpHeaders {
   ChannelHttpHeaders toDomain() => ChannelHttpHeaders(
-        id: hasId() ? id.toInt() : null,
-        channelId: hasChannelId() ? channelId.toInt() : null,
-        referrer: hasReferrer() ? referrer : null,
-        userAgent: hasUserAgent() ? userAgent : null,
-        httpOrigin: hasHttpOrigin() ? httpOrigin : null,
-        ignoreSSL: hasIgnoreSsl() ? ignoreSsl.toString() : null,
-      );
+    id: hasId() ? id.toInt() : null,
+    channelId: hasChannelId() ? channelId.toInt() : null,
+    referrer: hasReferrer() ? referrer : null,
+    userAgent: hasUserAgent() ? userAgent : null,
+    httpOrigin: hasHttpOrigin() ? httpOrigin : null,
+    ignoreSSL: hasIgnoreSsl() ? ignoreSsl.toString() : null,
+  );
 }

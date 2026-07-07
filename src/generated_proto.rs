@@ -63,16 +63,22 @@ pub struct Source {
 }
 #[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct Settings {
-    #[prost(bool, optional, tag = "3")]
+    #[prost(bool, optional, tag = "1")]
     pub use_stream_caching: ::core::option::Option<bool>,
-    #[prost(uint32, optional, tag = "4")]
+    #[prost(uint32, optional, tag = "2")]
     pub default_view: ::core::option::Option<u32>,
-    #[prost(uint32, optional, tag = "5")]
-    pub volume: ::core::option::Option<u32>,
-    #[prost(bool, optional, tag = "6")]
+    #[prost(bool, optional, tag = "3")]
     pub refresh_on_start: ::core::option::Option<bool>,
-    #[prost(uint32, optional, tag = "10")]
+    #[prost(uint32, optional, tag = "4")]
     pub default_sort: ::core::option::Option<u32>,
+    #[prost(bool, optional, tag = "5")]
+    pub force_tv_mode: ::core::option::Option<bool>,
+    #[prost(bool, optional, tag = "6")]
+    pub show_livestreams: ::core::option::Option<bool>,
+    #[prost(bool, optional, tag = "7")]
+    pub show_movies: ::core::option::Option<bool>,
+    #[prost(bool, optional, tag = "8")]
+    pub show_series: ::core::option::Option<bool>,
 }
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct Filters {

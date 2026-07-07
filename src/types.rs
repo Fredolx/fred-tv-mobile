@@ -61,9 +61,12 @@ pub struct Source {
 pub struct Settings {
     pub use_stream_caching: Option<bool>,
     pub default_view: Option<u8>,
-    pub volume: Option<u8>,
     pub refresh_on_start: Option<bool>,
     pub default_sort: Option<u8>,
+    pub force_tv_mode: Option<bool>,
+    pub show_livestreams: Option<bool>,
+    pub show_movies: Option<bool>,
+    pub show_series: Option<bool>,
 }
 
 #[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]

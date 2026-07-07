@@ -23,9 +23,12 @@ impl From<crate::types::Settings> for crate::generated_proto::Settings {
         crate::generated_proto::Settings {
             use_stream_caching: settings.use_stream_caching,
             default_view: settings.default_view.map(|v| v as u32),
-            volume: settings.volume.map(|v| v as u32),
             refresh_on_start: settings.refresh_on_start,
             default_sort: settings.default_sort.map(|s| s as u32),
+            force_tv_mode: settings.force_tv_mode,
+            show_livestreams: settings.show_livestreams,
+            show_series: settings.show_series,
+            show_movies: settings.show_movies,
         }
     }
 }
@@ -35,9 +38,12 @@ impl From<crate::generated_proto::Settings> for crate::types::Settings {
         crate::types::Settings {
             use_stream_caching: settings.use_stream_caching,
             default_view: settings.default_view.map(|v| v as u8),
-            volume: settings.volume.map(|v| v as u8),
             refresh_on_start: settings.refresh_on_start,
             default_sort: settings.default_sort.map(|s| s as u8),
+            force_tv_mode: settings.force_tv_mode,
+            show_livestreams: settings.show_livestreams,
+            show_movies: settings.show_movies,
+            show_series: settings.show_series,
         }
     }
 }
