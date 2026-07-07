@@ -11,6 +11,7 @@ import 'package:media_kit_video/media_kit_video.dart' as mkvideo;
 import 'package:open_tv/models/settings.dart';
 import 'package:open_tv/native_bridge.dart';
 import 'package:open_tv/select_dialog.dart';
+import 'package:open_tv/error.dart';
 
 class Player extends StatefulWidget {
   final Channel channel;
@@ -41,7 +42,11 @@ class _PlayerState extends State<Player> {
     player.setPlaylistMode(mk.PlaylistMode.none);
     await setMpvOptions();
     final seconds = widget.channel.mediaType == MediaType.movie
-        ? await NativeBridge.instance.getMoviePosition(widget.channel.id!)
+        ? (await Error.tryAsyncNoLoading(() async {
+            return await NativeBridge.instance.getMoviePosition(
+              widget.channel.id!,
+            );
+          }, context)).data
         : null;
     await _startPlayback(seconds != null ? Duration(seconds: seconds) : null);
     subscriptions.add(
@@ -76,9 +81,11 @@ class _PlayerState extends State<Player> {
     while (true) {
       if (!mounted || exiting) return;
       try {
-        final headers = await NativeBridge.instance.getChannelHeaders(
-          widget.channel.id!,
-        );
+        final headers = (await Error.tryAsyncNoLoading(() async {
+          return await NativeBridge.instance.getChannelHeaders(
+            widget.channel.id!,
+          );
+        }, context)).data;
         await player.open(
           mk.Media(
             widget.channel.url!,

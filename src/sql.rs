@@ -152,14 +152,6 @@ ANALYZE;
     Ok(())
 }
 
-pub fn drop_db() -> Result<()> {
-    let sql = get_conn()?;
-    sql.execute_batch(
-        "DROP TABLE channels; DROP TABLE groups; DROP TABLE sources; DROP TABLE settings;",
-    )?;
-    Ok(())
-}
-
 pub fn create_or_find_source_by_name(tx: &Transaction, source: &Source) -> Result<i64> {
     let id: Option<i64> = tx
         .query_row(
@@ -365,6 +357,7 @@ pub fn update_settings(map: HashMap<String, Option<String>>) -> Result<()> {
 }
 
 pub fn search(filters: Filters) -> Result<Vec<Channel>> {
+    tracing::info!("{:#?}", filters);
     if filters.view_type == view_type::CATEGORIES
         && filters.group_id.is_none()
         && filters.series_id.is_none()
@@ -549,10 +542,6 @@ pub fn series_has_episodes(series_id: i64, source_id: i64) -> Result<bool> {
     Ok(series_exists)
 }
 
-fn to_sql_like(query: Option<String>) -> String {
-    query.map(|x| format!("%{x}%")).unwrap_or("%".to_string())
-}
-
 pub fn search_group(filters: Filters) -> Result<Vec<Channel>> {
     let sql = get_conn()?;
     let offset: u16 = filters.page as u16 * PAGE_SIZE as u16 - PAGE_SIZE as u16;
@@ -710,16 +699,6 @@ pub fn delete_source(id: i64) -> Result<()> {
     Ok(())
 }
 
-pub fn get_channel_count_by_source(id: i64) -> Result<i64> {
-    let sql = get_conn()?;
-    let count = sql.query_row(
-        "SELECT COUNT(*) FROM channels WHERE source_id = ?",
-        params![id],
-        |row| row.get::<_, i64>(0),
-    )?;
-    Ok(count)
-}
-
 pub fn source_name_exists(name: &str) -> Result<bool> {
     let sql = get_conn()?;
     Ok(sql
@@ -845,7 +824,7 @@ pub fn wipe(tx: &Transaction, id: i64) -> Result<()> {
 }
 
 pub fn get_preserve(tx: &Transaction, source_id: i64) -> Result<Vec<ChannelPreserve>> {
-    let mut channels: Vec<ChannelPreserve> = tx
+    let channels: Vec<ChannelPreserve> = tx
         .prepare(
             r#"
               SELECT name, favorite, last_watched
@@ -868,15 +847,6 @@ fn row_to_channel_preserve(row: &Row) -> Result<ChannelPreserve, rusqlite::Error
         favorite: row.get("favorite")?,
         last_watched: row.get("last_watched")?,
         is_group: false,
-    })
-}
-
-fn row_to_group_preserve(row: &Row) -> Result<ChannelPreserve, rusqlite::Error> {
-    Ok(ChannelPreserve {
-        name: row.get("name")?,
-        favorite: false,
-        last_watched: None,
-        is_group: true,
     })
 }
 
@@ -954,24 +924,6 @@ pub fn clear_history() -> Result<()> {
         params![],
     )?;
     Ok(())
-}
-
-pub fn find_all_episodes_after(channel: &Channel) -> Result<Vec<String>> {
-    let sql = get_conn()?;
-    Ok(sql
-        .prepare(
-            r#"
-        SELECT url FROM channels
-        WHERE season_id = ?
-        AND episode_num > ?
-        ORDER BY episode_num
-      "#,
-        )?
-        .query_map(params![channel.season_id, channel.episode_num], |row| {
-            row.get::<_, String>(0)
-        })?
-        .filter_map(Result::ok)
-        .collect())
 }
 
 pub fn update_source_last_updated(source_id: i64) -> Result<()> {

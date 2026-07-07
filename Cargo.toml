@@ -21,7 +21,9 @@ rusqlite = { version = "0.39.0", features = ["bundled"] }
 rusqlite_migration = "2.5.0"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-simplelog = "0.12.2"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["fmt", "registry", "env-filter"] }
+tracing-log = "0.2"
 sysdirs = "0.9.4"
 tokio = { version = "1.52", features = ["full"] }
 
@@ -32,6 +34,10 @@ reqwest = { version = "0.13", default-features = false, features = [
     "charset",
     "http2",
 ] }
+tracing-android = "0.2"
+
+[target.'cfg(target_os = "ios")'.dependencies]
+tracing-oslog = "0.2"
 
 [target.'cfg(not(target_os = "android"))'.dependencies]
 reqwest = { version = "0.13", default-features = false, features = [

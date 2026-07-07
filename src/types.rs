@@ -96,16 +96,6 @@ pub struct ChannelHttpHeaders {
 }
 
 #[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
-pub struct Group {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub id: Option<i64>,
-    pub name: String,
-    pub image: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub source_id: Option<i64>,
-}
-
-#[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
 pub struct ChannelPreserve {
     pub name: String,
     pub favorite: bool,

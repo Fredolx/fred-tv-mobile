@@ -1,4 +1,3 @@
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -75,31 +74,54 @@ class _ChannelTileState extends State<ChannelTile> {
     }, context);
   }
 
-  Future<void> play() async {
-    if (widget.channel.mediaType == MediaType.group ||
-        widget.channel.mediaType == MediaType.serie) {
-      if (widget.channel.mediaType == MediaType.serie &&
-          !refreshedSeries.contains(widget.channel.id)) {
-        await Error.tryAsync(
-          () async {
-            await NativeBridge.instance.getEpisodes(
-              widget.channel.id!,
-              widget.channel.sourceId,
-              widget.channel.image,
-            );
-            refreshedSeries.add(widget.channel.id!);
-          },
-          widget.parentContext,
-          null,
-          true,
-          false,
+  Future<int?> _handleSeries() async {
+    if (widget.channel.url?.isEmpty == true) {
+      if (context.mounted) {
+        Error.handleError(context, "Invalid series: series ID is null");
+      }
+      return null;
+    }
+    final seriesId = int.tryParse(widget.channel.url!);
+    if (seriesId == null) {
+      if (context.mounted) {
+        Error.handleError(
+          context,
+          "Invalid series: series ID is not a valid number",
         );
       }
+      return null;
+    }
+    await Error.tryAsync(
+      () async {
+        await NativeBridge.instance.getEpisodes(
+          seriesId,
+          widget.channel.sourceId,
+          widget.channel.image,
+        );
+        refreshedSeries.add(seriesId);
+      },
+      widget.parentContext,
+      null,
+      true,
+      false,
+    );
+    return seriesId;
+  }
+
+  Future<void> play() async {
+    late final int? seriesId;
+    if (widget.channel.mediaType == MediaType.serie) {
+      seriesId = await _handleSeries();
+      if (seriesId == null) return;
+    }
+
+    if (widget.channel.mediaType == MediaType.group ||
+        widget.channel.mediaType == MediaType.serie) {
       widget.setNode(
         Node(
           id: widget.channel.mediaType == MediaType.group
               ? widget.channel.id!
-              : int.parse(widget.channel.url!),
+              : seriesId!,
           name: widget.channel.name,
           type: fromMediaType(widget.channel.mediaType),
         ),
