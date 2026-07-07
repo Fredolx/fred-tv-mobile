@@ -37,11 +37,14 @@ message Source {
 }
 
 message Settings {
-  optional bool use_stream_caching = 3;
-  optional uint32 default_view = 4;
-  optional uint32 volume = 5;
-  optional bool refresh_on_start = 6;
-  optional uint32 default_sort = 10;
+  optional bool use_stream_caching = 1;
+  optional uint32 default_view = 2;
+  optional bool refresh_on_start = 3;
+  optional uint32 default_sort = 4;
+  optional bool force_tv_mode = 5;
+  optional bool show_livestreams = 6;
+  optional bool show_movies = 7;
+  optional bool show_series = 8;
 }
 
 enum MediaType {
