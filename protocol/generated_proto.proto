@@ -1,0 +1,157 @@
+syntax = "proto3";
+package generated_proto;
+
+message Channel {
+  optional int64 id = 1;
+  string name = 2;
+  optional string url = 3;
+  optional string group = 4;
+  optional string image = 5;
+  uint32 media_type = 6;
+  optional int64 source_id = 7;
+  optional uint64 series_id = 8;
+  optional int64 group_id = 9;
+  bool favorite = 10;
+  optional uint64 stream_id = 11;
+  optional bool tv_archive = 12;
+  optional int64 season_id = 13;
+  optional int64 episode_num = 14;
+}
+
+message ChannelList {
+  repeated Channel channels = 1;
+}
+
+message Source {
+  optional int64 id = 1;
+  string name = 2;
+  optional string url = 3;
+  optional string url_origin = 4;
+  optional string username = 5;
+  optional string password = 6;
+  uint32 source_type = 7;         
+  bool enabled = 9;
+  optional string user_agent = 10;
+  optional string stream_user_agent = 12;
+  optional int64 last_updated = 13;
+}
+
+message Settings {
+  optional bool use_stream_caching = 1;
+  optional uint32 default_view = 2;
+  optional bool refresh_on_start = 3;
+  optional uint32 default_sort = 4;
+  optional bool force_tv_mode = 5;
+  optional bool show_livestreams = 6;
+  optional bool show_movies = 7;
+  optional bool show_series = 8;
+}
+
+enum MediaType {
+  MEDIA_TYPE_LIVESTREAM = 0;
+  MEDIA_TYPE_MOVIE = 1;
+  MEDIA_TYPE_SERIE = 2;
+  MEDIA_TYPE_GROUP = 3;
+  MEDIA_TYPE_SEASON = 4;
+}
+
+enum ViewType {
+  VIEW_TYPE_ALL = 0;
+  VIEW_TYPE_CATEGORIES = 1;
+  VIEW_TYPE_FAVORITES = 2;
+  VIEW_TYPE_HISTORY = 3;
+  VIEW_TYPE_SETTINGS = 4;
+}
+
+message Filters {
+  optional string query = 1;
+  repeated int64 source_ids = 2;
+  repeated MediaType media_types = 3; 
+  ViewType view_type = 4;
+  uint32 page = 5;
+  optional int64 series_id = 6;
+  optional int64 group_id = 7;
+  bool use_keywords = 8;
+  uint32 sort = 9;
+  optional int64 season = 10;
+}
+
+message ToggleFavorite {
+  int64 channel_id = 1;
+  bool favorite = 2;
+}
+
+message IdMessage {
+  int64 value = 1;
+}
+
+message MoviePosition {
+  int64 channel_id = 1;
+  int64 position = 2;
+}
+
+message StrMessage {
+  string value = 1;
+}
+
+message OptStrMessage {
+  optional string value = 1;
+}
+
+message BoolMessage {
+  bool value = 1;
+}
+
+message GetMoviePosition {
+  optional int64 position = 1; 
+}
+
+message InitMessage {
+  string db_path = 1;
+  string temp_path = 2;
+}
+
+message GetEpisodes {
+  int64 series_id = 1;
+  int64 source_id = 2;
+  optional string fallback_image = 3;
+}
+
+message ChannelHttpHeaders {
+  optional int64 id = 1;
+  optional int64 channel_id = 2;
+  optional string referrer = 3;
+  optional string user_agent = 4;
+  optional string http_origin = 5;
+  optional bool ignore_ssl = 6;
+}
+
+message GetEnabledSourcesMinimal {
+  repeated int64 list_id = 1;
+}
+
+message SourceList {
+  repeated Source sources = 1;
+}
+
+message SetSourceEnabled {
+  int64 source_id = 1;
+  bool enabled = 2;
+}
+
+message FFIResult {
+  bool success = 1;
+  optional string error_message = 2;
+  oneof data {
+    Settings settings = 3;
+    Source source = 4;
+    ChannelList channel_list = 6;
+    BoolMessage bool_message = 7;
+    GetMoviePosition movie_position = 8;
+    ChannelHttpHeaders headers = 9;
+    GetEnabledSourcesMinimal enabled_sources_minimal = 10;
+    SourceList source_list = 11;
+  }
+}
+
+
