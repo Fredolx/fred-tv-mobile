@@ -4,6 +4,9 @@ use std::{path::PathBuf, str::FromStr};
 use tracing_subscriber::prelude::*;
 
 pub fn init_logger() {
+    unsafe {
+        std::env::set_var("RUST_BACKTRACE", "1");
+    }
     let _ = tracing_log::LogTracer::init();
 
     let file_layer = get_and_create_log_path()

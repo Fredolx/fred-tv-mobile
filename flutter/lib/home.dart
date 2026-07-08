@@ -195,6 +195,10 @@ class _HomeState extends State<Home> {
       home.filters.groupId = node.id;
     }
     if (node.type == NodeType.series) home.filters.seriesId = node.id;
+    if (node.type == NodeType.season) {
+      home.filters.seriesId = widget.home.filters.seriesId;
+      home.filters.seasonId = node.id;
+    }
     Navigator.of(context).push(
       NoPushAnimationMaterialPageRoute(builder: (context) => Home(home: home)),
     );

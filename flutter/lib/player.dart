@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -101,7 +102,9 @@ class _PlayerState extends State<Player> {
                 : null,
           ),
         );
-        await key.currentState?.enterFullscreen();
+        if (Platform.isAndroid || Platform.isIOS) {
+          await key.currentState?.enterFullscreen();
+        }
         return;
       } catch (e) {
         debugPrint("Playback failed: $e. Retrying in 2s...");
@@ -184,6 +187,7 @@ class _PlayerState extends State<Player> {
             key: key,
             controller: videoController,
             onExitFullscreen: () async => onExit(),
+            controls: MaterialVideoControls,
           ),
         ),
       ),
@@ -203,13 +207,15 @@ class _PlayerState extends State<Player> {
       await key.currentState!.exitFullscreen();
     }
     Navigator.of(context).pop();
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-    ]);
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    if (Platform.isAndroid || Platform.isIOS) {
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    }
   }
 
   void toggleZoom() {

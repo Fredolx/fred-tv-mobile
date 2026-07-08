@@ -8,6 +8,7 @@ class Filters {
   ViewType viewType;
   int page;
   int? seriesId;
+  int? seasonId;
   int? groupId;
   bool useKeywords;
 
@@ -18,6 +19,7 @@ class Filters {
     required this.viewType,
     this.page = 1,
     this.seriesId,
+    this.seasonId,
     this.groupId,
     this.useKeywords = false,
   });

@@ -10,7 +10,13 @@ import 'package:open_tv/native_bridge.dart';
 class EditDialog extends StatefulWidget {
   final Source source;
   final AsyncCallback afterSave;
-  const EditDialog({super.key, required this.source, required this.afterSave});
+  final BuildContext parentContext;
+  const EditDialog({
+    super.key,
+    required this.source,
+    required this.afterSave,
+    required this.parentContext,
+  });
 
   @override
   State<EditDialog> createState() => _EditDialogState();
@@ -47,7 +53,7 @@ class _EditDialogState extends State<EditDialog> {
                           : null,
                     ),
                   ),
-                  context,
+                  widget.parentContext,
                 );
                 await widget.afterSave();
               },

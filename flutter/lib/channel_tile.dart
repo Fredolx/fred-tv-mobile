@@ -116,10 +116,12 @@ class _ChannelTileState extends State<ChannelTile> {
     }
 
     if (widget.channel.mediaType == MediaType.group ||
-        widget.channel.mediaType == MediaType.serie) {
+        widget.channel.mediaType == MediaType.serie ||
+        widget.channel.mediaType == MediaType.season) {
       widget.setNode(
         Node(
-          id: widget.channel.mediaType == MediaType.group
+          id: widget.channel.mediaType == MediaType.group ||
+                  widget.channel.mediaType == MediaType.season
               ? widget.channel.id!
               : seriesId!,
           name: widget.channel.name,

@@ -59,6 +59,7 @@ extension FiltersDomainExtension on Filters {
     viewType: pb.ViewType.valueOf(viewType.index),
     page: page,
     seriesId: seriesId != null ? Int64(seriesId!) : null,
+    season: seasonId != null ? Int64(seasonId!) : null,
     groupId: groupId != null ? Int64(groupId!) : null,
     useKeywords: useKeywords,
   );
