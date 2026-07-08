@@ -288,6 +288,8 @@ class _PlayerState extends State<Player> {
       seekBarThumbSize: 20,
       seekBarHeight: 10,
       displaySeekBar: widget.channel.mediaType != MediaType.livestream,
+      hideMouseOnControlsRemoval: true,
+      controlsHoverDuration: const Duration(seconds: 3),
       topButtonBar: [
         IconButton(
           onPressed: onExit,
