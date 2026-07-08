@@ -183,13 +183,17 @@ class _PlayerState extends State<Player> {
         body: MaterialVideoControlsTheme(
           normal: getThemeData(context),
           fullscreen: getThemeData(context),
-          child: Video(
-            key: key,
-            controller: videoController,
-            onExitFullscreen: (Platform.isAndroid || Platform.isIOS)
-                ? () async => onExit()
-                : defaultExitNativeFullscreen,
-            controls: MaterialVideoControls,
+          child: MaterialDesktopVideoControlsTheme(
+            normal: getDesktopThemeData(context),
+            fullscreen: getDesktopThemeData(context),
+            child: Video(
+              key: key,
+              controller: videoController,
+              onExitFullscreen: (Platform.isAndroid || Platform.isIOS)
+                  ? () async => onExit()
+                  : defaultExitNativeFullscreen,
+              controls: AdaptiveVideoControls,
+            ),
           ),
         ),
       ),
@@ -274,6 +278,48 @@ class _PlayerState extends State<Player> {
             iconColor: Colors.white,
           ),
         ],
+      ],
+    );
+  }
+
+  MaterialDesktopVideoControlsThemeData getDesktopThemeData(BuildContext context) {
+    return MaterialDesktopVideoControlsThemeData(
+      seekBarMargin: const EdgeInsets.only(bottom: 60),
+      seekBarThumbSize: 20,
+      seekBarHeight: 10,
+      displaySeekBar: widget.channel.mediaType != MediaType.livestream,
+      topButtonBar: [
+        IconButton(
+          onPressed: onExit,
+          icon: const Icon(Icons.arrow_back, color: Colors.white, size: 32),
+        ),
+        const SizedBox(width: 10),
+        Text(widget.channel.name),
+      ],
+      bottomButtonBar: [
+        IconButton(
+          onPressed: openSubtitlesModal,
+          icon: const Icon(Icons.subtitles, color: Colors.white, size: 32),
+        ),
+        const SizedBox(width: 20),
+        IconButton(
+          onPressed: openAudioModal,
+          icon: const Icon(Icons.music_note, color: Colors.white, size: 32),
+        ),
+        const SizedBox(width: 20),
+        IconButton(
+          icon: const Icon(
+            Icons.aspect_ratio_outlined,
+            color: Colors.white,
+            size: 32,
+          ),
+          onPressed: toggleZoom,
+        ),
+        const Spacer(),
+        const MaterialDesktopFullscreenButton(
+          iconSize: 32,
+          iconColor: Colors.white,
+        ),
       ],
     );
   }
