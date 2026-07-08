@@ -186,7 +186,9 @@ class _PlayerState extends State<Player> {
           child: Video(
             key: key,
             controller: videoController,
-            onExitFullscreen: () async => onExit(),
+            onExitFullscreen: (Platform.isAndroid || Platform.isIOS)
+                ? () async => onExit()
+                : defaultExitNativeFullscreen,
             controls: MaterialVideoControls,
           ),
         ),
@@ -265,6 +267,13 @@ class _PlayerState extends State<Player> {
           ),
           onPressed: toggleZoom,
         ),
+        if (!(Platform.isAndroid || Platform.isIOS)) ...[
+          const Spacer(),
+          const MaterialFullscreenButton(
+            iconSize: 32,
+            iconColor: Colors.white,
+          ),
+        ],
       ],
     );
   }
