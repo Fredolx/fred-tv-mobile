@@ -1,0 +1,62 @@
+[package]
+name = "fred-tv-lib"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+anyhow = "1"
+base64 = "0.22.1"
+chrono = "0.4.45"
+futures = "0.3.32"
+log = "0.4.33"
+prost = "0.14"
+prost-types = "0.14.4"
+r2d2 = "0.8.10"
+r2d2_sqlite = "0.34.0"
+regex = "1.12.4"
+rusqlite = { version = "0.39.0", features = ["bundled"] }
+rusqlite_migration = "2.5.0"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["fmt", "registry", "env-filter"] }
+tracing-log = "0.2"
+sysdirs = "0.9.4"
+tokio = { version = "1.52", features = ["full"] }
+
+[target.'cfg(target_os = "android")'.dependencies]
+reqwest = { version = "0.13", default-features = false, features = [
+    "json",
+    "native-tls-vendored",
+    "charset",
+    "http2",
+] }
+tracing-android = "0.2"
+
+[target.'cfg(target_os = "ios")'.dependencies]
+tracing-oslog = "0.2"
+
+[target.'cfg(not(target_os = "android"))'.dependencies]
+reqwest = { version = "0.13", default-features = false, features = [
+    "json",
+    "rustls",
+    "charset",
+    "http2",
+] }
+
+# Install cargo-cmd:
+# cargo install cargo-cmd
+[package.metadata.commands]
+build-linux = "cargo build --release && mkdir -p flutter/linux/libs && cp target/release/libfred_tv_lib.so flutter/linux/libs/"
+build-android = "cargo ndk -t arm64-v8a -t armeabi-v7a -t x86_64 --platform 30 -o flutter/android/app/src/main/jniLibs build --release"
+build-android-debug = "cargo ndk -t arm64-v8a -t armeabi-v7a -t x86_64 --platform 30 -o flutter/android/app/src/main/jniLibs build"
+# install cbindgen, cargo install cbindgen
+gen-header = "cbindgen --config ./template.toml --crate fred-tv-lib --output out/lib.h"
+# install protobuf, on windows: scoop install protobuf. AND cargo install protoc-gen-prost
+gen-proto-rust = "protoc --prost_opt=flat_output_dir=true --prost_out=src -I ./protocol/ generated_proto.proto"
+# needed: dart pub global activate protoc_plugin
+gen-proto-dart = "protoc --dart_out=flutter/lib/generated -I ./protocol/ generated_proto.proto"
+ffigen = "cd flutter && dart run ffigen"
