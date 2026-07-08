@@ -357,7 +357,6 @@ pub fn update_settings(map: HashMap<String, Option<String>>) -> Result<()> {
 }
 
 pub fn search(filters: Filters) -> Result<Vec<Channel>> {
-    tracing::info!("{:#?}", filters);
     if filters.view_type == view_type::CATEGORIES
         && filters.group_id.is_none()
         && filters.series_id.is_none()
@@ -802,7 +801,7 @@ pub fn update_source(source: Source) -> Result<()> {
     sql.execute(
         r#"
         UPDATE sources
-        SET username = ?, password = ?, url = ?, use_tvg_id = ?, user_agent = ?, max_streams = ?, stream_user_agent = ?
+        SET username = ?, password = ?, url = ?, user_agent = ?, stream_user_agent = ?
         WHERE id = ?"#,
         params![
             source.username,

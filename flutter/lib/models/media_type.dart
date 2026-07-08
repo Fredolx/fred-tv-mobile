@@ -3,4 +3,5 @@ enum MediaType {
   movie,
   serie,
   group,
+  season,
 }

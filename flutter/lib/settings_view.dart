@@ -70,8 +70,11 @@ class _SettingsState extends State<SettingsView> {
     await showDialog(
       barrierDismissible: true,
       context: context,
-      builder: (builder) =>
-          EditDialog(source: source, afterSave: reloadSources),
+      builder: (builder) => EditDialog(
+        source: source,
+        afterSave: reloadSources,
+        parentContext: context,
+      ),
     );
   }
 

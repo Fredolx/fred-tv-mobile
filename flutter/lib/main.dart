@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -18,11 +19,21 @@ import 'package:path_provider/path_provider.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final appDir = await getApplicationSupportDirectory();
-  print(appDir);
-  final tempDir = await getTemporaryDirectory();
-  await nb.NativeBridge.instance.initialize(
-    gen.InitMessage(dbPath: appDir.path, tempPath: tempDir.path),
-  );
+  final tempDir = await getApplicationCacheDirectory();
+  try {
+    await nb.NativeBridge.instance.initialize(
+      gen.InitMessage(dbPath: appDir.path, tempPath: tempDir.path),
+    );
+  } catch (e, stack) {
+    if (!e.toString().contains(appDir.path)) {
+      developer.log(
+        "Failed to initialize NativeBridge",
+        error: e,
+        stackTrace: stack,
+        name: "dev.fredol.open-tv",
+      );
+    }
+  }
   final hasSources = await nb.NativeBridge.instance.hasSources();
   final settings = await nb.NativeBridge.instance.getSettings();
   final hasTouchScreen = await Utils.hasTouchScreen();
