@@ -21,6 +21,7 @@ import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.ui.AspectRatioFrameLayout
+import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.PlayerView
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
@@ -51,58 +52,77 @@ class ExoPlayerView(
 
     companion object {
         var active: ExoPlayerView? = null
+        const val SEEK_INCREMENT_MS = 10_000L
     }
 
     init {
         methodChannel.setMethodCallHandler(this)
+        player = ExoPlayer.Builder(context)
+            .setMediaSourceFactory(
+                DefaultMediaSourceFactory(context).setDataSourceFactory(createHttpFactory(params))
+            )
+            .setSeekBackIncrementMs(SEEK_INCREMENT_MS)
+            .setSeekForwardIncrementMs(SEEK_INCREMENT_MS)
+            .build()
+        root = LayoutInflater.from(context)
+            .inflate(R.layout.exo_player_container, null) as FrameLayout
+        playerView = root.findViewById(R.id.player_view)
+        attachPlayer()
+        bindControls()
+        observeForReconnect()
+        active = this
+        startPlayback()
+    }
 
+    private fun createHttpFactory(params: Map<String, Any?>): DefaultHttpDataSource.Factory {
         val headers = HashMap<String, String>()
         (params["referer"] as? String)?.takeIf { it.isNotEmpty() }?.let { headers["Referer"] = it }
         (params["origin"] as? String)?.takeIf { it.isNotEmpty() }?.let { headers["Origin"] = it }
         val userAgent = params["userAgent"] as? String
-
-        val httpFactory = DefaultHttpDataSource.Factory()
+        return DefaultHttpDataSource.Factory()
             .setAllowCrossProtocolRedirects(true)
             .apply {
                 if (headers.isNotEmpty()) setDefaultRequestProperties(headers)
                 if (!userAgent.isNullOrEmpty()) setUserAgent(userAgent)
             }
+    }
 
-        player = ExoPlayer.Builder(context)
-            .setMediaSourceFactory(DefaultMediaSourceFactory(context).setDataSourceFactory(httpFactory))
-            .build()
-
-        root = LayoutInflater.from(context)
-            .inflate(R.layout.exo_player_container, null) as FrameLayout
-        playerView = root.findViewById(R.id.player_view)
+    private fun attachPlayer() {
         playerView.player = restrictedPlayer(player, isLive)
         playerView.setShowSubtitleButton(true)
         playerView.setShowNextButton(false)
         playerView.setShowPreviousButton(false)
         playerView.controllerShowTimeoutMs = 3000
-
-        val topBar = root.findViewById<View>(R.id.top_bar)
-        root.findViewById<TextView>(R.id.title_text).text = title
-        root.findViewById<View>(R.id.back_button).setOnClickListener {
-            methodChannel.invokeMethod("onBack", null)
-        }
-        // audio_button / zoom_button now live inside the custom control layout (bottom bar).
-        playerView.findViewById<View>(R.id.audio_button).setOnClickListener { showAudioTrackDialog() }
-        playerView.findViewById<View>(R.id.zoom_button).setOnClickListener { toggleZoom() }
-
-        // D-pad handling is driven natively via MainActivity.dispatchKeyEvent -> dispatchDpad.
         playerView.isFocusable = true
-        active = this
+        makeSeekBarGranular()
+        keepLiveControlsHidden()
+        if (isLive) hideLiveControls()
+    }
 
-        // Keep the custom top bar in sync with the native controller's show/hide.
+    private fun makeSeekBarGranular() {
+        val timeBar = playerView.findViewById<View?>(androidx.media3.ui.R.id.exo_progress) as? DefaultTimeBar
+        timeBar?.setKeyTimeIncrement(SEEK_INCREMENT_MS)
+    }
+
+    private fun keepLiveControlsHidden() {
+        if (!isLive) return
         playerView.setControllerVisibilityListener(
             PlayerView.ControllerVisibilityListener { visibility ->
-                topBar.visibility = visibility
-                if (isLive && visibility == View.VISIBLE) hideLiveControls()
+                if (visibility == View.VISIBLE) hideLiveControls()
             }
         )
-        if (isLive) hideLiveControls()
+    }
 
+    private fun bindControls() {
+        playerView.findViewById<TextView>(R.id.title_text).text = title
+        playerView.findViewById<View>(R.id.back_button).setOnClickListener {
+            methodChannel.invokeMethod("onBack", null)
+        }
+        playerView.findViewById<View>(R.id.audio_button).setOnClickListener { showAudioTrackDialog() }
+        playerView.findViewById<View>(R.id.zoom_button).setOnClickListener { toggleZoom() }
+    }
+
+    private fun observeForReconnect() {
         player.addListener(object : Player.Listener {
             override fun onPlayerError(error: PlaybackException) {
                 if (isLive) scheduleReconnect()
@@ -112,20 +132,30 @@ class ExoPlayerView(
                 if (state == Player.STATE_ENDED && isLive) scheduleReconnect()
             }
         })
+    }
 
+    private fun startPlayback() {
         player.setMediaItem(MediaItem.fromUri(Uri.parse(url)))
         if (!isLive && startPositionMs > 0) player.seekTo(startPositionMs)
         player.playWhenReady = true
         player.prepare()
     }
 
-    /**
-     * Restricts the commands the native controls react to:
-     *  - always removes speed control,
-     *  - for livestreams also removes seek commands (hides the scrubber) and play/pause
-     *    (a livestream shouldn't be pausable — it would just fall behind live).
-     */
     private fun restrictedPlayer(delegate: Player, isLive: Boolean): Player {
+        val blocked = blockedCommands(isLive)
+        return object : ForwardingPlayer(delegate) {
+            override fun getAvailableCommands(): Player.Commands {
+                val builder = super.getAvailableCommands().buildUpon()
+                for (command in blocked) builder.remove(command)
+                return builder.build()
+            }
+
+            override fun isCommandAvailable(command: Int): Boolean =
+                command !in blocked && super.isCommandAvailable(command)
+        }
+    }
+
+    private fun blockedCommands(isLive: Boolean): IntArray {
         val blocked = mutableListOf(Player.COMMAND_SET_SPEED_AND_PITCH)
         if (isLive) {
             blocked += listOf(
@@ -139,35 +169,19 @@ class ExoPlayerView(
                 Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM,
             )
         }
-        val blockedSet = blocked.toIntArray()
-        return object : ForwardingPlayer(delegate) {
-            override fun getAvailableCommands(): Player.Commands {
-                val builder = super.getAvailableCommands().buildUpon()
-                for (command in blockedSet) builder.remove(command)
-                return builder.build()
-            }
-
-            override fun isCommandAvailable(command: Int): Boolean =
-                command !in blockedSet && super.isCommandAvailable(command)
-        }
+        return blocked.toIntArray()
     }
 
-    /**
-     * Hides the controls that don't apply to livestreams (not just disabled): the seekbar,
-     * the time labels and the play/pause button (a livestream can't be seeked or paused).
-     */
     private fun hideLiveControls() {
         intArrayOf(
             androidx.media3.ui.R.id.exo_progress,
             androidx.media3.ui.R.id.exo_time,
             androidx.media3.ui.R.id.exo_play_pause,
+            androidx.media3.ui.R.id.exo_rew_with_amount,
+            androidx.media3.ui.R.id.exo_ffwd_with_amount,
         ).forEach { id -> playerView.findViewById<View?>(id)?.visibility = View.GONE }
     }
 
-    /**
-     * Dedicated audio-track selector. Tapping a row applies it and closes immediately
-     * (no OK/Cancel), matching Media3's native subtitle popup.
-     */
     private fun showAudioTrackDialog() {
         val activePlayer = playerView.player ?: return
         val groups = activePlayer.currentTracks.groups.filter { it.type == C.TRACK_TYPE_AUDIO }
@@ -184,7 +198,6 @@ class ExoPlayerView(
             }
         }
 
-        // The app uses a framework (non-AppCompat) theme, so force a platform dialog theme.
         AlertDialog.Builder(playerView.context, android.R.style.Theme_DeviceDefault_Dialog_Alert)
             .setTitle(R.string.exo_audio)
             .setItems(labels.toTypedArray()) { dialog, which ->
@@ -224,37 +237,38 @@ class ExoPlayerView(
         }
     }
 
-    /**
-     * Handles a remote/D-pad key entirely in native code (called from
-     * [MainActivity.dispatchKeyEvent], before Flutter sees the event).
-     * Returns true if consumed. Non-navigation keys (e.g. Back) are left for Flutter.
-     */
     fun dispatchDpad(event: KeyEvent): Boolean {
         val keyCode = event.keyCode
         if (!isNavOrSelect(keyCode)) return false
 
-        // If controls are hidden or nothing is focused yet, just show them and focus a default.
-        if (!playerView.isControllerFullyVisible || root.findFocus() == null) {
-            if (event.action == KeyEvent.ACTION_DOWN) {
-                playerView.showController()
-                focusDefaultControl()
-            }
+        if (controlsNeedWaking()) {
+            if (event.action == KeyEvent.ACTION_DOWN) wakeControls()
             return true
         }
 
-        val current = root.findFocus()!!
-        // Let the focused control handle it first (timebar scrubbing, button activation).
-        if (current.dispatchKeyEvent(event)) {
+        val focused = root.findFocus()!!
+        if (focused.dispatchKeyEvent(event)) {
             playerView.showController()
             return true
         }
-        // Otherwise move focus in the pressed direction.
         if (event.action == KeyEvent.ACTION_DOWN && isDirection(keyCode)) {
-            val direction = directionFor(keyCode)
-            current.focusSearch(direction)?.requestFocus(direction)
-            playerView.showController()
+            moveFocus(focused, keyCode)
         }
         return true
+    }
+
+    private fun controlsNeedWaking(): Boolean =
+        !playerView.isControllerFullyVisible || root.findFocus() == null
+
+    private fun wakeControls() {
+        playerView.showController()
+        focusDefaultControl()
+    }
+
+    private fun moveFocus(from: View, keyCode: Int) {
+        val direction = directionFor(keyCode)
+        from.focusSearch(direction)?.requestFocus(direction)
+        playerView.showController()
     }
 
     private fun focusDefaultControl() {

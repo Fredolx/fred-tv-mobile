@@ -13,8 +13,6 @@ class MainActivity : FlutterActivity() {
         )
     }
 
-    // Route remote/D-pad keys to the native ExoPlayer controls before Flutter sees them.
-    // When no native player is on screen (or the key isn't navigation), Flutter handles it.
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         if (ExoPlayerView.active?.dispatchDpad(event) == true) {
             return true

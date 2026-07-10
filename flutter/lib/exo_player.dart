@@ -12,9 +12,6 @@ import 'package:open_tv/models/media_type.dart';
 import 'package:open_tv/models/settings.dart';
 import 'package:open_tv/native_bridge.dart';
 
-/// Native Media3/ExoPlayer screen used only on Android. Every other platform
-/// keeps the media_kit [Player]. Orchestration (headers, positions, exit) stays
-/// in Dart; the native [PlatformView] only renders and drives the controls.
 class ExoPlayerScreen extends StatefulWidget {
   final Channel channel;
   final Settings settings;
@@ -95,9 +92,7 @@ class _ExoPlayerScreenState extends State<ExoPlayerScreen> {
           widget.channel.id!,
           posMs ~/ 1000,
         );
-      } catch (_) {
-        // Best-effort; never block exit on position persistence.
-      }
+      } catch (_) {}
     }
     if (!mounted) return;
     Navigator.of(context).pop();
@@ -124,9 +119,6 @@ class _ExoPlayerScreenState extends State<ExoPlayerScreen> {
     );
   }
 
-  // D-pad / focus handling for Android TV lives entirely in native Kotlin
-  // (MainActivity.dispatchKeyEvent -> ExoPlayerView), so Flutter's focus system
-  // stays out of the way for this screen.
   Widget _buildPlatformView() {
     return PlatformViewLink(
       viewType: _viewType,
