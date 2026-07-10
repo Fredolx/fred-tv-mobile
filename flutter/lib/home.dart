@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:open_tv/native_bridge.dart';
 import 'package:open_tv/bottom_nav.dart';
 import 'package:open_tv/channel_tile.dart';
@@ -32,12 +33,14 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> {
+class _HomeState extends State<Home> with WidgetsBindingObserver {
+  bool _keyboardVisible = false;
   Timer? _debounce;
   bool reachedMax = false;
   final int pageSize = 36;
   List<Channel> channels = [];
   TextEditingController searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
   bool isLoading = false;
   bool blockSettings = false;
@@ -47,7 +50,9 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _scrollController.addListener(_scrollListener);
+    _searchFocusNode.onKeyEvent = _handleSearchKeyEvent;
     initializeAsync();
   }
 
@@ -124,8 +129,10 @@ class _HomeState extends State<Home> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _scrollController.dispose();
     _debounce?.cancel();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -153,6 +160,47 @@ class _HomeState extends State<Home> {
   void clearSearch() {
     widget.home.filters.query = null;
     searchController.clear();
+  }
+
+  KeyEventResult _handleSearchKeyEvent(FocusNode node, KeyEvent event) {
+    if (event is KeyDownEvent) {
+      final key = event.logicalKey;
+      if (key == LogicalKeyboardKey.escape ||
+          key == LogicalKeyboardKey.goBack) {
+        bool moved = FocusScope.of(context).nextFocus();
+        if (!moved) {
+          node.unfocus();
+        }
+        return KeyEventResult.handled;
+      }
+      if (key == LogicalKeyboardKey.arrowDown) {
+        bool moved = FocusScope.of(context).nextFocus();
+        if (moved) {
+          return KeyEventResult.handled;
+        }
+      }
+    }
+    return KeyEventResult.ignored;
+  }
+
+  @override
+  void didChangeMetrics() {
+    super.didChangeMetrics();
+    final view = View.of(context);
+    final isKeyboardOpen = view.viewInsets.bottom > 0.0;
+    if (_keyboardVisible && !isKeyboardOpen) {
+      if (_searchFocusNode.hasFocus) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && _searchFocusNode.hasFocus) {
+            bool moved = FocusScope.of(context).nextFocus();
+            if (!moved) {
+              _searchFocusNode.unfocus();
+            }
+          }
+        });
+      }
+    }
+    _keyboardVisible = isKeyboardOpen;
   }
 
   ViewType getStartingView() {
@@ -229,6 +277,7 @@ class _HomeState extends State<Home> {
                       padding: const EdgeInsets.all(16),
                       child: Center(
                         child: TextField(
+                          focusNode: _searchFocusNode,
                           style: TextStyle(
                             fontSize: Theme.of(
                               context,
