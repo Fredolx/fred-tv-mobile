@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -30,29 +31,111 @@ class ChannelTile extends StatefulWidget {
 }
 
 class _ChannelTileState extends State<ChannelTile> {
+  static final _selectionKeys = {
+    LogicalKeyboardKey.select,
+    LogicalKeyboardKey.enter,
+    LogicalKeyboardKey.numpadEnter,
+  };
+
   final FocusNode _focusNode = FocusNode();
+  final _statesController = WidgetStatesController();
+  Timer? _longPressTimer;
+  bool _longPressTriggered = false;
+  InteractiveInkFeature? _inkFeature;
+  BuildContext? _innerContext;
+
   @override
   void initState() {
     super.initState();
-    _focusNode.onKeyEvent = (node, event) {
-      if (event is KeyDownEvent &&
-          event.logicalKey == LogicalKeyboardKey.arrowRight) {
-        if (!FocusScope.of(
-          context,
-        ).focusInDirection(TraversalDirection.right)) {
-          widget.onFocusNavbar?.call();
-        }
-        return KeyEventResult.handled;
+    _focusNode.onKeyEvent = _handleKeyEvent;
+    _focusNode.addListener(_handleFocusChange);
+  }
+
+  void _showSplash() {
+    final context = _innerContext;
+    if (context == null) return;
+    final renderBox = context.findRenderObject() as RenderBox?;
+    if (renderBox == null) return;
+
+    _inkFeature?.cancel();
+
+    final theme = Theme.of(context);
+    final splashFactory = theme.splashFactory;
+
+    _inkFeature = splashFactory.create(
+      controller: Material.of(context),
+      referenceBox: renderBox,
+      position: renderBox.size.center(Offset.zero),
+      color: theme.splashColor,
+      textDirection: Directionality.of(context),
+      containedInkWell: true,
+      rectCallback: () => Offset.zero & renderBox.size,
+      borderRadius: BorderRadius.circular(12),
+    );
+  }
+
+  void _confirmSplash() {
+    _inkFeature?.confirm();
+    _inkFeature = null;
+  }
+
+  void _cancelSplash() {
+    _inkFeature?.cancel();
+    _inkFeature = null;
+  }
+
+  void _handleFocusChange() {
+    if (!_focusNode.hasFocus) {
+      _longPressTimer?.cancel();
+      _longPressTriggered = false;
+      _cancelSplash();
+      _statesController.update(WidgetState.pressed, false);
+    }
+    setState(() {});
+  }
+
+  KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
+    if (event is KeyDownEvent &&
+        event.logicalKey == LogicalKeyboardKey.arrowRight) {
+      if (!FocusScope.of(
+        context,
+      ).focusInDirection(TraversalDirection.right)) {
+        widget.onFocusNavbar?.call();
       }
-      return KeyEventResult.ignored;
-    };
-    _focusNode.addListener(() {
-      setState(() {});
-    });
+      return KeyEventResult.handled;
+    }
+
+    if (_selectionKeys.contains(event.logicalKey)) {
+      if (event is KeyDownEvent) {
+        _longPressTimer?.cancel();
+        _statesController.update(WidgetState.pressed, true);
+        _showSplash();
+        _longPressTimer = Timer(const Duration(milliseconds: 500), () {
+          _longPressTriggered = true;
+          _confirmSplash();
+          _statesController.update(WidgetState.pressed, false);
+          favorite();
+        });
+      } else if (event is KeyUpEvent) {
+        _longPressTimer?.cancel();
+        _statesController.update(WidgetState.pressed, false);
+        _confirmSplash();
+        if (!_longPressTriggered) {
+          play();
+        }
+        _longPressTriggered = false;
+      }
+      return KeyEventResult.handled;
+    }
+
+    return KeyEventResult.ignored;
   }
 
   @override
   void dispose() {
+    _longPressTimer?.cancel();
+    _cancelSplash();
+    _statesController.dispose();
     _focusNode.dispose();
     super.dispose();
   }
@@ -150,64 +233,71 @@ class _ChannelTileState extends State<ChannelTile> {
       elevation: _focusNode.hasFocus ? 8.0 : 2.0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       color: Theme.of(context).colorScheme.surfaceContainer,
-      child: InkWell(
-        focusNode: _focusNode,
-        onLongPress: favorite,
-        onTap: () async => await play(),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            AspectRatio(
-              aspectRatio: 1,
-              child: Container(
-                padding: const EdgeInsets.all(8.0),
-                child: Center(
-                  child: widget.channel.image != null
-                      ? CachedNetworkImage(
-                          imageUrl: widget.channel.image!,
-                          memCacheHeight: 300,
-                          memCacheWidth: 300,
-                          fit: BoxFit.contain,
-                          errorWidget: (_, __, ___) => const Icon(
-                            Icons.tv,
-                            size: 45,
-                            color: Colors.grey,
-                          ),
-                        )
-                      : const Icon(Icons.tv, size: 45, color: Colors.grey),
-                ),
-              ),
-            ),
-            Expanded(
-              flex: 3,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    widget.channel.name,
-                    textAlign: TextAlign.left,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: Theme.of(
-                        context,
-                      ).textTheme.titleMedium?.fontSize!,
-                      fontWeight: FontWeight.w600,
+      child: Builder(
+        builder: (innerContext) {
+          _innerContext = innerContext;
+          return InkWell(
+            focusNode: _focusNode,
+            statesController: _statesController,
+            borderRadius: BorderRadius.circular(12),
+            onLongPress: favorite,
+            onTap: () async => await play(),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                AspectRatio(
+                  aspectRatio: 1,
+                  child: Container(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Center(
+                      child: widget.channel.image != null
+                          ? CachedNetworkImage(
+                              imageUrl: widget.channel.image!,
+                              memCacheHeight: 300,
+                              memCacheWidth: 300,
+                              fit: BoxFit.contain,
+                              errorWidget: (_, __, ___) => const Icon(
+                                Icons.tv,
+                                size: 45,
+                                color: Colors.grey,
+                              ),
+                            )
+                          : const Icon(Icons.tv, size: 45, color: Colors.grey),
                     ),
                   ),
                 ),
-              ),
-            ),
-            if (widget.channel.favorite)
-              Padding(
-                padding: EdgeInsets.only(right: 8.0),
-                child: Center(
-                  child: const Icon(Icons.star, size: 25, color: Colors.amber),
+                Expanded(
+                  flex: 3,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        widget.channel.name,
+                        textAlign: TextAlign.left,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: Theme.of(
+                            context,
+                          ).textTheme.titleMedium?.fontSize!,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-          ],
-        ),
+                if (widget.channel.favorite)
+                  Padding(
+                    padding: EdgeInsets.only(right: 8.0),
+                    child: Center(
+                      child: const Icon(Icons.star, size: 25, color: Colors.amber),
+                    ),
+                  ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
