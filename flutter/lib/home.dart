@@ -52,7 +52,7 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     _scrollController.addListener(_scrollListener);
-    _searchFocusNode.onKeyEvent = _handleSearchKeyEvent;
+    _searchFocusNode.onKey = _handleSearchRawKey;
     _keywordsFocusNode.onKeyEvent = _handleKeywordsKeyEvent;
     _sortFocusNode.onKeyEvent = _handleSortKeyEvent;
     initializeAsync();
@@ -165,8 +165,23 @@ class _HomeState extends State<Home> {
     searchController.clear();
   }
 
-  KeyEventResult _handleSearchKeyEvent(FocusNode node, KeyEvent event) {
-    if (event is KeyDownEvent) {
+  static const int _androidFlagSoftKeyboard = 0x2;
+
+  bool _isFromSoftKeyboard(RawKeyEvent event) {
+    final data = event.data;
+    return data is RawKeyEventDataAndroid &&
+        (data.flags & _androidFlagSoftKeyboard) != 0;
+  }
+
+  bool _focusChannelsBelow() {
+    return FocusScope.of(context).focusInDirection(TraversalDirection.down);
+  }
+
+  KeyEventResult _handleSearchRawKey(FocusNode node, RawKeyEvent event) {
+    if (_isFromSoftKeyboard(event)) {
+      return KeyEventResult.ignored;
+    }
+    if (event is RawKeyDownEvent) {
       final key = event.logicalKey;
       if (key == LogicalKeyboardKey.escape ||
           key == LogicalKeyboardKey.goBack) {
@@ -312,6 +327,8 @@ class _HomeState extends State<Home> {
                             ).textTheme.titleMedium?.fontSize!,
                           ),
                           controller: searchController,
+                          textInputAction: TextInputAction.search,
+                          onEditingComplete: _focusChannelsBelow,
                           onChanged: (query) {
                             _debounce?.cancel();
                             _debounce = Timer(

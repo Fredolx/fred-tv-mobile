@@ -43,6 +43,7 @@ class _ChannelTileState extends State<ChannelTile> {
   final _statesController = WidgetStatesController();
   Timer? _longPressTimer;
   bool _longPressTriggered = false;
+  bool _selectKeyDown = false;
   InteractiveInkFeature? _inkFeature;
   BuildContext? _innerContext;
 
@@ -90,6 +91,7 @@ class _ChannelTileState extends State<ChannelTile> {
     if (!_focusNode.hasFocus) {
       _longPressTimer?.cancel();
       _longPressTriggered = false;
+      _selectKeyDown = false;
       _cancelSplash();
       _statesController.update(WidgetState.pressed, false);
     }
@@ -109,6 +111,7 @@ class _ChannelTileState extends State<ChannelTile> {
 
     if (_selectionKeys.contains(event.logicalKey)) {
       if (event is KeyDownEvent) {
+        _selectKeyDown = true;
         _longPressTimer?.cancel();
         _statesController.update(WidgetState.pressed, true);
         _showSplash();
@@ -119,6 +122,10 @@ class _ChannelTileState extends State<ChannelTile> {
           favorite();
         });
       } else if (event is KeyUpEvent) {
+        if (!_selectKeyDown) {
+          return KeyEventResult.handled;
+        }
+        _selectKeyDown = false;
         _longPressTimer?.cancel();
         _statesController.update(WidgetState.pressed, false);
         _confirmSplash();
