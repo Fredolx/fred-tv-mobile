@@ -18,12 +18,14 @@ class ChannelTile extends StatefulWidget {
   final BuildContext parentContext;
   final Function(Node node) setNode;
   final VoidCallback? onFocusNavbar;
+  final bool autofocus;
   const ChannelTile({
     super.key,
     required this.channel,
     required this.setNode,
     required this.parentContext,
     this.onFocusNavbar,
+    this.autofocus = false,
   });
 
   @override
@@ -238,6 +240,7 @@ class _ChannelTileState extends State<ChannelTile> {
           _innerContext = innerContext;
           return InkWell(
             focusNode: _focusNode,
+            autofocus: widget.autofocus,
             statesController: _statesController,
             borderRadius: BorderRadius.circular(12),
             onLongPress: favorite,
