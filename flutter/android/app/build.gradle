@@ -8,7 +8,7 @@ plugins {
 android {
     namespace = "dev.fredol.open_tv"
     compileSdk = 36
-
+    ndkVersion = "30.0.14904198"
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
@@ -40,4 +40,14 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    def media3_version = "1.4.1"
+    // Native ExoPlayer path (Android only; other platforms use media_kit).
+    implementation "androidx.media3:media3-exoplayer:$media3_version"
+    implementation "androidx.media3:media3-exoplayer-hls:$media3_version"
+    implementation "androidx.media3:media3-exoplayer-dash:$media3_version"
+    implementation "androidx.media3:media3-datasource:$media3_version"
+    implementation "androidx.media3:media3-ui:$media3_version"
 }

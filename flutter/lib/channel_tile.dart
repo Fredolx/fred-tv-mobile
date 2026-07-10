@@ -9,6 +9,8 @@ import 'package:open_tv/models/node.dart';
 import 'package:open_tv/models/node_type.dart';
 import 'package:open_tv/native_bridge.dart';
 import 'package:open_tv/player.dart';
+import 'package:open_tv/exo_player.dart';
+import 'dart:io' show Platform;
 
 class ChannelTile extends StatefulWidget {
   final Channel channel;
@@ -134,7 +136,9 @@ class _ChannelTileState extends State<ChannelTile> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => Player(channel: widget.channel, settings: settings),
+          builder: (_) => Platform.isAndroid
+              ? ExoPlayerScreen(channel: widget.channel, settings: settings)
+              : Player(channel: widget.channel, settings: settings),
         ),
       );
     }
