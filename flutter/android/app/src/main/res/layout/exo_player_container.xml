@@ -14,40 +14,4 @@
         app:show_subtitle_button="true"
         app:auto_show="true"
         app:controller_layout_id="@layout/custom_player_control_view" />
-
-    <!-- Top bar overlaid above the native controls: back button + channel title.
-         Audio and zoom now live in the bottom control bar (custom_player_control_view). -->
-    <LinearLayout
-        android:id="@+id/top_bar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top"
-        android:background="#66000000"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingHorizontal="8dp"
-        android:paddingVertical="6dp">
-
-        <ImageButton
-            android:id="@+id/back_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/exo_back"
-            android:scaleType="fitCenter"
-            android:padding="8dp"
-            android:src="@drawable/ic_exo_back"
-            android:tint="@android:color/white" />
-
-        <TextView
-            android:id="@+id/title_text"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="8dp"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:textColor="@android:color/white"
-            android:textSize="18sp" />
-    </LinearLayout>
 </FrameLayout>

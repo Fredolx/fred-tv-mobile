@@ -1,7 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Custom Media3 control layout: standard transport + subtitle button, plus our own
-     audio-track and zoom buttons in the bottom-right. The settings (gear) button is
-     intentionally omitted (speed is disabled and audio/subtitle have dedicated buttons). -->
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
 
     <View
@@ -9,6 +6,39 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="@color/exo_black_opacity_60" />
+
+    <LinearLayout
+        android:id="@+id/top_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="6dp">
+
+        <ImageButton
+            android:id="@+id/back_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/exo_back"
+            android:scaleType="fitCenter"
+            android:padding="8dp"
+            android:src="@drawable/ic_exo_back"
+            android:tint="@android:color/white" />
+
+        <TextView
+            android:id="@+id/title_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@android:color/white"
+            android:textSize="18sp" />
+    </LinearLayout>
 
     <FrameLayout
         android:id="@id/exo_bottom_bar"
@@ -84,8 +114,16 @@
         android:padding="@dimen/exo_styled_controls_padding"
         android:layoutDirection="ltr">
 
+        <Button
+            android:id="@id/exo_rew_with_amount"
+            style="@style/ExoStyledControls.Button.Center.RewWithAmount" />
+
         <ImageButton
             android:id="@id/exo_play_pause"
             style="@style/ExoStyledControls.Button.Center.PlayPause" />
+
+        <Button
+            android:id="@id/exo_ffwd_with_amount"
+            style="@style/ExoStyledControls.Button.Center.FfwdWithAmount" />
     </LinearLayout>
 </merge>
