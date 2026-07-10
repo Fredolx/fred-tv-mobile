@@ -33,14 +33,15 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> with WidgetsBindingObserver {
-  bool _keyboardVisible = false;
+class _HomeState extends State<Home> {
   Timer? _debounce;
   bool reachedMax = false;
   final int pageSize = 36;
   List<Channel> channels = [];
   TextEditingController searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
+  final FocusNode _keywordsFocusNode = FocusNode(skipTraversal: true);
+  final FocusNode _sortFocusNode = FocusNode(skipTraversal: true);
   final ScrollController _scrollController = ScrollController();
   bool isLoading = false;
   bool blockSettings = false;
@@ -50,9 +51,10 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
     _scrollController.addListener(_scrollListener);
     _searchFocusNode.onKeyEvent = _handleSearchKeyEvent;
+    _keywordsFocusNode.onKeyEvent = _handleKeywordsKeyEvent;
+    _sortFocusNode.onKeyEvent = _handleSortKeyEvent;
     initializeAsync();
   }
 
@@ -129,10 +131,11 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
     _scrollController.dispose();
     _debounce?.cancel();
     _searchFocusNode.dispose();
+    _keywordsFocusNode.dispose();
+    _sortFocusNode.dispose();
     super.dispose();
   }
 
@@ -167,14 +170,42 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
       final key = event.logicalKey;
       if (key == LogicalKeyboardKey.escape ||
           key == LogicalKeyboardKey.goBack) {
-        bool moved = FocusScope.of(context).nextFocus();
+        bool moved = FocusScope.of(context).focusInDirection(TraversalDirection.down);
         if (!moved) {
           node.unfocus();
         }
         return KeyEventResult.handled;
       }
       if (key == LogicalKeyboardKey.arrowDown) {
-        bool moved = FocusScope.of(context).nextFocus();
+        bool moved = FocusScope.of(context).focusInDirection(TraversalDirection.down);
+        if (moved) {
+          return KeyEventResult.handled;
+        }
+      }
+      if (key == LogicalKeyboardKey.arrowRight) {
+        _keywordsFocusNode.requestFocus();
+        return KeyEventResult.handled;
+      }
+    }
+    return KeyEventResult.ignored;
+  }
+
+  KeyEventResult _handleKeywordsKeyEvent(FocusNode node, KeyEvent event) {
+    if (event is KeyDownEvent) {
+      final key = event.logicalKey;
+      if (key == LogicalKeyboardKey.arrowLeft) {
+        _searchFocusNode.requestFocus();
+        searchController.selection = TextSelection.fromPosition(
+          TextPosition(offset: searchController.text.length),
+        );
+        return KeyEventResult.handled;
+      }
+      if (key == LogicalKeyboardKey.arrowRight) {
+        _sortFocusNode.requestFocus();
+        return KeyEventResult.handled;
+      }
+      if (key == LogicalKeyboardKey.arrowDown) {
+        bool moved = FocusScope.of(context).focusInDirection(TraversalDirection.down);
         if (moved) {
           return KeyEventResult.handled;
         }
@@ -183,24 +214,21 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     return KeyEventResult.ignored;
   }
 
-  @override
-  void didChangeMetrics() {
-    super.didChangeMetrics();
-    final view = View.of(context);
-    final isKeyboardOpen = view.viewInsets.bottom > 0.0;
-    if (_keyboardVisible && !isKeyboardOpen) {
-      if (_searchFocusNode.hasFocus) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted && _searchFocusNode.hasFocus) {
-            bool moved = FocusScope.of(context).nextFocus();
-            if (!moved) {
-              _searchFocusNode.unfocus();
-            }
-          }
-        });
+  KeyEventResult _handleSortKeyEvent(FocusNode node, KeyEvent event) {
+    if (event is KeyDownEvent) {
+      final key = event.logicalKey;
+      if (key == LogicalKeyboardKey.arrowLeft) {
+        _keywordsFocusNode.requestFocus();
+        return KeyEventResult.handled;
+      }
+      if (key == LogicalKeyboardKey.arrowDown) {
+        bool moved = FocusScope.of(context).focusInDirection(TraversalDirection.down);
+        if (moved) {
+          return KeyEventResult.handled;
+        }
       }
     }
-    _keyboardVisible = isKeyboardOpen;
+    return KeyEventResult.ignored;
   }
 
   ViewType getStartingView() {
@@ -306,17 +334,28 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide.none,
                             ),
-                            suffixIcon: IconButton(
-                              onPressed: () {
-                                widget.home.filters.useKeywords =
-                                    !widget.home.filters.useKeywords;
-                                load(false);
-                              },
-                              icon: Icon(
-                                widget.home.filters.useKeywords
-                                    ? Icons.label
-                                    : Icons.label_outline,
-                              ),
+                            suffixIcon: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  focusNode: _keywordsFocusNode,
+                                  onPressed: () {
+                                    widget.home.filters.useKeywords =
+                                        !widget.home.filters.useKeywords;
+                                    load(false);
+                                  },
+                                  icon: Icon(
+                                    widget.home.filters.useKeywords
+                                        ? Icons.label
+                                        : Icons.label_outline,
+                                  ),
+                                ),
+                                IconButton(
+                                  focusNode: _sortFocusNode,
+                                  onPressed: () {},
+                                  icon: const Icon(Icons.sort),
+                                ),
+                              ],
                             ),
                             filled: true,
                           ),
@@ -333,6 +372,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                           channel: channel,
                           parentContext: context,
                           setNode: setNode,
+                          autofocus: index == 0,
                         );
                       }, childCount: channels.length),
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
