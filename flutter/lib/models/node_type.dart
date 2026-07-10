@@ -6,6 +6,7 @@ enum NodeType { category, series, season }
 NodeType fromMediaType(MediaType type) {
   switch (type) {
     case MediaType.group:
+      return NodeType.category;
     case MediaType.season:
       return NodeType.season;
     case MediaType.serie:
