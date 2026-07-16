@@ -1,0 +1,51 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Dart
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter SDK
+        uses: flutter-actions/setup-flutter@v4
+        with:
+          channel: stable
+          
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Install deps
+        run: |
+          apt update
+          apt install curl git unzip xz-utils zip libglu1-mesa
+          apt install cmake ninja-build clang
+          cargo install cargo-cmd
+
+      - name: Build
+        run: |
+          cargo cmd build-linux
+          cd flutter
+          flutter build linux --release
+
+      - name: Upload Linux Build Bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: linux-desktop-app
+          path: flutter/build/linux/x64/release/bundle/
+
+      
+      
+          
+          
+
