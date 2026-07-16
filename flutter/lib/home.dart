@@ -43,6 +43,7 @@ class _HomeState extends State<Home> {
   final FocusNode _keywordsFocusNode = FocusNode(skipTraversal: true);
   final FocusNode _sortFocusNode = FocusNode(skipTraversal: true);
   final ScrollController _scrollController = ScrollController();
+  int currentlyFocusedChannel = 0;
   bool isLoading = false;
   bool blockSettings = false;
   int? previousScroll;
@@ -52,7 +53,7 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     _scrollController.addListener(_scrollListener);
-    _searchFocusNode.onKey = _handleSearchRawKey;
+    _searchFocusNode.onKeyEvent = _handleSearchKeyEvent;
     _keywordsFocusNode.onKeyEvent = _handleKeywordsKeyEvent;
     _sortFocusNode.onKeyEvent = _handleSortKeyEvent;
     initializeAsync();
@@ -165,34 +166,27 @@ class _HomeState extends State<Home> {
     searchController.clear();
   }
 
-  static const int _androidFlagSoftKeyboard = 0x2;
-
-  bool _isFromSoftKeyboard(RawKeyEvent event) {
-    final data = event.data;
-    return data is RawKeyEventDataAndroid &&
-        (data.flags & _androidFlagSoftKeyboard) != 0;
-  }
-
   bool _focusChannelsBelow() {
     return FocusScope.of(context).focusInDirection(TraversalDirection.down);
   }
 
-  KeyEventResult _handleSearchRawKey(FocusNode node, RawKeyEvent event) {
-    if (_isFromSoftKeyboard(event)) {
-      return KeyEventResult.ignored;
-    }
-    if (event is RawKeyDownEvent) {
+  KeyEventResult _handleSearchKeyEvent(FocusNode node, KeyEvent event) {
+    if (event is KeyDownEvent) {
       final key = event.logicalKey;
       if (key == LogicalKeyboardKey.escape ||
           key == LogicalKeyboardKey.goBack) {
-        bool moved = FocusScope.of(context).focusInDirection(TraversalDirection.down);
+        bool moved = FocusScope.of(
+          context,
+        ).focusInDirection(TraversalDirection.down);
         if (!moved) {
           node.unfocus();
         }
         return KeyEventResult.handled;
       }
       if (key == LogicalKeyboardKey.arrowDown) {
-        bool moved = FocusScope.of(context).focusInDirection(TraversalDirection.down);
+        bool moved = FocusScope.of(
+          context,
+        ).focusInDirection(TraversalDirection.down);
         if (moved) {
           return KeyEventResult.handled;
         }
@@ -220,7 +214,9 @@ class _HomeState extends State<Home> {
         return KeyEventResult.handled;
       }
       if (key == LogicalKeyboardKey.arrowDown) {
-        bool moved = FocusScope.of(context).focusInDirection(TraversalDirection.down);
+        bool moved = FocusScope.of(
+          context,
+        ).focusInDirection(TraversalDirection.down);
         if (moved) {
           return KeyEventResult.handled;
         }
@@ -237,7 +233,9 @@ class _HomeState extends State<Home> {
         return KeyEventResult.handled;
       }
       if (key == LogicalKeyboardKey.arrowDown) {
-        bool moved = FocusScope.of(context).focusInDirection(TraversalDirection.down);
+        bool moved = FocusScope.of(
+          context,
+        ).focusInDirection(TraversalDirection.down);
         if (moved) {
           return KeyEventResult.handled;
         }
@@ -389,7 +387,7 @@ class _HomeState extends State<Home> {
                           channel: channel,
                           parentContext: context,
                           setNode: setNode,
-                          autofocus: index == 0,
+                          autofocus: index == currentlyFocusedChannel,
                         );
                       }, childCount: channels.length),
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
