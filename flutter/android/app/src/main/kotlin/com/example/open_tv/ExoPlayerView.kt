@@ -2,9 +2,11 @@ package dev.fredol.open_tv
 
 import android.app.AlertDialog
 import android.content.Context
+import android.content.pm.ApplicationInfo
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -18,8 +20,12 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.TrackSelectionOverride
 import androidx.media3.datasource.DefaultHttpDataSource
+import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.LoadControl
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import androidx.media3.exoplayer.upstream.DefaultLoadErrorHandlingPolicy
+import androidx.media3.exoplayer.util.EventLogger
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.PlayerView
@@ -40,6 +46,7 @@ class ExoPlayerView(
     private val url = params["url"] as String
     private val startPositionMs = (params["startPositionMs"] as? Number)?.toLong() ?: 0L
     private val title = params["title"] as? String ?: ""
+    private val debug = (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
 
     private val methodChannel = MethodChannel(messenger, "dev.fredol.open_tv/exoplayer_$viewId")
     private val handler = Handler(Looper.getMainLooper())
@@ -49,24 +56,37 @@ class ExoPlayerView(
 
     private var zoomed = false
     private var reconnecting = false
+    private var reconnectAttempts = 0
 
     companion object {
         var active: ExoPlayerView? = null
+        const val DIAG_TAG = "ExoPlayerDiag"
         const val SEEK_INCREMENT_MS = 10_000L
+        val RECONNECT_DELAYS_MS = longArrayOf(1_000L, 3_000L, 5_000L)
+        const val BUFFER_MIN_MS = 30_000
+        const val BUFFER_MAX_MS = 60_000
+        const val BUFFER_FOR_PLAYBACK_MS = 10_000
+        const val BUFFER_RESUME_AFTER_REBUFFER_MS = 10_000
+        const val HTTP_CONNECT_TIMEOUT_MS = 15_000
+        const val HTTP_READ_TIMEOUT_MS = 60_000
     }
 
     init {
         methodChannel.setMethodCallHandler(this)
         player = ExoPlayer.Builder(context)
             .setMediaSourceFactory(
-                DefaultMediaSourceFactory(context).setDataSourceFactory(createHttpFactory(params))
+                DefaultMediaSourceFactory(context)
+                    .setDataSourceFactory(createHttpFactory(params))
+                    .setLoadErrorHandlingPolicy(DefaultLoadErrorHandlingPolicy(999))
             )
+            .setLoadControl(tolerantLoadControl())
             .setSeekBackIncrementMs(SEEK_INCREMENT_MS)
             .setSeekForwardIncrementMs(SEEK_INCREMENT_MS)
             .build()
         root = LayoutInflater.from(context)
             .inflate(R.layout.exo_player_container, null) as FrameLayout
         playerView = root.findViewById(R.id.player_view)
+        if (debug) player.addAnalyticsListener(EventLogger(DIAG_TAG))
         attachPlayer()
         bindControls()
         observeForReconnect()
@@ -81,6 +101,8 @@ class ExoPlayerView(
         val userAgent = params["userAgent"] as? String
         return DefaultHttpDataSource.Factory()
             .setAllowCrossProtocolRedirects(true)
+            .setConnectTimeoutMs(HTTP_CONNECT_TIMEOUT_MS)
+            .setReadTimeoutMs(HTTP_READ_TIMEOUT_MS)
             .apply {
                 if (headers.isNotEmpty()) setDefaultRequestProperties(headers)
                 if (!userAgent.isNullOrEmpty()) setUserAgent(userAgent)
@@ -92,6 +114,7 @@ class ExoPlayerView(
         playerView.setShowSubtitleButton(true)
         playerView.setShowNextButton(false)
         playerView.setShowPreviousButton(false)
+        playerView.setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS)
         playerView.controllerShowTimeoutMs = 1500
         playerView.isFocusable = true
         makeSeekBarGranular()
@@ -123,16 +146,39 @@ class ExoPlayerView(
         playerView.findViewById<View>(R.id.zoom_button).setOnClickListener { toggleZoom() }
     }
 
+    private fun tolerantLoadControl(): LoadControl =
+        DefaultLoadControl.Builder()
+            .setBufferDurationsMs(
+                BUFFER_MIN_MS,
+                BUFFER_MAX_MS,
+                BUFFER_FOR_PLAYBACK_MS,
+                BUFFER_RESUME_AFTER_REBUFFER_MS,
+            )
+            .build()
+
     private fun observeForReconnect() {
         player.addListener(object : Player.Listener {
             override fun onPlayerError(error: PlaybackException) {
+                if (debug) Log.e(DIAG_TAG, "onPlayerError code=${error.errorCodeName} cause=${error.cause}", error)
                 if (isLive) scheduleReconnect()
             }
 
             override fun onPlaybackStateChanged(state: Int) {
-                if (state == Player.STATE_ENDED && isLive) scheduleReconnect()
+                if (debug) Log.i(DIAG_TAG, "onPlaybackStateChanged state=${stateName(state)}")
+                when (state) {
+                    Player.STATE_READY -> reconnectAttempts = 0
+                    Player.STATE_ENDED -> if (isLive) scheduleReconnect()
+                }
             }
         })
+    }
+
+    private fun stateName(state: Int): String = when (state) {
+        Player.STATE_IDLE -> "IDLE"
+        Player.STATE_BUFFERING -> "BUFFERING"
+        Player.STATE_READY -> "READY"
+        Player.STATE_ENDED -> "ENDED"
+        else -> "UNKNOWN($state)"
     }
 
     private fun startPlayback() {
@@ -303,12 +349,15 @@ class ExoPlayerView(
     private fun scheduleReconnect() {
         if (reconnecting) return
         reconnecting = true
+        val delay = RECONNECT_DELAYS_MS[reconnectAttempts.coerceAtMost(RECONNECT_DELAYS_MS.lastIndex)]
+        if (debug) Log.w(DIAG_TAG, "scheduleReconnect attempt=$reconnectAttempts delayMs=$delay")
+        reconnectAttempts++
         handler.postDelayed({
             reconnecting = false
             player.setMediaItem(MediaItem.fromUri(Uri.parse(url)))
             player.playWhenReady = true
             player.prepare()
-        }, 1000)
+        }, delay)
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
