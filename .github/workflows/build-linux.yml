@@ -32,6 +32,10 @@ jobs:
           cd flutter
           flutter build linux --release
 
+      - name: Package libmpv into the bundle
+        run: |
+          cp /usr/lib/x86_64-linux-gnu/libmpv.so.1 flutter/build/linux/x64/release/bundle/lib/
+
       - name: Upload Linux Build Bundle
         uses: actions/upload-artifact@v7
         with:
