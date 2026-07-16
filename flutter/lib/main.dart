@@ -115,6 +115,33 @@ class MyApp extends StatelessWidget {
             }),
           ),
         ),
+        iconButtonTheme: IconButtonThemeData(
+          style: ButtonStyle(
+            side: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.focused) && !hasTouchScreen) {
+                return const BorderSide(
+                  color: Colors.yellow, // yellow border
+                  width: 4,
+                );
+              }
+              return null;
+            }),
+          ),
+        ),
+        switchTheme: SwitchThemeData(
+          trackOutlineColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.focused) && !hasTouchScreen) {
+              return Colors.yellow;
+            }
+            return null;
+          }),
+          trackOutlineWidth: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.focused) && !hasTouchScreen) {
+              return 4;
+            }
+            return null;
+          }),
+        ),
         useMaterial3: true,
       ),
       themeMode: ThemeMode.dark,
