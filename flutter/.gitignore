@@ -134,6 +134,8 @@ coverage/
 app.*.symbols
 
 # Exceptions to above rules.
+# pubspec.lock must be committed for reproducible / offline (Flatpak) builds.
+!/pubspec.lock
 !**/ios/**/default.mode1v3
 !**/ios/**/default.mode2v3
 !**/ios/**/default.pbxuser
