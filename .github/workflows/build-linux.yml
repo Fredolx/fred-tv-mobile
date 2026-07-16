@@ -1,9 +1,4 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-name: Dart
+name: build-linux
 
 on:
   push:
@@ -28,7 +23,7 @@ jobs:
       - name: Install deps
         run: |
           sudo apt-get update
-          sudo apt-get install -y curl git unzip xz-utils zip libglu1-mesa cmake ninja-build clang
+          sudo apt-get install -y curl git unzip xz-utils zip libglu1-mesa cmake ninja-build clang pkg-config libgtk-3-dev libstdc++-12-dev liblzma-dev
           cargo install cargo-cmd
           
       - name: Build
