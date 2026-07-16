@@ -70,6 +70,12 @@ class MyApp extends StatelessWidget {
         null;
   }
 
+  bool get _showFocusOutline =>
+      !hasTouchScreen ||
+      Platform.isLinux ||
+      Platform.isWindows ||
+      Platform.isMacOS;
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -105,7 +111,7 @@ class MyApp extends StatelessWidget {
         filledButtonTheme: FilledButtonThemeData(
           style: ButtonStyle(
             side: WidgetStateProperty.resolveWith((states) {
-              if (states.contains(WidgetState.focused) && !hasTouchScreen) {
+              if (states.contains(WidgetState.focused) && _showFocusOutline) {
                 return const BorderSide(
                   color: Colors.yellow, // yellow border
                   width: 4,
@@ -118,7 +124,7 @@ class MyApp extends StatelessWidget {
         textButtonTheme: TextButtonThemeData(
           style: ButtonStyle(
             side: WidgetStateProperty.resolveWith((states) {
-              if (states.contains(WidgetState.focused) && !hasTouchScreen) {
+              if (states.contains(WidgetState.focused) && _showFocusOutline) {
                 return const BorderSide(
                   color: Colors.yellow, // yellow border
                   width: 4,
@@ -131,7 +137,7 @@ class MyApp extends StatelessWidget {
         iconButtonTheme: IconButtonThemeData(
           style: ButtonStyle(
             side: WidgetStateProperty.resolveWith((states) {
-              if (states.contains(WidgetState.focused) && !hasTouchScreen) {
+              if (states.contains(WidgetState.focused) && _showFocusOutline) {
                 return const BorderSide(
                   color: Colors.yellow, // yellow border
                   width: 4,
@@ -143,13 +149,13 @@ class MyApp extends StatelessWidget {
         ),
         switchTheme: SwitchThemeData(
           trackOutlineColor: WidgetStateProperty.resolveWith((states) {
-            if (states.contains(WidgetState.focused) && !hasTouchScreen) {
+            if (states.contains(WidgetState.focused) && _showFocusOutline) {
               return Colors.yellow;
             }
             return null;
           }),
           trackOutlineWidth: WidgetStateProperty.resolveWith((states) {
-            if (states.contains(WidgetState.focused) && !hasTouchScreen) {
+            if (states.contains(WidgetState.focused) && _showFocusOutline) {
               return 4;
             }
             return null;
