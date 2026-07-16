@@ -69,7 +69,7 @@ extension FiltersDomainExtension on Filters {
 
 extension SettingsProtoExtension on pb.Settings {
   Settings toDomain() => Settings(
-    defaultView: ViewType.values[defaultView],
+    defaultView: hasDefaultView() ? ViewType.values[defaultView] : ViewType.all,
     defaultSort: hasDefaultSort()
         ? SortType.values[defaultSort]
         : SortType.provider,
