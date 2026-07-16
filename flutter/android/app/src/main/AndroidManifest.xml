@@ -7,7 +7,7 @@
         android:label="Fred TV"
         android:name="${applicationName}"
         android:usesCleartextTraffic="true"
-        android:banner="@mipmap/ic_launcher"
+        android:banner="@drawable/tv_banner"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
