@@ -51,6 +51,58 @@ class _SetupState extends State<Setup> {
   final nextButtonFocusNode = FocusNode();
   Set<String> existingSourceNames = {};
 
+  static const int _androidFlagSoftKeyboard = 0x2;
+
+  bool _isFromSoftKeyboard(RawKeyEvent event) {
+    final data = event.data;
+    return data is RawKeyEventDataAndroid &&
+        (data.flags & _androidFlagSoftKeyboard) != 0;
+  }
+
+  KeyEventResult _handleFormRawKey(FocusNode node, RawKeyEvent event) {
+    if (_isFromSoftKeyboard(event)) {
+      return KeyEventResult.ignored;
+    }
+    if (event is RawKeyDownEvent) {
+      final key = event.logicalKey;
+      if (key == LogicalKeyboardKey.escape ||
+          key == LogicalKeyboardKey.goBack) {
+        bool moved = FocusScope.of(
+          context,
+        ).focusInDirection(TraversalDirection.left);
+        if (!moved) {
+          node.unfocus();
+        }
+        return KeyEventResult.handled;
+      }
+      if (key == LogicalKeyboardKey.arrowDown) {
+        bool moved = FocusScope.of(
+          context,
+        ).focusInDirection(TraversalDirection.down);
+        if (moved) {
+          return KeyEventResult.handled;
+        }
+      }
+      if (key == LogicalKeyboardKey.arrowRight) {
+        bool moved = FocusScope.of(
+          context,
+        ).focusInDirection(TraversalDirection.right);
+        if (moved) {
+          return KeyEventResult.handled;
+        }
+      }
+      if (key == LogicalKeyboardKey.arrowLeft) {
+        bool moved = FocusScope.of(
+          context,
+        ).focusInDirection(TraversalDirection.left);
+        if (moved) {
+          return KeyEventResult.handled;
+        }
+      }
+    }
+    return KeyEventResult.ignored;
+  }
+
   Future<void> finish() async {
     var result = await Error.tryAsync(
       () async {
@@ -103,10 +155,17 @@ class _SetupState extends State<Setup> {
     );
   }
 
+  bool _focusNext() {
+    return FocusScope.of(context).focusInDirection(TraversalDirection.right);
+  }
+
   @override
   void initState() {
-    nextButtonFocusNode.requestFocus();
     super.initState();
+    nextButtonFocusNode.requestFocus();
+    for (var node in focusNodes.values) {
+      node.onKey = _handleFormRawKey;
+    }
   }
 
   @override
