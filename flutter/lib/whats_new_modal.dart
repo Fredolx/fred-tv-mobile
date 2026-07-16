@@ -20,6 +20,7 @@ class WhatsNewModal extends StatelessWidget {
               ),
               mode: LaunchMode.externalApplication,
             );
+            if (!context.mounted) return;
             Navigator.pop(context, false);
           },
           child: const Text("Donate"),
@@ -29,17 +30,18 @@ class WhatsNewModal extends StatelessWidget {
             await NativeBridge.instance.updateLastSeenVersion(
               (await PackageInfo.fromPlatform()).version,
             );
+            if (!context.mounted) return;
             Navigator.pop(context, true);
           },
           child: const Text("Don't show again"),
         ),
       ],
-      content: Scrollbar(
+      content: const Scrollbar(
         thumbVisibility: true,
         child: SingleChildScrollView(
-          child: const Padding(
+          child: Padding(
             padding: EdgeInsets.only(right: 8.0),
-            child: const Text('''
+            child: Text('''
 Hi! Thanks for supporting Fred TV. Here's everything new:
 
 - Improved UI

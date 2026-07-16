@@ -77,6 +77,7 @@ class _HomeState extends State<Home> {
         await NativeBridge.instance.shouldShowWhatsNew(version)) {
       await showWhatsNew(version);
     }
+    if (!mounted) return;
     if (widget.refresh) {
       Error.tryAsyncNoLoading(
         () async {
@@ -402,7 +403,7 @@ class _HomeState extends State<Home> {
                     ),
                   ),
                   SliverPadding(
-                    padding: EdgeInsets.fromLTRB(10, 5, 10, 10),
+                    padding: const EdgeInsets.fromLTRB(10, 5, 10, 10),
                     sliver: SliverGrid(
                       delegate: SliverChildBuilderDelegate((context, index) {
                         final channel = channels[index];
