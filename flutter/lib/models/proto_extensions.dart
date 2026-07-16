@@ -73,12 +73,12 @@ extension SettingsProtoExtension on pb.Settings {
     defaultSort: hasDefaultSort()
         ? SortType.values[defaultSort]
         : SortType.provider,
-    refreshOnStart: refreshOnStart,
-    lowLatency: !useStreamCaching,
-    forceTVMode: forceTvMode,
-    showLivestreams: showLivestreams,
-    showMovies: showMovies,
-    showSeries: showSeries,
+    refreshOnStart: hasRefreshOnStart() ? refreshOnStart : false,
+    lowLatency: hasUseStreamCaching() ? !useStreamCaching : false,
+    forceTVMode: hasForceTvMode() ? forceTvMode : false,
+    showLivestreams: hasShowLivestreams() ? showLivestreams : true,
+    showMovies: hasShowMovies() ? showMovies : true,
+    showSeries: hasShowSeries() ? showSeries : true,
   );
 }
 
