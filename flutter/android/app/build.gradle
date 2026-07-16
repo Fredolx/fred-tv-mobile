@@ -8,7 +8,7 @@ plugins {
 android {
     namespace = "dev.fredol.open_tv"
     compileSdk = 36
-    ndkVersion = "30.0.14904198"
+    ndkVersion = "29.0.14206865"
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
