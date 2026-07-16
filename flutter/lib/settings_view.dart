@@ -13,6 +13,7 @@ import 'package:open_tv/models/device_detector.dart';
 import 'package:open_tv/models/settings.dart';
 import 'package:open_tv/models/source.dart';
 import 'package:open_tv/models/source_type.dart';
+import 'package:open_tv/models/sort_type.dart';
 import 'package:open_tv/models/view_type.dart';
 import 'package:open_tv/error.dart';
 import 'package:open_tv/setup.dart';
@@ -96,6 +97,28 @@ class _SettingsState extends State<SettingsView> {
           action: (view) {
             setState(() {
               settings.defaultView = ViewType.values[view];
+              updateSettings();
+            });
+            Navigator.of(context).pop();
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _showDefaultSortDialog(BuildContext context) async {
+    showDialog(
+      barrierDismissible: true,
+      context: context,
+      builder: (BuildContext context) {
+        return SelectDialog(
+          title: "Default sort",
+          data: SortType.values
+              .map((x) => IdData(id: x.index, data: sortTypeToString(x)))
+              .toList(),
+          action: (sort) {
+            setState(() {
+              settings.defaultSort = SortType.values[sort];
               updateSettings();
             });
             Navigator.of(context).pop();
@@ -256,6 +279,11 @@ class _SettingsState extends State<SettingsView> {
                     title: const Text("Default view"),
                     subtitle: Text(viewTypeToString(settings.defaultView)),
                     onTap: () async => await _showDefaultViewDialog(context),
+                  ),
+                  ListTile(
+                    title: const Text("Default sort"),
+                    subtitle: Text(sortTypeToString(settings.defaultSort)),
+                    onTap: () async => await _showDefaultSortDialog(context),
                   ),
                   ListTile(
                     title: const Text("Force TV Mode"),

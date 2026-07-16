@@ -68,8 +68,9 @@ class _HomeState extends State<Home> {
       widget.home.filters.sourceIds = sources;
     }
     if (widget.home.filters.mediaTypes == null) {
-      widget.home.filters.mediaTypes =
-          (await NativeBridge.instance.getSettings()).getMediaTypes();
+      final settings = await NativeBridge.instance.getSettings();
+      widget.home.filters.mediaTypes = settings.getMediaTypes();
+      widget.home.filters.sort = settings.defaultSort;
     }
     await load();
     var version = (await PackageInfo.fromPlatform()).version;
