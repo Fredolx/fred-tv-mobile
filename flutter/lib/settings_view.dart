@@ -9,6 +9,7 @@ import 'package:open_tv/home.dart';
 import 'package:open_tv/loading.dart';
 import 'package:open_tv/models/home_manager.dart';
 import 'package:open_tv/models/id_data.dart';
+import 'package:open_tv/models/device_detector.dart';
 import 'package:open_tv/models/settings.dart';
 import 'package:open_tv/models/source.dart';
 import 'package:open_tv/models/source_type.dart';
@@ -30,6 +31,7 @@ class _SettingsState extends State<SettingsView> {
   Settings settings = Settings();
   List<Source> sources = [];
   bool loading = true;
+  bool isTv = false;
   @override
   void initState() {
     super.initState();
@@ -37,6 +39,7 @@ class _SettingsState extends State<SettingsView> {
   }
 
   Future<void> initAsync() async {
+    final isTvResult = await DeviceDetector.isTV();
     var results = await Future.wait([
       NativeBridge.instance.getSettings(),
       NativeBridge.instance.getSources(),
@@ -44,6 +47,7 @@ class _SettingsState extends State<SettingsView> {
     setState(() {
       settings = results[0] as Settings;
       sources = results[1] as List<Source>;
+      isTv = isTvResult;
       loading = false;
     });
   }
@@ -153,7 +157,7 @@ class _SettingsState extends State<SettingsView> {
               ),
             ),
             Offstage(
-              offstage: source.sourceType == SourceType.m3u,
+              offstage: source.sourceType == SourceType.m3u || isTv,
               child: IconButton(
                 icon: const Icon(Icons.edit),
                 onPressed: () async => await showEditDialog(context, source),
