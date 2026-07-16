@@ -26,6 +26,7 @@ class WhatsNewModal extends StatelessWidget {
           child: const Text("Donate"),
         ),
         TextButton(
+          autofocus: true,
           onPressed: () async {
             await NativeBridge.instance.updateLastSeenVersion(
               (await PackageInfo.fromPlatform()).version,
@@ -44,9 +45,16 @@ class WhatsNewModal extends StatelessWidget {
             child: Text('''
 Hi! Thanks for supporting Fred TV. Here's everything new:
 
-- Improved UI
-- Fixed Xtream importing bugs
-- Improved Android TV support
+- Completely replaced the backend to use the Rust backend from the Desktop version
+- Super robust and smooth native playback on Android using ExoPlayer
+- Android TV Support 
+- Easy-to-use redesigned Home for TV
+- Full D-Pad navigation support
+- Speed and performance optimizations, the app is at least 50% faster!
+- Fixed all xtream and m3u parsing issues (hopefully)
+- Sorting added
+- Sorting default options added to Settings
+- And more behind the curtains!
 
 If you like Fred TV, please consider donating (Even a dollar helps tremendously), reporting issues on the github and sharing it with your friends.
 '''),
