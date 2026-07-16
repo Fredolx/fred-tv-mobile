@@ -156,6 +156,7 @@ class _ChannelTileState extends State<ChannelTile> {
         widget.channel.id!,
         !widget.channel.favorite,
       );
+      if (!mounted) return;
       setState(() {
         widget.channel.favorite = !widget.channel.favorite;
       });
@@ -227,6 +228,7 @@ class _ChannelTileState extends State<ChannelTile> {
     } else {
       var settings = await NativeBridge.instance.getSettings();
       NativeBridge.instance.addLastWatched(widget.channel.id!);
+      if (!mounted) return;
       await Navigator.push(
         context,
         MaterialPageRoute(
@@ -301,14 +303,10 @@ class _ChannelTileState extends State<ChannelTile> {
                   ),
                 ),
                 if (widget.channel.favorite)
-                  Padding(
+                  const Padding(
                     padding: EdgeInsets.only(right: 8.0),
                     child: Center(
-                      child: const Icon(
-                        Icons.star,
-                        size: 25,
-                        color: Colors.amber,
-                      ),
+                      child: Icon(Icons.star, size: 25, color: Colors.amber),
                     ),
                   ),
               ],

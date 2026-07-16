@@ -183,6 +183,7 @@ class _SettingsState extends State<SettingsView> {
             "Successfully deleted source",
           );
           await reloadSources();
+          if (!mounted) return;
           if (sources.isEmpty) {
             Navigator.pushAndRemoveUntil(
               context,

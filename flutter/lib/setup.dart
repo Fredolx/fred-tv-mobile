@@ -99,7 +99,7 @@ class _SetupState extends State<Setup> {
   Future showXtreamCorrectionModal() async {
     return await showDialog(
       context: context,
-      builder: (context) => CorrectionModal(),
+      builder: (context) => const CorrectionModal(),
     );
   }
 
@@ -265,7 +265,7 @@ class _SetupState extends State<Setup> {
                             ignoring:
                                 step == Steps.welcome || step == Steps.finish,
                             child: FocusTraversalOrder(
-                              order: NumericFocusOrder(2.0),
+                              order: const NumericFocusOrder(2.0),
                               child: FilledButton.tonal(
                                 onPressed: prevStep,
                                 style: FilledButton.styleFrom(
@@ -283,7 +283,7 @@ class _SetupState extends State<Setup> {
                           ),
                         ),
                         FocusTraversalOrder(
-                          order: NumericFocusOrder(1.0),
+                          order: const NumericFocusOrder(1.0),
                           child: FilledButton(
                             focusNode: nextButtonFocusNode,
                             onPressed: !formPages.contains(step) || formValid
@@ -383,7 +383,7 @@ class _SetupState extends State<Setup> {
             child: FormBuilderTextField(
               autocorrect: false,
               focusNode: focusNodes[Steps.name],
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: "Name",
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.label_outline),
@@ -423,7 +423,7 @@ class _SetupState extends State<Setup> {
             child: FormBuilderTextField(
               autocorrect: false,
               focusNode: focusNodes[Steps.url],
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: "URL",
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.link),
@@ -451,7 +451,7 @@ class _SetupState extends State<Setup> {
             child: FormBuilderTextField(
               autocorrect: false,
               focusNode: focusNodes[Steps.username],
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: "Username",
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.person),
@@ -479,7 +479,7 @@ class _SetupState extends State<Setup> {
             child: FormBuilderTextField(
               autocorrect: false,
               focusNode: focusNodes[Steps.password],
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: "Password",
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.password),

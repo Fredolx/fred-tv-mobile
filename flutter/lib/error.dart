@@ -117,7 +117,7 @@ class Error {
       final error = "${e.toString()}\n\n-- Dart Stack Trace --\n${stackTrace.toString()}";
       await handleError(context, error);
     }
-    if (useLoading && context.loaderOverlay.visible) {
+    if (useLoading && context.mounted && context.loaderOverlay.visible) {
       context.loaderOverlay.hide();
     }
     return Result(success: success, data: result);

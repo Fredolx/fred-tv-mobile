@@ -22,6 +22,7 @@ class ConfirmDelete extends StatelessWidget {
       ])),
       actions: [
         TextButton(
+            autofocus: true,
             onPressed: () async {
               Navigator.of(context).pop();
               confirm();

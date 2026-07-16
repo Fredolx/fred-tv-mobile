@@ -212,6 +212,7 @@ class _PlayerState extends State<Player> {
     if (key.currentState!.isFullscreen()) {
       await key.currentState!.exitFullscreen();
     }
+    if (!mounted) return;
     Navigator.of(context).pop();
     if (Platform.isAndroid || Platform.isIOS) {
       SystemChrome.setPreferredOrientations([
@@ -257,14 +258,14 @@ class _PlayerState extends State<Player> {
           onPressed: openSubtitlesModal,
           icon: const Icon(Icons.subtitles, color: Colors.white, size: 32),
         ),
-        SizedBox(width: 20),
+        const SizedBox(width: 20),
         IconButton(
           onPressed: openAudioModal,
           icon: const Icon(Icons.music_note, color: Colors.white, size: 32),
         ),
-        SizedBox(width: 20),
+        const SizedBox(width: 20),
         IconButton(
-          icon: Icon(
+          icon: const Icon(
             Icons.aspect_ratio_outlined,
             color: Colors.white,
             size: 32,
