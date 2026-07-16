@@ -17,8 +17,7 @@ import 'package:open_tv/models/sort_type.dart';
 import 'package:open_tv/models/view_type.dart';
 import 'package:open_tv/select_dialog.dart';
 import 'package:open_tv/error.dart';
-import 'package:open_tv/whats_new_modal.dart';
-import 'package:package_info_plus/package_info_plus.dart';
+import 'package:open_tv/utils.dart';
 
 class Home extends StatefulWidget {
   final HomeManager home;
@@ -73,10 +72,9 @@ class _HomeState extends State<Home> {
       widget.home.filters.sort = settings.defaultSort;
     }
     await load();
-    var version = (await PackageInfo.fromPlatform()).version;
-    if (widget.firstLaunch &&
-        await NativeBridge.instance.shouldShowWhatsNew(version)) {
-      await showWhatsNew(version);
+    if (!mounted) return;
+    if (widget.firstLaunch) {
+      await Utils.maybeShowWhatsNew(context);
     }
     if (!mounted) return;
     if (widget.refresh) {
@@ -114,13 +112,6 @@ class _HomeState extends State<Home> {
           load(false);
         },
       ),
-    );
-  }
-
-  Future<void> showWhatsNew(String version) async {
-    showDialog(
-      context: context,
-      builder: (context) => WhatsNewModal(version: version),
     );
   }
 
@@ -448,20 +439,22 @@ class _HomeState extends State<Home> {
               updateViewMode: updateViewMode,
             )
           : null,
-      floatingActionButton: IgnorePointer(
-        ignoring: !scrolledDeepEnough,
-        child: AnimatedOpacity(
-          opacity: scrolledDeepEnough ? 1.0 : 0.0,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-          child: FloatingActionButton(
-            onPressed: scrollToTop,
-            shape: const CircleBorder(),
-            tooltip: 'Scroll to Top',
-            child: const Icon(Icons.arrow_upward),
-          ),
-        ),
-      ),
+      floatingActionButton: widget.hasTouchScreen
+          ? IgnorePointer(
+              ignoring: !scrolledDeepEnough,
+              child: AnimatedOpacity(
+                opacity: scrolledDeepEnough ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                child: FloatingActionButton(
+                  onPressed: scrollToTop,
+                  shape: const CircleBorder(),
+                  tooltip: 'Scroll to Top',
+                  child: const Icon(Icons.arrow_upward),
+                ),
+              ),
+            )
+          : null,
     );
   }
 }

@@ -54,7 +54,7 @@ Hi! Thanks for supporting Fred TV. Here's everything new:
 - Fixed all xtream and m3u parsing issues (hopefully)
 - Sorting added
 - Sorting default options added to Settings
-- And more behind the curtains!
+- I had to wipe your playlists, sorry! Welcome to 2.0.0
 
 If you like Fred TV, please consider donating (Even a dollar helps tremendously), reporting issues on the github and sharing it with your friends.
 '''),
