@@ -9,10 +9,13 @@ import 'package:open_tv/loading.dart';
 import 'package:open_tv/models/channel.dart';
 import 'package:open_tv/models/filters.dart';
 import 'package:open_tv/models/home_manager.dart';
+import 'package:open_tv/models/id_data.dart';
 import 'package:open_tv/models/no_push_animation_material_page_route.dart';
 import 'package:open_tv/models/node.dart';
 import 'package:open_tv/models/node_type.dart';
+import 'package:open_tv/models/sort_type.dart';
 import 'package:open_tv/models/view_type.dart';
+import 'package:open_tv/select_dialog.dart';
 import 'package:open_tv/error.dart';
 import 'package:open_tv/whats_new_modal.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -90,6 +93,26 @@ class _HomeState extends State<Home> {
         blockSettings = false;
       });
     }
+  }
+
+  void showSortDialog() {
+    showDialog(
+      barrierDismissible: true,
+      context: context,
+      builder: (context) => SelectDialog(
+        title: "Sort by",
+        data: SortType.values
+            .map((x) => IdData(id: x.index, data: sortTypeToString(x)))
+            .toList(),
+        action: (sort) {
+          setState(() {
+            widget.home.filters.sort = SortType.values[sort];
+          });
+          Navigator.of(context).pop();
+          load(false);
+        },
+      ),
+    );
   }
 
   Future<void> showWhatsNew(String version) async {
@@ -367,7 +390,7 @@ class _HomeState extends State<Home> {
                                 ),
                                 IconButton(
                                   focusNode: _sortFocusNode,
-                                  onPressed: () {},
+                                  onPressed: showSortDialog,
                                   icon: const Icon(Icons.sort),
                                 ),
                               ],
