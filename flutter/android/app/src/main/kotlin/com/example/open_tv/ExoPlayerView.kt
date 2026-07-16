@@ -92,10 +92,10 @@ class ExoPlayerView(
         playerView.setShowSubtitleButton(true)
         playerView.setShowNextButton(false)
         playerView.setShowPreviousButton(false)
-        playerView.controllerShowTimeoutMs = 3000
+        playerView.controllerShowTimeoutMs = 1500
         playerView.isFocusable = true
         makeSeekBarGranular()
-        keepLiveControlsHidden()
+        syncControllerVisibility()
         if (isLive) hideLiveControls()
     }
 
@@ -104,11 +104,12 @@ class ExoPlayerView(
         timeBar?.setKeyTimeIncrement(SEEK_INCREMENT_MS)
     }
 
-    private fun keepLiveControlsHidden() {
-        if (!isLive) return
+    private fun syncControllerVisibility() {
+        val topBar = playerView.findViewById<View>(R.id.top_bar)
         playerView.setControllerVisibilityListener(
             PlayerView.ControllerVisibilityListener { visibility ->
-                if (visibility == View.VISIBLE) hideLiveControls()
+                topBar.visibility = visibility
+                if (isLive && visibility == View.VISIBLE) hideLiveControls()
             }
         )
     }
