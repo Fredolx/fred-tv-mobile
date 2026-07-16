@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Fred TV Next
+GenericName=IPTV Player
+Comment=Watch IPTV, Xtream and M3U playlists
+Exec=open_tv
+Icon=dev.fredol.fred-tv-next
+Terminal=false
+Categories=AudioVideo;Video;Player;TV;
+Keywords=IPTV;M3U;Xtream;TV;Streaming;
+StartupWMClass=dev.fredol.open_tv
+StartupNotify=true

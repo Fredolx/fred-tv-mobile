@@ -1,0 +1,7 @@
+{
+    "rust_lib": {
+        "cargo_locks": [
+            "."
+        ]
+    }
+}

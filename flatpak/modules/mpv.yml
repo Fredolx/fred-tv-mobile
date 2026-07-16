@@ -1,0 +1,77 @@
+# libmpv built from source, with the dependency chain that media_kit_video's
+# CMake resolves via `pkg-config mpv`. Adapted from the Fladder Flathub manifest
+# (nl.jknaapen.fladder). Must be built before the open_tv module.
+name: mpv
+buildsystem: meson
+config-opts:
+  - -Dlibmpv=true
+  - -Dcplayer=false
+  - -Dbuild-date=false
+  - -Dmanpage-build=disabled
+  - -Dvaapi=enabled
+  - -Dcuda-hwaccel=enabled
+  - -Dpulse=enabled
+  - -Dalsa=enabled
+  - -Duchardet=enabled
+cleanup:
+  - /share
+sources:
+  - type: git
+    url: https://github.com/mpv-player/mpv.git
+    tag: v0.39.0
+    commit: a0fba7be57f3822d967b04f0f6b6d6341e7516e7
+modules:
+  - name: luajit
+    no-autogen: true
+    make-args:
+      - BUILDMODE=dynamic
+      - PREFIX=${FLATPAK_DEST}
+    make-install-args:
+      - PREFIX=${FLATPAK_DEST}
+    cleanup:
+      - /bin
+      - /include
+      - /lib/pkgconfig
+      - /share/man
+    sources:
+      - type: git
+        url: https://github.com/openresty/luajit2.git
+        tag: v2.1-20260620
+        commit: b411bec3ce550ef9968fc83bca094455cf812c1f
+
+  - name: libass
+    config-opts:
+      - --enable-shared
+      - --disable-static
+    sources:
+      - type: git
+        url: https://github.com/libass/libass.git
+        tag: 0.17.3
+        commit: e46aedea0a0d17da4c4ef49d84b94a7994664ab5
+
+  - name: uchardet
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DBUILD_BINARY=OFF
+      - -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+    cleanup:
+      - /lib/*.a
+      - /share
+    sources:
+      - type: archive
+        url: https://www.freedesktop.org/software/uchardet/releases/uchardet-0.0.8.tar.xz
+        sha256: e97a60cfc00a1c147a674b097bb1422abd9fa78a2d9ce3f3fdcc2e78a34ac5f0
+
+  - name: libplacebo
+    buildsystem: meson
+    config-opts:
+      - -Dvulkan=enabled
+      - -Dshaderc=enabled
+    sources:
+      - type: git
+        url: https://code.videolan.org/videolan/libplacebo.git
+        tag: v7.351.0
+        commit: 3188549fba13bbdf3a5a98de2a38c2e71f04e21e
+      - type: patch
+        path: libplacebo-python3.13.patch

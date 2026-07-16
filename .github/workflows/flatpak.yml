@@ -1,0 +1,44 @@
+name: Flatpak
+
+# Builds a single-file .flatpak bundle from the offline manifest and uploads it
+# as a workflow artifact. The manifest and its vendored sources under
+# flatpak/generated/ are produced by flatpak-flutter (see flatpak/README.md);
+# this workflow does NOT regenerate them, it only builds what is committed.
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+    paths:
+      - flatpak/**
+      - .github/workflows/flatpak.yml
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:gnome-49
+      options: --privileged
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Pin app source to this commit
+        run: |
+          sed -i "0,/commit:/s//commit: ${GITHUB_SHA}/" flatpak/dev.fredol.fred-tv-next.yml
+
+      - name: Build bundle
+        uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        with:
+          bundle: fred-tv-next.flatpak
+          manifest-path: flatpak/dev.fredol.fred-tv-next.yml
+          cache-key: flatpak-builder-${{ github.sha }}
+          arch: x86_64
+
+      - name: Upload bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fred-tv-next-flatpak
+          path: fred-tv-next.flatpak
+          if-no-files-found: error

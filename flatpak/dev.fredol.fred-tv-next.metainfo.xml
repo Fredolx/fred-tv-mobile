@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>dev.fredol.fred-tv-next</id>
+
+  <name>Fred TV Next</name>
+  <summary>Watch IPTV from M3U playlists and Xtream sources</summary>
+
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>AGPL-3.0-or-later</project_license>
+
+  <developer id="dev.fredol">
+    <name>Frederic Lachapelle</name>
+  </developer>
+
+  <description>
+    <p>
+      Fred TV Next is a simple and fast IPTV player.
+    </p>
+    <p>Features:</p>
+    <ul>
+      <li>M3U and Xtream Codes support</li>
+      <li>Live TV, movies and series</li>
+      <li>Favorites and fast search</li>
+      <li>Powered by mpv for smooth playback</li>
+    </ul>
+  </description>
+
+  <launchable type="desktop-id">dev.fredol.fred-tv-next.desktop</launchable>
+
+  <url type="homepage">https://github.com/Fredolx/fred-tv-mobile</url>
+  <url type="bugtracker">https://github.com/Fredolx/fred-tv-mobile/issues</url>
+  <url type="donation">https://github.com/sponsors/Fredolx</url>
+
+  <screenshots>
+    <screenshot type="default">
+      <caption>Browsing channels in Fred TV</caption>
+      <image>https://github.com/user-attachments/assets/baf0c53b-a33a-4bb7-bf48-24b8dd20fb20</image>
+    </screenshot>
+  </screenshots>
+
+  <content_rating type="oars-1.1"/>
+
+  <releases>
+    <release version="2.0.0" date="2026-07-16">
+      <description>
+        <p>Linux release.</p>
+      </description>
+    </release>
+  </releases>
+</component>
