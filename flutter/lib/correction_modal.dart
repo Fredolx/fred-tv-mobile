@@ -9,14 +9,18 @@ class CorrectionModal extends StatelessWidget {
       title: const Text("Is this the right URL?"),
       actions: [
         TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text("Proceed anyway")),
+          onPressed: () => Navigator.pop(context, false),
+          child: const Text("Proceed anyway"),
+        ),
         TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text("Correct URL automatically"))
+          autofocus: true,
+          onPressed: () => Navigator.pop(context, true),
+          child: const Text("Correct URL automatically"),
+        ),
       ],
       content: const Text(
-          "It seems your url is not pointing to an Xtream API server, Fred TV can correct the URL automatically for you"),
+        "It seems your url is not pointing to an Xtream API server, Fred TV can correct the URL automatically for you",
+      ),
     );
   }
 }
