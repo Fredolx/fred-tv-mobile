@@ -6,6 +6,7 @@ import 'package:open_tv/models/home_manager.dart';
 import 'package:open_tv/models/media_type.dart';
 import 'package:open_tv/models/view_type.dart';
 import 'package:open_tv/settings_view.dart';
+import 'package:open_tv/utils.dart';
 
 class TvHome extends StatefulWidget {
   final bool nested;
@@ -17,6 +18,16 @@ class TvHome extends StatefulWidget {
 }
 
 class _TvHomeState extends State<TvHome> {
+  @override
+  void initState() {
+    super.initState();
+    if (!widget.nested) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => Utils.maybeShowWhatsNew(context),
+      );
+    }
+  }
+
   void navigateHome(Filters filters) {
     Navigator.of(context).push(
       MaterialPageRoute(
