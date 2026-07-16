@@ -18,12 +18,14 @@ class ChannelTile extends StatefulWidget {
   final BuildContext parentContext;
   final Function(Node node) setNode;
   final VoidCallback? onFocusNavbar;
+  final VoidCallback onSelect;
   final bool autofocus;
   const ChannelTile({
     super.key,
     required this.channel,
     required this.setNode,
     required this.parentContext,
+    required this.onSelect,
     this.onFocusNavbar,
     this.autofocus = false,
   });
@@ -101,9 +103,7 @@ class _ChannelTileState extends State<ChannelTile> {
   KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
     if (event is KeyDownEvent &&
         event.logicalKey == LogicalKeyboardKey.arrowRight) {
-      if (!FocusScope.of(
-        context,
-      ).focusInDirection(TraversalDirection.right)) {
+      if (!FocusScope.of(context).focusInDirection(TraversalDirection.right)) {
         widget.onFocusNavbar?.call();
       }
       return KeyEventResult.handled;
@@ -203,6 +203,7 @@ class _ChannelTileState extends State<ChannelTile> {
   }
 
   Future<void> play() async {
+    widget.onSelect();
     late final int? seriesId;
     if (widget.channel.mediaType == MediaType.serie) {
       seriesId = await _handleSeries();
@@ -214,7 +215,8 @@ class _ChannelTileState extends State<ChannelTile> {
         widget.channel.mediaType == MediaType.season) {
       widget.setNode(
         Node(
-          id: widget.channel.mediaType == MediaType.group ||
+          id:
+              widget.channel.mediaType == MediaType.group ||
                   widget.channel.mediaType == MediaType.season
               ? widget.channel.id!
               : seriesId!,
@@ -225,7 +227,7 @@ class _ChannelTileState extends State<ChannelTile> {
     } else {
       var settings = await NativeBridge.instance.getSettings();
       NativeBridge.instance.addLastWatched(widget.channel.id!);
-      Navigator.push(
+      await Navigator.push(
         context,
         MaterialPageRoute(
           builder: (_) => Platform.isAndroid
@@ -233,6 +235,7 @@ class _ChannelTileState extends State<ChannelTile> {
               : Player(channel: widget.channel, settings: settings),
         ),
       );
+      if (mounted) _focusNode.requestFocus();
     }
   }
 
@@ -301,7 +304,11 @@ class _ChannelTileState extends State<ChannelTile> {
                   Padding(
                     padding: EdgeInsets.only(right: 8.0),
                     child: Center(
-                      child: const Icon(Icons.star, size: 25, color: Colors.amber),
+                      child: const Icon(
+                        Icons.star,
+                        size: 25,
+                        color: Colors.amber,
+                      ),
                     ),
                   ),
               ],

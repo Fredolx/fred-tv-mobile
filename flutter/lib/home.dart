@@ -388,6 +388,7 @@ class _HomeState extends State<Home> {
                           parentContext: context,
                           setNode: setNode,
                           autofocus: index == currentlyFocusedChannel,
+                          onSelect: () => currentlyFocusedChannel = index,
                         );
                       }, childCount: channels.length),
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
