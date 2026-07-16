@@ -1,8 +1,10 @@
 import 'package:open_tv/models/media_type.dart';
+import 'package:open_tv/models/sort_type.dart';
 import 'package:open_tv/models/view_type.dart';
 
 class Settings {
   ViewType defaultView;
+  SortType defaultSort;
   bool refreshOnStart;
   bool showLivestreams;
   bool lowLatency;
@@ -11,6 +13,7 @@ class Settings {
   bool forceTVMode;
   Settings({
     this.defaultView = ViewType.all,
+    this.defaultSort = SortType.provider,
     this.refreshOnStart = false,
     this.showLivestreams = true,
     this.lowLatency = false,

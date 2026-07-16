@@ -51,6 +51,58 @@ class _SetupState extends State<Setup> {
   final nextButtonFocusNode = FocusNode();
   Set<String> existingSourceNames = {};
 
+  static const int _androidFlagSoftKeyboard = 0x2;
+
+  bool _isFromSoftKeyboard(RawKeyEvent event) {
+    final data = event.data;
+    return data is RawKeyEventDataAndroid &&
+        (data.flags & _androidFlagSoftKeyboard) != 0;
+  }
+
+  KeyEventResult _handleFormRawKey(FocusNode node, RawKeyEvent event) {
+    if (_isFromSoftKeyboard(event)) {
+      return KeyEventResult.ignored;
+    }
+    if (event is RawKeyDownEvent) {
+      final key = event.logicalKey;
+      if (key == LogicalKeyboardKey.escape ||
+          key == LogicalKeyboardKey.goBack) {
+        bool moved = FocusScope.of(
+          context,
+        ).focusInDirection(TraversalDirection.left);
+        if (!moved) {
+          node.unfocus();
+        }
+        return KeyEventResult.handled;
+      }
+      if (key == LogicalKeyboardKey.arrowDown) {
+        bool moved = FocusScope.of(
+          context,
+        ).focusInDirection(TraversalDirection.down);
+        if (moved) {
+          return KeyEventResult.handled;
+        }
+      }
+      if (key == LogicalKeyboardKey.arrowRight) {
+        bool moved = FocusScope.of(
+          context,
+        ).focusInDirection(TraversalDirection.right);
+        if (moved) {
+          return KeyEventResult.handled;
+        }
+      }
+      if (key == LogicalKeyboardKey.arrowLeft) {
+        bool moved = FocusScope.of(
+          context,
+        ).focusInDirection(TraversalDirection.left);
+        if (moved) {
+          return KeyEventResult.handled;
+        }
+      }
+    }
+    return KeyEventResult.ignored;
+  }
+
   Future<void> finish() async {
     var result = await Error.tryAsync(
       () async {
@@ -99,14 +151,21 @@ class _SetupState extends State<Setup> {
   Future showXtreamCorrectionModal() async {
     return await showDialog(
       context: context,
-      builder: (context) => CorrectionModal(),
+      builder: (context) => const CorrectionModal(),
     );
+  }
+
+  bool _focusNext() {
+    return FocusScope.of(context).focusInDirection(TraversalDirection.right);
   }
 
   @override
   void initState() {
-    nextButtonFocusNode.requestFocus();
     super.initState();
+    nextButtonFocusNode.requestFocus();
+    for (var node in focusNodes.values) {
+      node.onKey = _handleFormRawKey;
+    }
   }
 
   @override
@@ -265,7 +324,7 @@ class _SetupState extends State<Setup> {
                             ignoring:
                                 step == Steps.welcome || step == Steps.finish,
                             child: FocusTraversalOrder(
-                              order: NumericFocusOrder(2.0),
+                              order: const NumericFocusOrder(2.0),
                               child: FilledButton.tonal(
                                 onPressed: prevStep,
                                 style: FilledButton.styleFrom(
@@ -283,7 +342,7 @@ class _SetupState extends State<Setup> {
                           ),
                         ),
                         FocusTraversalOrder(
-                          order: NumericFocusOrder(1.0),
+                          order: const NumericFocusOrder(1.0),
                           child: FilledButton(
                             focusNode: nextButtonFocusNode,
                             onPressed: !formPages.contains(step) || formValid
@@ -383,7 +442,7 @@ class _SetupState extends State<Setup> {
             child: FormBuilderTextField(
               autocorrect: false,
               focusNode: focusNodes[Steps.name],
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: "Name",
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.label_outline),
@@ -423,7 +482,7 @@ class _SetupState extends State<Setup> {
             child: FormBuilderTextField(
               autocorrect: false,
               focusNode: focusNodes[Steps.url],
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: "URL",
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.link),
@@ -451,7 +510,7 @@ class _SetupState extends State<Setup> {
             child: FormBuilderTextField(
               autocorrect: false,
               focusNode: focusNodes[Steps.username],
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: "Username",
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.person),
@@ -479,7 +538,7 @@ class _SetupState extends State<Setup> {
             child: FormBuilderTextField(
               autocorrect: false,
               focusNode: focusNodes[Steps.password],
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: "Password",
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.password),

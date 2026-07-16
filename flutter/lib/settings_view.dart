@@ -9,9 +9,11 @@ import 'package:open_tv/home.dart';
 import 'package:open_tv/loading.dart';
 import 'package:open_tv/models/home_manager.dart';
 import 'package:open_tv/models/id_data.dart';
+import 'package:open_tv/models/device_detector.dart';
 import 'package:open_tv/models/settings.dart';
 import 'package:open_tv/models/source.dart';
 import 'package:open_tv/models/source_type.dart';
+import 'package:open_tv/models/sort_type.dart';
 import 'package:open_tv/models/view_type.dart';
 import 'package:open_tv/error.dart';
 import 'package:open_tv/setup.dart';
@@ -30,6 +32,7 @@ class _SettingsState extends State<SettingsView> {
   Settings settings = Settings();
   List<Source> sources = [];
   bool loading = true;
+  bool isTv = false;
   @override
   void initState() {
     super.initState();
@@ -37,6 +40,7 @@ class _SettingsState extends State<SettingsView> {
   }
 
   Future<void> initAsync() async {
+    final isTvResult = await DeviceDetector.isTV();
     var results = await Future.wait([
       NativeBridge.instance.getSettings(),
       NativeBridge.instance.getSources(),
@@ -44,6 +48,7 @@ class _SettingsState extends State<SettingsView> {
     setState(() {
       settings = results[0] as Settings;
       sources = results[1] as List<Source>;
+      isTv = isTvResult;
       loading = false;
     });
   }
@@ -92,6 +97,28 @@ class _SettingsState extends State<SettingsView> {
           action: (view) {
             setState(() {
               settings.defaultView = ViewType.values[view];
+              updateSettings();
+            });
+            Navigator.of(context).pop();
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _showDefaultSortDialog(BuildContext context) async {
+    showDialog(
+      barrierDismissible: true,
+      context: context,
+      builder: (BuildContext context) {
+        return SelectDialog(
+          title: "Default sort",
+          data: SortType.values
+              .map((x) => IdData(id: x.index, data: sortTypeToString(x)))
+              .toList(),
+          action: (sort) {
+            setState(() {
+              settings.defaultSort = SortType.values[sort];
               updateSettings();
             });
             Navigator.of(context).pop();
@@ -153,7 +180,7 @@ class _SettingsState extends State<SettingsView> {
               ),
             ),
             Offstage(
-              offstage: source.sourceType == SourceType.m3u,
+              offstage: source.sourceType == SourceType.m3u || isTv,
               child: IconButton(
                 icon: const Icon(Icons.edit),
                 onPressed: () async => await showEditDialog(context, source),
@@ -183,6 +210,7 @@ class _SettingsState extends State<SettingsView> {
             "Successfully deleted source",
           );
           await reloadSources();
+          if (!mounted) return;
           if (sources.isEmpty) {
             Navigator.pushAndRemoveUntil(
               context,
@@ -251,6 +279,11 @@ class _SettingsState extends State<SettingsView> {
                     title: const Text("Default view"),
                     subtitle: Text(viewTypeToString(settings.defaultView)),
                     onTap: () async => await _showDefaultViewDialog(context),
+                  ),
+                  ListTile(
+                    title: const Text("Default sort"),
+                    subtitle: Text(sortTypeToString(settings.defaultSort)),
+                    onTap: () async => await _showDefaultSortDialog(context),
                   ),
                   ListTile(
                     title: const Text("Force TV Mode"),
