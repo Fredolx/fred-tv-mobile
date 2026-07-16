@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:open_tv/models/source.dart';
@@ -24,6 +25,65 @@ class EditDialog extends StatefulWidget {
 
 class _EditDialogState extends State<EditDialog> {
   final _formKey = GlobalKey<FormBuilderState>();
+  final FocusNode _urlFocusNode = FocusNode();
+  final FocusNode _usernameFocusNode = FocusNode();
+  final FocusNode _passwordFocusNode = FocusNode();
+
+  static const int _androidFlagSoftKeyboard = 0x2;
+
+  bool _isFromSoftKeyboard(RawKeyEvent event) {
+    final data = event.data;
+    return data is RawKeyEventDataAndroid &&
+        (data.flags & _androidFlagSoftKeyboard) != 0;
+  }
+
+  bool _focusDown() {
+    return FocusScope.of(context).focusInDirection(TraversalDirection.down);
+  }
+
+  KeyEventResult _handleFieldRawKey(FocusNode node, RawKeyEvent event) {
+    if (_isFromSoftKeyboard(event)) {
+      return KeyEventResult.ignored;
+    }
+    if (event is RawKeyDownEvent) {
+      final key = event.logicalKey;
+      if (key == LogicalKeyboardKey.escape ||
+          key == LogicalKeyboardKey.goBack) {
+        node.unfocus();
+        return KeyEventResult.handled;
+      }
+      if (key == LogicalKeyboardKey.arrowDown) {
+        if (_focusDown()) {
+          return KeyEventResult.handled;
+        }
+      }
+      if (key == LogicalKeyboardKey.arrowUp) {
+        bool moved = FocusScope.of(
+          context,
+        ).focusInDirection(TraversalDirection.up);
+        if (moved) {
+          return KeyEventResult.handled;
+        }
+      }
+    }
+    return KeyEventResult.ignored;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _urlFocusNode.onKey = _handleFieldRawKey;
+    _usernameFocusNode.onKey = _handleFieldRawKey;
+    _passwordFocusNode.onKey = _handleFieldRawKey;
+  }
+
+  @override
+  void dispose() {
+    _urlFocusNode.dispose();
+    _usernameFocusNode.dispose();
+    _passwordFocusNode.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,6 +131,9 @@ class _EditDialogState extends State<EditDialog> {
               children: [
                 const SizedBox(height: 15),
                 FormBuilderTextField(
+                  autofocus: true,
+                  focusNode: _urlFocusNode,
+                  textInputAction: TextInputAction.next,
                   initialValue: widget.source.url,
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   validator: FormBuilderValidators.compose([
@@ -90,6 +153,8 @@ class _EditDialogState extends State<EditDialog> {
                 Visibility(
                   visible: widget.source.sourceType == SourceType.xtream,
                   child: FormBuilderTextField(
+                    focusNode: _usernameFocusNode,
+                    textInputAction: TextInputAction.next,
                     initialValue: widget.source.username,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     validator: FormBuilderValidators.compose([
@@ -110,6 +175,8 @@ class _EditDialogState extends State<EditDialog> {
                 Visibility(
                   visible: widget.source.sourceType == SourceType.xtream,
                   child: FormBuilderTextField(
+                    focusNode: _passwordFocusNode,
+                    textInputAction: TextInputAction.next,
                     initialValue: widget.source.password,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     validator: FormBuilderValidators.compose([
