@@ -315,7 +315,10 @@ class _HomeState extends State<Home> {
       home.filters.seasonId = node.id;
     }
     Navigator.of(context).push(
-      NoPushAnimationMaterialPageRoute(builder: (context) => Home(home: home)),
+      NoPushAnimationMaterialPageRoute(
+        builder: (context) =>
+            Home(home: home, hasTouchScreen: widget.hasTouchScreen),
+      ),
     );
   }
 
@@ -325,10 +328,13 @@ class _HomeState extends State<Home> {
       appBar: widget.home.node != null
           ? AppBar(
               title: Text(widget.home.node.toString()),
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
+              automaticallyImplyLeading: widget.hasTouchScreen,
+              leading: widget.hasTouchScreen
+                  ? IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: () => Navigator.of(context).pop(),
+                    )
+                  : null,
             )
           : null,
       body: Loading(
