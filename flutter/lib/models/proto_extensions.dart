@@ -4,6 +4,7 @@ import 'package:open_tv/models/channel.dart';
 import 'package:open_tv/models/source.dart';
 import 'package:open_tv/models/filters.dart';
 import 'package:open_tv/models/settings.dart';
+import 'package:open_tv/models/sort_type.dart';
 import 'package:open_tv/models/media_type.dart';
 import 'package:open_tv/models/view_type.dart';
 import 'package:open_tv/models/channel_http_headers.dart';
@@ -62,12 +63,16 @@ extension FiltersDomainExtension on Filters {
     season: seasonId != null ? Int64(seasonId!) : null,
     groupId: groupId != null ? Int64(groupId!) : null,
     useKeywords: useKeywords,
+    sort: sort.index,
   );
 }
 
 extension SettingsProtoExtension on pb.Settings {
   Settings toDomain() => Settings(
     defaultView: ViewType.values[defaultView],
+    defaultSort: hasDefaultSort()
+        ? SortType.values[defaultSort]
+        : SortType.provider,
     refreshOnStart: refreshOnStart,
     lowLatency: !useStreamCaching,
     forceTVMode: forceTvMode,
@@ -80,6 +85,7 @@ extension SettingsProtoExtension on pb.Settings {
 extension SettingsDomainExtension on Settings {
   pb.Settings toProto() => pb.Settings(
     defaultView: defaultView.index,
+    defaultSort: defaultSort.index,
     refreshOnStart: refreshOnStart,
     useStreamCaching: !lowLatency,
     forceTvMode: forceTVMode,

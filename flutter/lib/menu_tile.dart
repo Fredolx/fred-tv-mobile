@@ -72,7 +72,7 @@ class _MenuTileState extends State<MenuTile> {
                       context,
                     ).textTheme.headlineSmall?.fontSize,
                     fontWeight: FontWeight.w600,
-                    shadows: [
+                    shadows: const [
                       Shadow(
                         color: Colors.black45,
                         offset: Offset(0, 2),

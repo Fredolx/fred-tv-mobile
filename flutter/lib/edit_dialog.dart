@@ -71,6 +71,8 @@ class _EditDialogState extends State<EditDialog> {
               children: [
                 const SizedBox(height: 15),
                 FormBuilderTextField(
+                  autofocus: true,
+                  textInputAction: TextInputAction.next,
                   initialValue: widget.source.url,
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   validator: FormBuilderValidators.compose([
@@ -90,6 +92,7 @@ class _EditDialogState extends State<EditDialog> {
                 Visibility(
                   visible: widget.source.sourceType == SourceType.xtream,
                   child: FormBuilderTextField(
+                    textInputAction: TextInputAction.next,
                     initialValue: widget.source.username,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     validator: FormBuilderValidators.compose([
@@ -110,6 +113,7 @@ class _EditDialogState extends State<EditDialog> {
                 Visibility(
                   visible: widget.source.sourceType == SourceType.xtream,
                   child: FormBuilderTextField(
+                    textInputAction: TextInputAction.next,
                     initialValue: widget.source.password,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     validator: FormBuilderValidators.compose([

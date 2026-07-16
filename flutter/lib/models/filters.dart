@@ -1,4 +1,5 @@
 import 'package:open_tv/models/media_type.dart';
+import 'package:open_tv/models/sort_type.dart';
 import 'package:open_tv/models/view_type.dart';
 
 class Filters {
@@ -11,6 +12,7 @@ class Filters {
   int? seasonId;
   int? groupId;
   bool useKeywords;
+  SortType sort;
 
   Filters({
     this.query,
@@ -22,5 +24,6 @@ class Filters {
     this.seasonId,
     this.groupId,
     this.useKeywords = false,
+    this.sort = SortType.provider,
   });
 }

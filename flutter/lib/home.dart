@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:open_tv/native_bridge.dart';
 import 'package:open_tv/bottom_nav.dart';
 import 'package:open_tv/channel_tile.dart';
@@ -8,10 +9,13 @@ import 'package:open_tv/loading.dart';
 import 'package:open_tv/models/channel.dart';
 import 'package:open_tv/models/filters.dart';
 import 'package:open_tv/models/home_manager.dart';
+import 'package:open_tv/models/id_data.dart';
 import 'package:open_tv/models/no_push_animation_material_page_route.dart';
 import 'package:open_tv/models/node.dart';
 import 'package:open_tv/models/node_type.dart';
+import 'package:open_tv/models/sort_type.dart';
 import 'package:open_tv/models/view_type.dart';
+import 'package:open_tv/select_dialog.dart';
 import 'package:open_tv/error.dart';
 import 'package:open_tv/whats_new_modal.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -38,7 +42,11 @@ class _HomeState extends State<Home> {
   final int pageSize = 36;
   List<Channel> channels = [];
   TextEditingController searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
+  final FocusNode _keywordsFocusNode = FocusNode(skipTraversal: true);
+  final FocusNode _sortFocusNode = FocusNode(skipTraversal: true);
   final ScrollController _scrollController = ScrollController();
+  int currentlyFocusedChannel = 0;
   bool isLoading = false;
   bool blockSettings = false;
   int? previousScroll;
@@ -48,6 +56,9 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     _scrollController.addListener(_scrollListener);
+    _searchFocusNode.onKey = _handleSearchRawKey;
+    _keywordsFocusNode.onKeyEvent = _handleKeywordsKeyEvent;
+    _sortFocusNode.onKeyEvent = _handleSortKeyEvent;
     initializeAsync();
   }
 
@@ -57,8 +68,9 @@ class _HomeState extends State<Home> {
       widget.home.filters.sourceIds = sources;
     }
     if (widget.home.filters.mediaTypes == null) {
-      widget.home.filters.mediaTypes =
-          (await NativeBridge.instance.getSettings()).getMediaTypes();
+      final settings = await NativeBridge.instance.getSettings();
+      widget.home.filters.mediaTypes = settings.getMediaTypes();
+      widget.home.filters.sort = settings.defaultSort;
     }
     await load();
     var version = (await PackageInfo.fromPlatform()).version;
@@ -66,6 +78,7 @@ class _HomeState extends State<Home> {
         await NativeBridge.instance.shouldShowWhatsNew(version)) {
       await showWhatsNew(version);
     }
+    if (!mounted) return;
     if (widget.refresh) {
       Error.tryAsyncNoLoading(
         () async {
@@ -82,6 +95,26 @@ class _HomeState extends State<Home> {
         blockSettings = false;
       });
     }
+  }
+
+  void showSortDialog() {
+    showDialog(
+      barrierDismissible: true,
+      context: context,
+      builder: (context) => SelectDialog(
+        title: "Sort by",
+        data: SortType.values
+            .map((x) => IdData(id: x.index, data: sortTypeToString(x)))
+            .toList(),
+        action: (sort) {
+          setState(() {
+            widget.home.filters.sort = SortType.values[sort];
+          });
+          Navigator.of(context).pop();
+          load(false);
+        },
+      ),
+    );
   }
 
   Future<void> showWhatsNew(String version) async {
@@ -126,6 +159,9 @@ class _HomeState extends State<Home> {
   void dispose() {
     _scrollController.dispose();
     _debounce?.cancel();
+    _searchFocusNode.dispose();
+    _keywordsFocusNode.dispose();
+    _sortFocusNode.dispose();
     super.dispose();
   }
 
@@ -153,6 +189,95 @@ class _HomeState extends State<Home> {
   void clearSearch() {
     widget.home.filters.query = null;
     searchController.clear();
+  }
+
+  bool _focusChannelsBelow() {
+    return FocusScope.of(context).focusInDirection(TraversalDirection.down);
+  }
+
+  static const int _androidFlagSoftKeyboard = 0x2;
+
+  bool _isFromSoftKeyboard(RawKeyEvent event) {
+    final data = event.data;
+    return data is RawKeyEventDataAndroid &&
+        (data.flags & _androidFlagSoftKeyboard) != 0;
+  }
+
+  KeyEventResult _handleSearchRawKey(FocusNode node, RawKeyEvent event) {
+    if (_isFromSoftKeyboard(event)) {
+      return KeyEventResult.ignored;
+    }
+    if (event is RawKeyDownEvent) {
+      final key = event.logicalKey;
+      if (key == LogicalKeyboardKey.escape ||
+          key == LogicalKeyboardKey.goBack) {
+        bool moved = FocusScope.of(
+          context,
+        ).focusInDirection(TraversalDirection.down);
+        if (!moved) {
+          node.unfocus();
+        }
+        return KeyEventResult.handled;
+      }
+      if (key == LogicalKeyboardKey.arrowDown) {
+        bool moved = FocusScope.of(
+          context,
+        ).focusInDirection(TraversalDirection.down);
+        if (moved) {
+          return KeyEventResult.handled;
+        }
+      }
+      if (key == LogicalKeyboardKey.arrowRight) {
+        _keywordsFocusNode.requestFocus();
+        return KeyEventResult.handled;
+      }
+    }
+    return KeyEventResult.ignored;
+  }
+
+  KeyEventResult _handleKeywordsKeyEvent(FocusNode node, KeyEvent event) {
+    if (event is KeyDownEvent) {
+      final key = event.logicalKey;
+      if (key == LogicalKeyboardKey.arrowLeft) {
+        _searchFocusNode.requestFocus();
+        searchController.selection = TextSelection.fromPosition(
+          TextPosition(offset: searchController.text.length),
+        );
+        return KeyEventResult.handled;
+      }
+      if (key == LogicalKeyboardKey.arrowRight) {
+        _sortFocusNode.requestFocus();
+        return KeyEventResult.handled;
+      }
+      if (key == LogicalKeyboardKey.arrowDown) {
+        bool moved = FocusScope.of(
+          context,
+        ).focusInDirection(TraversalDirection.down);
+        if (moved) {
+          return KeyEventResult.handled;
+        }
+      }
+    }
+    return KeyEventResult.ignored;
+  }
+
+  KeyEventResult _handleSortKeyEvent(FocusNode node, KeyEvent event) {
+    if (event is KeyDownEvent) {
+      final key = event.logicalKey;
+      if (key == LogicalKeyboardKey.arrowLeft) {
+        _keywordsFocusNode.requestFocus();
+        return KeyEventResult.handled;
+      }
+      if (key == LogicalKeyboardKey.arrowDown) {
+        bool moved = FocusScope.of(
+          context,
+        ).focusInDirection(TraversalDirection.down);
+        if (moved) {
+          return KeyEventResult.handled;
+        }
+      }
+    }
+    return KeyEventResult.ignored;
   }
 
   ViewType getStartingView() {
@@ -229,12 +354,15 @@ class _HomeState extends State<Home> {
                       padding: const EdgeInsets.all(16),
                       child: Center(
                         child: TextField(
+                          focusNode: _searchFocusNode,
                           style: TextStyle(
                             fontSize: Theme.of(
                               context,
                             ).textTheme.titleMedium?.fontSize!,
                           ),
                           controller: searchController,
+                          textInputAction: TextInputAction.search,
+                          onEditingComplete: _focusChannelsBelow,
                           onChanged: (query) {
                             _debounce?.cancel();
                             _debounce = Timer(
@@ -257,17 +385,28 @@ class _HomeState extends State<Home> {
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide.none,
                             ),
-                            suffixIcon: IconButton(
-                              onPressed: () {
-                                widget.home.filters.useKeywords =
-                                    !widget.home.filters.useKeywords;
-                                load(false);
-                              },
-                              icon: Icon(
-                                widget.home.filters.useKeywords
-                                    ? Icons.label
-                                    : Icons.label_outline,
-                              ),
+                            suffixIcon: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  focusNode: _keywordsFocusNode,
+                                  onPressed: () {
+                                    widget.home.filters.useKeywords =
+                                        !widget.home.filters.useKeywords;
+                                    load(false);
+                                  },
+                                  icon: Icon(
+                                    widget.home.filters.useKeywords
+                                        ? Icons.label
+                                        : Icons.label_outline,
+                                  ),
+                                ),
+                                IconButton(
+                                  focusNode: _sortFocusNode,
+                                  onPressed: showSortDialog,
+                                  icon: const Icon(Icons.sort),
+                                ),
+                              ],
                             ),
                             filled: true,
                           ),
@@ -276,7 +415,7 @@ class _HomeState extends State<Home> {
                     ),
                   ),
                   SliverPadding(
-                    padding: EdgeInsets.fromLTRB(10, 5, 10, 10),
+                    padding: const EdgeInsets.fromLTRB(10, 5, 10, 10),
                     sliver: SliverGrid(
                       delegate: SliverChildBuilderDelegate((context, index) {
                         final channel = channels[index];
@@ -284,6 +423,8 @@ class _HomeState extends State<Home> {
                           channel: channel,
                           parentContext: context,
                           setNode: setNode,
+                          autofocus: index == currentlyFocusedChannel,
+                          onSelect: () => currentlyFocusedChannel = index,
                         );
                       }, childCount: channels.length),
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

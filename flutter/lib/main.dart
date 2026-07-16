@@ -70,6 +70,12 @@ class MyApp extends StatelessWidget {
         null;
   }
 
+  bool get _showFocusOutline =>
+      !hasTouchScreen ||
+      Platform.isLinux ||
+      Platform.isWindows ||
+      Platform.isMacOS;
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -78,14 +84,14 @@ class MyApp extends StatelessWidget {
       builder: (context, child) {
         return CallbackShortcuts(
           bindings: {
-            CustomShortcut(
-              const SingleActivator(LogicalKeyboardKey.escape),
+            const CustomShortcut(
+              SingleActivator(LogicalKeyboardKey.escape),
             ): () {
               if (_isEditingText) return;
               navigatorKey.currentState?.maybePop();
             },
-            CustomShortcut(
-              const SingleActivator(LogicalKeyboardKey.backspace),
+            const CustomShortcut(
+              SingleActivator(LogicalKeyboardKey.backspace),
             ): () {
               if (_isEditingText) return;
               navigatorKey.currentState?.maybePop();
@@ -100,12 +106,12 @@ class MyApp extends StatelessWidget {
           seedColor: Colors.blue,
           surface: Colors.black,
           brightness: Brightness.dark,
-          surfaceContainer: Color.fromARGB(255, 29, 36, 41),
+          surfaceContainer: const Color.fromARGB(255, 29, 36, 41),
         ),
         filledButtonTheme: FilledButtonThemeData(
           style: ButtonStyle(
             side: WidgetStateProperty.resolveWith((states) {
-              if (states.contains(WidgetState.focused) && !hasTouchScreen) {
+              if (states.contains(WidgetState.focused) && _showFocusOutline) {
                 return const BorderSide(
                   color: Colors.yellow, // yellow border
                   width: 4,
@@ -115,6 +121,46 @@ class MyApp extends StatelessWidget {
             }),
           ),
         ),
+        textButtonTheme: TextButtonThemeData(
+          style: ButtonStyle(
+            side: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.focused) && _showFocusOutline) {
+                return const BorderSide(
+                  color: Colors.yellow, // yellow border
+                  width: 4,
+                );
+              }
+              return null;
+            }),
+          ),
+        ),
+        iconButtonTheme: IconButtonThemeData(
+          style: ButtonStyle(
+            side: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.focused) && _showFocusOutline) {
+                return const BorderSide(
+                  color: Colors.yellow, // yellow border
+                  width: 4,
+                );
+              }
+              return null;
+            }),
+          ),
+        ),
+        switchTheme: SwitchThemeData(
+          trackOutlineColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.focused) && _showFocusOutline) {
+              return Colors.yellow;
+            }
+            return null;
+          }),
+          trackOutlineWidth: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.focused) && _showFocusOutline) {
+              return 4;
+            }
+            return null;
+          }),
+        ),
         useMaterial3: true,
       ),
       themeMode: ThemeMode.dark,
@@ -123,7 +169,7 @@ class MyApp extends StatelessWidget {
           ? (settings.forceTVMode ||
                     isTV ||
                     (!hasTouchScreen && (Platform.isAndroid || Platform.isIOS))
-                ? TvHome()
+                ? const TvHome()
                 : Home(
                     firstLaunch: true,
                     refresh: settings.refreshOnStart,

@@ -18,12 +18,16 @@ class ChannelTile extends StatefulWidget {
   final BuildContext parentContext;
   final Function(Node node) setNode;
   final VoidCallback? onFocusNavbar;
+  final VoidCallback onSelect;
+  final bool autofocus;
   const ChannelTile({
     super.key,
     required this.channel,
     required this.setNode,
     required this.parentContext,
+    required this.onSelect,
     this.onFocusNavbar,
+    this.autofocus = false,
   });
 
   @override
@@ -41,6 +45,7 @@ class _ChannelTileState extends State<ChannelTile> {
   final _statesController = WidgetStatesController();
   Timer? _longPressTimer;
   bool _longPressTriggered = false;
+  bool _selectKeyDown = false;
   InteractiveInkFeature? _inkFeature;
   BuildContext? _innerContext;
 
@@ -88,6 +93,7 @@ class _ChannelTileState extends State<ChannelTile> {
     if (!_focusNode.hasFocus) {
       _longPressTimer?.cancel();
       _longPressTriggered = false;
+      _selectKeyDown = false;
       _cancelSplash();
       _statesController.update(WidgetState.pressed, false);
     }
@@ -97,9 +103,7 @@ class _ChannelTileState extends State<ChannelTile> {
   KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
     if (event is KeyDownEvent &&
         event.logicalKey == LogicalKeyboardKey.arrowRight) {
-      if (!FocusScope.of(
-        context,
-      ).focusInDirection(TraversalDirection.right)) {
+      if (!FocusScope.of(context).focusInDirection(TraversalDirection.right)) {
         widget.onFocusNavbar?.call();
       }
       return KeyEventResult.handled;
@@ -107,6 +111,7 @@ class _ChannelTileState extends State<ChannelTile> {
 
     if (_selectionKeys.contains(event.logicalKey)) {
       if (event is KeyDownEvent) {
+        _selectKeyDown = true;
         _longPressTimer?.cancel();
         _statesController.update(WidgetState.pressed, true);
         _showSplash();
@@ -117,6 +122,10 @@ class _ChannelTileState extends State<ChannelTile> {
           favorite();
         });
       } else if (event is KeyUpEvent) {
+        if (!_selectKeyDown) {
+          return KeyEventResult.handled;
+        }
+        _selectKeyDown = false;
         _longPressTimer?.cancel();
         _statesController.update(WidgetState.pressed, false);
         _confirmSplash();
@@ -147,6 +156,7 @@ class _ChannelTileState extends State<ChannelTile> {
         widget.channel.id!,
         !widget.channel.favorite,
       );
+      if (!mounted) return;
       setState(() {
         widget.channel.favorite = !widget.channel.favorite;
       });
@@ -194,6 +204,7 @@ class _ChannelTileState extends State<ChannelTile> {
   }
 
   Future<void> play() async {
+    widget.onSelect();
     late final int? seriesId;
     if (widget.channel.mediaType == MediaType.serie) {
       seriesId = await _handleSeries();
@@ -205,7 +216,8 @@ class _ChannelTileState extends State<ChannelTile> {
         widget.channel.mediaType == MediaType.season) {
       widget.setNode(
         Node(
-          id: widget.channel.mediaType == MediaType.group ||
+          id:
+              widget.channel.mediaType == MediaType.group ||
                   widget.channel.mediaType == MediaType.season
               ? widget.channel.id!
               : seriesId!,
@@ -216,7 +228,8 @@ class _ChannelTileState extends State<ChannelTile> {
     } else {
       var settings = await NativeBridge.instance.getSettings();
       NativeBridge.instance.addLastWatched(widget.channel.id!);
-      Navigator.push(
+      if (!mounted) return;
+      await Navigator.push(
         context,
         MaterialPageRoute(
           builder: (_) => Platform.isAndroid
@@ -224,6 +237,7 @@ class _ChannelTileState extends State<ChannelTile> {
               : Player(channel: widget.channel, settings: settings),
         ),
       );
+      if (mounted) _focusNode.requestFocus();
     }
   }
 
@@ -238,6 +252,7 @@ class _ChannelTileState extends State<ChannelTile> {
           _innerContext = innerContext;
           return InkWell(
             focusNode: _focusNode,
+            autofocus: widget.autofocus,
             statesController: _statesController,
             borderRadius: BorderRadius.circular(12),
             onLongPress: favorite,
@@ -288,10 +303,10 @@ class _ChannelTileState extends State<ChannelTile> {
                   ),
                 ),
                 if (widget.channel.favorite)
-                  Padding(
+                  const Padding(
                     padding: EdgeInsets.only(right: 8.0),
                     child: Center(
-                      child: const Icon(Icons.star, size: 25, color: Colors.amber),
+                      child: Icon(Icons.star, size: 25, color: Colors.amber),
                     ),
                   ),
               ],

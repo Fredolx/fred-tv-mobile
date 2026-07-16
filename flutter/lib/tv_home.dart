@@ -36,7 +36,9 @@ class _TvHomeState extends State<TvHome> {
 
   void navSettings() {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => SettingsView(showNavBar: false)),
+      MaterialPageRoute(
+        builder: (context) => const SettingsView(showNavBar: false),
+      ),
     );
   }
 
@@ -128,7 +130,7 @@ class _TvHomeState extends State<TvHome> {
         autofocus: true,
         icon: Icons.tv,
         label: "Channels",
-        color: LinearGradient(
+        color: const LinearGradient(
           colors: [Colors.blueGrey, Colors.blue],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -138,7 +140,7 @@ class _TvHomeState extends State<TvHome> {
       MenuTile(
         icon: Icons.dashboard,
         label: "Categories",
-        color: LinearGradient(
+        color: const LinearGradient(
           colors: [Colors.purple, Colors.deepPurple],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
