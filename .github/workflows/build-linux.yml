@@ -27,11 +27,10 @@ jobs:
 
       - name: Install deps
         run: |
-          apt update
-          apt install curl git unzip xz-utils zip libglu1-mesa
-          apt install cmake ninja-build clang
+          sudo apt-get update
+          sudo apt-get install -y curl git unzip xz-utils zip libglu1-mesa cmake ninja-build clang
           cargo install cargo-cmd
-
+          
       - name: Build
         run: |
           cargo cmd build-linux
