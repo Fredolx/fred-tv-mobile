@@ -83,7 +83,11 @@ class _TvHomeState extends State<TvHome> {
         onTap: () => navigateHome(
           Filters(
             viewType: widget.previousViewType!,
-            mediaTypes: [MediaType.livestream],
+            mediaTypes: [
+              MediaType.livestream,
+              MediaType.movie,
+              MediaType.serie,
+            ],
           ),
         ),
       ),
