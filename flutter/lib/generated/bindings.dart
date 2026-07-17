@@ -1670,14 +1670,18 @@ class RustLibBindings {
   late final _favorite = _favoritePtr
       .asFunction<void Function(int, FfiCallback, Bytes)>();
 
-  void free_message(Bytes bytes) {
-    return _free_message(bytes);
+  void free_message(ffi.Pointer<ffi.Uint8> ptr, int len) {
+    return _free_message(ptr, len);
   }
 
   late final _free_messagePtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(Bytes)>>('free_message');
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Void Function(ffi.Pointer<ffi.Uint8>, ffi.Size)
+        >
+      >('free_message');
   late final _free_message = _free_messagePtr
-      .asFunction<void Function(Bytes)>();
+      .asFunction<void Function(ffi.Pointer<ffi.Uint8>, int)>();
 
   void get_channel_headers(int task_id, FfiCallback callback, Bytes message) {
     return _get_channel_headers(task_id, callback, message);
@@ -2409,8 +2413,13 @@ final class Bytes extends ffi.Struct {
 }
 
 typedef FfiCallbackFunction =
-    ffi.Void Function(ffi.Uint64 task_id, Bytes response);
-typedef DartFfiCallbackFunction = void Function(int task_id, Bytes response);
+    ffi.Void Function(
+      ffi.Uint64 task_id,
+      ffi.Pointer<ffi.Uint8> ptr,
+      ffi.Size len,
+    );
+typedef DartFfiCallbackFunction =
+    void Function(int task_id, ffi.Pointer<ffi.Uint8> ptr, int len);
 typedef FfiCallback = ffi.Pointer<ffi.NativeFunction<FfiCallbackFunction>>;
 
 const int __bool_true_false_are_defined = 1;

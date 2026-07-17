@@ -21,7 +21,7 @@ class NativeBridge {
   final ffi.RustLibBindings _bindings;
   int _nextTaskId = 0;
   final Map<int, Completer<pb.FFIResult>> _pendingRequests = {};
-  late final NativeCallable<Void Function(Uint64, ffi.Bytes)> _globalCallback;
+  late final NativeCallable<Void Function(Uint64, Pointer<Uint8>, Size)> _globalCallback;
 
   static NativeBridge get instance => _instance ??= NativeBridge._internal(
     ffi.RustLibBindings(_openDynamicLibrary()),
@@ -41,18 +41,18 @@ class NativeBridge {
   }
 
   NativeBridge._internal(this._bindings) {
-    _globalCallback = NativeCallable<Void Function(Uint64, ffi.Bytes)>.listener(
-      (int taskId, ffi.Bytes response) {
+    _globalCallback = NativeCallable<Void Function(Uint64, Pointer<Uint8>, Size)>.listener(
+      (int taskId, Pointer<Uint8> ptr, int len) {
         final completer = _pendingRequests.remove(taskId);
         if (completer == null) return;
 
         try {
           final Uint8List copiedBytes;
           try {
-            final u8List = response.ptr.asTypedList(response.len);
+            final u8List = ptr.asTypedList(len);
             copiedBytes = Uint8List.fromList(u8List);
           } finally {
-            _bindings.free_message(response);
+            _bindings.free_message(ptr, len);
           }
           final result = pb.FFIResult.fromBuffer(copiedBytes);
           completer.complete(result);

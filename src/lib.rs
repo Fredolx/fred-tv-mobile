@@ -439,8 +439,11 @@ pub extern "C" fn set_source_enabled(task_id: u64, callback: FfiCallback, messag
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn free_message(bytes: Bytes) {
+pub extern "C" fn free_message(ptr: *mut u8, len: usize) {
     unsafe {
-        bytes.free();
+        if !ptr.is_null() && len > 0 {
+            let fat_ptr = std::ptr::slice_from_raw_parts_mut(ptr, len);
+            let _ = Box::from_raw(fat_ptr);
+        }
     }
 }
