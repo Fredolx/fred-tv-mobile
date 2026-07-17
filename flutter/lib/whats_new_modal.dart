@@ -61,7 +61,7 @@ This minor version:
 
 - Fix nav bug on android tv that displayed bottom mobile controls
 - Fix player going to sleep
-
+- Fix bug where the setup view could be popped while loading
 
 If you like Fred TV, please consider donating (Even a dollar helps tremendously), reporting issues on the github and sharing it with your friends.
 '''),
