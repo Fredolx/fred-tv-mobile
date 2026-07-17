@@ -45,6 +45,8 @@ class WhatsNewModal extends StatelessWidget {
             child: Text('''
 Hi! Thanks for supporting Fred TV. Here's everything new:
 
+This major version:
+
 - Completely replaced the backend to use the Rust backend from the Desktop version
 - Super robust and smooth native playback on Android using ExoPlayer
 - Android TV Support 
@@ -54,7 +56,12 @@ Hi! Thanks for supporting Fred TV. Here's everything new:
 - Fixed all xtream and m3u parsing issues (hopefully)
 - Sorting added
 - Sorting default options added to Settings
-- I had to wipe your playlists, sorry! Welcome to 2.0.0
+
+This minor version: 
+
+- Fix nav bug on android tv that displayed bottom mobile controls
+- Fix player going to sleep
+
 
 If you like Fred TV, please consider donating (Even a dollar helps tremendously), reporting issues on the github and sharing it with your friends.
 '''),
