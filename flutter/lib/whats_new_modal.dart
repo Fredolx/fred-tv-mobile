@@ -47,7 +47,6 @@ Hi! Thanks for supporting Fred TV. Here's everything new:
 
 This major version:
 
-- Completely replaced the backend to use the Rust backend from the Desktop version
 - Super robust and smooth native playback on Android using ExoPlayer
 - Android TV Support 
 - Easy-to-use redesigned Home for TV
@@ -55,13 +54,14 @@ This major version:
 - Speed and performance optimizations, the app is at least 50% faster!
 - Fixed all xtream and m3u parsing issues (hopefully)
 - Sorting added
-- Sorting default options added to Settings
+- Fixed a bug where the mobile nav would appear in the TV nav
+- Fixed android player going to sleep
+- Fixed bug where setup could be popped while it was loading a source
 
 This minor version: 
 
-- Fix nav bug on android tv that displayed bottom mobile controls
-- Fix player going to sleep
-- Fix bug where the setup view could be popped while loading
+- Fixed TV home not being displayed after setup on Android TV
+- Fixed 'All' on TV home not actually showing ALL media types
 
 If you like Fred TV, please consider donating (Even a dollar helps tremendously), reporting issues on the github and sharing it with your friends.
 '''),
