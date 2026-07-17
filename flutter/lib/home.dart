@@ -282,6 +282,7 @@ class _HomeState extends State<Home> {
     Navigator.of(context).pushAndRemoveUntil(
       NoPushAnimationMaterialPageRoute(
         builder: (context) => Home(
+          tvMode: widget.tvMode,
           home: HomeManager(
             filters: Filters(
               viewType: type,
