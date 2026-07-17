@@ -60,7 +60,7 @@ modules:
       - /share
     sources:
       - type: archive
-        url: https://www.freedesktop.org/software/uchardet/releases/uchardet-0.0.8.tar.xz
+        url: https://deb.debian.org/debian/pool/main/u/uchardet/uchardet_0.0.8.orig.tar.xz
         sha256: e97a60cfc00a1c147a674b097bb1422abd9fa78a2d9ce3f3fdcc2e78a34ac5f0
 
   - name: libplacebo
@@ -70,7 +70,7 @@ modules:
       - -Dshaderc=enabled
     sources:
       - type: git
-        url: https://code.videolan.org/videolan/libplacebo.git
+        url: https://github.com/haasn/libplacebo.git
         tag: v7.351.0
         commit: 3188549fba13bbdf3a5a98de2a38c2e71f04e21e
       - type: patch
