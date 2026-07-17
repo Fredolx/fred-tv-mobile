@@ -1,0 +1,36 @@
+name: build-windows
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Build Rust DLL
+        run: |
+          cargo install cargo-cmd
+          cargo cmd build-windows
+
+      - name: Build Flutter Windows
+        working-directory: flutter
+        run: |
+          flutter pub get
+          flutter build windows --release
+
+      - name: Upload bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fred-tv-windows
+          path: flutter/build/windows/x64/runner/Release/
+          if-no-files-found: error
