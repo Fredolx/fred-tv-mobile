@@ -1,18 +1,8 @@
 name: Flatpak
 
-# Builds a single-file .flatpak bundle from the offline manifest and uploads it
-# as a workflow artifact. The manifest and its vendored sources under
-# flatpak/generated/ are produced by flatpak-flutter (see flatpak/README.md);
-# this workflow does NOT regenerate them, it only builds what is committed.
-
 on:
   push:
     branches: [main]
-    tags: ["v*"]
-  pull_request:
-    paths:
-      - flatpak/**
-      - .github/workflows/flatpak.yml
   workflow_dispatch:
 
 jobs:
