@@ -85,6 +85,7 @@ class ExoPlayerView(
             .build()
         root = LayoutInflater.from(context)
             .inflate(R.layout.exo_player_container, null) as FrameLayout
+        root.keepScreenOn = true
         playerView = root.findViewById(R.id.player_view)
         if (debug) player.addAnalyticsListener(EventLogger(DIAG_TAG))
         attachPlayer()
