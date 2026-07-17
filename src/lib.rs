@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::c::{Bytes, FfiCallback};
+use crate::c::FfiCallback;
 use crate::generated_proto::ToggleFavorite;
 use anyhow::Ok;
 
@@ -152,11 +152,12 @@ impl From<crate::types::ChannelHttpHeaders> for crate::generated_proto::ChannelH
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn initialize(task_id: u64, callback: FfiCallback, message: Bytes) {
+pub extern "C" fn initialize(task_id: u64, callback: FfiCallback, ptr: *const u8, len: usize) {
     c::queue_blocking_with_message(
         task_id,
         callback,
-        message,
+        ptr,
+        len,
         |init_msg: generated_proto::InitMessage| {
             sql::DB_PATH_OVERRIDE
                 .set(init_msg.db_path)
@@ -171,11 +172,12 @@ pub extern "C" fn initialize(task_id: u64, callback: FfiCallback, message: Bytes
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn process_source(task_id: u64, callback: FfiCallback, message: Bytes) {
+pub extern "C" fn process_source(task_id: u64, callback: FfiCallback, ptr: *const u8, len: usize) {
     c::queue_async_with_message(
         task_id,
         callback,
-        message,
+        ptr,
+        len,
         |source: crate::generated_proto::Source| async move {
             utils::process_source(crate::types::Source::from(source)).await
         },
@@ -183,11 +185,12 @@ pub extern "C" fn process_source(task_id: u64, callback: FfiCallback, message: B
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn refresh_source(task_id: u64, callback: FfiCallback, message: Bytes) {
+pub extern "C" fn refresh_source(task_id: u64, callback: FfiCallback, ptr: *const u8, len: usize) {
     c::queue_async_with_message(
         task_id,
         callback,
-        message,
+        ptr,
+        len,
         |source: crate::generated_proto::Source| async move {
             utils::refresh_source(crate::types::Source::from(source)).await
         },
@@ -195,18 +198,19 @@ pub extern "C" fn refresh_source(task_id: u64, callback: FfiCallback, message: B
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn delete_source(task_id: u64, callback: FfiCallback, message: Bytes) {
-    c::queue_blocking_with_message(task_id, callback, message, |source_id| {
+pub extern "C" fn delete_source(task_id: u64, callback: FfiCallback, ptr: *const u8, len: usize) {
+    c::queue_blocking_with_message(task_id, callback, ptr, len, |source_id| {
         sql::delete_source(source_id)
     });
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn get_channels(task_id: u64, callback: FfiCallback, message: Bytes) {
+pub extern "C" fn get_channels(task_id: u64, callback: FfiCallback, ptr: *const u8, len: usize) {
     c::queue_blocking_with_message(
         task_id,
         callback,
-        message,
+        ptr,
+        len,
         |filters: crate::generated_proto::Filters| {
             Ok(generated_proto::ffi_result::Data::ChannelList(
                 crate::generated_proto::ChannelList::from(sql::search(
@@ -218,11 +222,12 @@ pub extern "C" fn get_channels(task_id: u64, callback: FfiCallback, message: Byt
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn favorite(task_id: u64, callback: FfiCallback, message: Bytes) {
+pub extern "C" fn favorite(task_id: u64, callback: FfiCallback, ptr: *const u8, len: usize) {
     c::queue_blocking_with_message(
         task_id,
         callback,
-        message,
+        ptr,
+        len,
         |favorite_msg: ToggleFavorite| {
             sql::favorite_channel(favorite_msg.channel_id, favorite_msg.favorite)
         },
@@ -239,11 +244,12 @@ pub extern "C" fn get_settings(task_id: u64, callback: FfiCallback) {
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn update_settings(task_id: u64, callback: FfiCallback, message: Bytes) {
+pub extern "C" fn update_settings(task_id: u64, callback: FfiCallback, ptr: *const u8, len: usize) {
     c::queue_blocking_with_message(
         task_id,
         callback,
-        message,
+        ptr,
+        len,
         |settings: generated_proto::Settings| {
             settings::update_settings(crate::types::Settings::from(settings))
         },
@@ -251,21 +257,23 @@ pub extern "C" fn update_settings(task_id: u64, callback: FfiCallback, message: 
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn add_last_watched(task_id: u64, callback: FfiCallback, message: Bytes) {
+pub extern "C" fn add_last_watched(task_id: u64, callback: FfiCallback, ptr: *const u8, len: usize) {
     c::queue_blocking_with_message(
         task_id,
         callback,
-        message,
+        ptr,
+        len,
         |id: crate::generated_proto::IdMessage| sql::add_last_watched(id.value),
     );
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn set_movie_position(task_id: u64, callback: FfiCallback, message: Bytes) {
+pub extern "C" fn set_movie_position(task_id: u64, callback: FfiCallback, ptr: *const u8, len: usize) {
     c::queue_blocking_with_message(
         task_id,
         callback,
-        message,
+        ptr,
+        len,
         |position: generated_proto::MoviePosition| {
             sql::set_movie_position(position.channel_id, position.position)
         },
@@ -273,11 +281,12 @@ pub extern "C" fn set_movie_position(task_id: u64, callback: FfiCallback, messag
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn get_movie_position(task_id: u64, callback: FfiCallback, message: Bytes) {
+pub extern "C" fn get_movie_position(task_id: u64, callback: FfiCallback, ptr: *const u8, len: usize) {
     c::queue_blocking_with_message(
         task_id,
         callback,
-        message,
+        ptr,
+        len,
         |id_message: generated_proto::IdMessage| {
             Ok(generated_proto::ffi_result::Data::MoviePosition(
                 generated_proto::GetMoviePosition {
@@ -294,11 +303,12 @@ pub extern "C" fn clear_history(task_id: u64, callback: FfiCallback) {
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn source_name_exists(task_id: u64, callback: FfiCallback, message: Bytes) {
+pub extern "C" fn source_name_exists(task_id: u64, callback: FfiCallback, ptr: *const u8, len: usize) {
     c::queue_blocking_with_message(
         task_id,
         callback,
-        message,
+        ptr,
+        len,
         |str_message: generated_proto::StrMessage| {
             Ok(crate::generated_proto::ffi_result::Data::BoolMessage(
                 crate::generated_proto::BoolMessage {
@@ -310,11 +320,12 @@ pub extern "C" fn source_name_exists(task_id: u64, callback: FfiCallback, messag
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn get_episodes(task_id: u64, callback: FfiCallback, message: Bytes) {
+pub extern "C" fn get_episodes(task_id: u64, callback: FfiCallback, ptr: *const u8, len: usize) {
     c::queue_async_with_message(
         task_id,
         callback,
-        message,
+        ptr,
+        len,
         async move |get_episodes_msg: crate::generated_proto::GetEpisodes| {
             xtream::get_episodes(
                 get_episodes_msg.series_id,
@@ -327,11 +338,12 @@ pub extern "C" fn get_episodes(task_id: u64, callback: FfiCallback, message: Byt
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn should_show_whats_new(task_id: u64, callback: FfiCallback, message: Bytes) {
+pub extern "C" fn should_show_whats_new(task_id: u64, callback: FfiCallback, ptr: *const u8, len: usize) {
     c::queue_blocking_with_message(
         task_id,
         callback,
-        message,
+        ptr,
+        len,
         |opt_str_message: generated_proto::OptStrMessage| {
             Ok(generated_proto::ffi_result::Data::BoolMessage(
                 crate::generated_proto::BoolMessage {
@@ -343,11 +355,12 @@ pub extern "C" fn should_show_whats_new(task_id: u64, callback: FfiCallback, mes
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn update_last_seen_version(task_id: u64, callback: FfiCallback, message: Bytes) {
+pub extern "C" fn update_last_seen_version(task_id: u64, callback: FfiCallback, ptr: *const u8, len: usize) {
     c::queue_blocking_with_message(
         task_id,
         callback,
-        message,
+        ptr,
+        len,
         |str_msg: crate::generated_proto::StrMessage| {
             let mut map: HashMap<String, Option<String>> = HashMap::new();
             map.insert(sql::LAST_SEEN_VERSION_KEY.to_string(), Some(str_msg.value));
@@ -362,11 +375,12 @@ pub extern "C" fn refresh_all(task_id: u64, callback: FfiCallback) {
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn get_channel_headers(task_id: u64, callback: FfiCallback, message: Bytes) {
+pub extern "C" fn get_channel_headers(task_id: u64, callback: FfiCallback, ptr: *const u8, len: usize) {
     c::queue_blocking_with_message(
         task_id,
         callback,
-        message,
+        ptr,
+        len,
         |id: crate::generated_proto::IdMessage| {
             let headers = sql::get_channel_headers_by_id(id.value)?;
             Ok(headers.map(|f| {
@@ -379,11 +393,12 @@ pub extern "C" fn get_channel_headers(task_id: u64, callback: FfiCallback, messa
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn update_source(task_id: u64, callback: FfiCallback, message: Bytes) {
+pub extern "C" fn update_source(task_id: u64, callback: FfiCallback, ptr: *const u8, len: usize) {
     c::queue_blocking_with_message(
         task_id,
         callback,
-        message,
+        ptr,
+        len,
         |source_msg: crate::generated_proto::Source| {
             sql::update_source(crate::types::Source::from(source_msg))
         },
@@ -424,11 +439,12 @@ pub extern "C" fn get_sources(task_id: u64, callback: FfiCallback) {
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn set_source_enabled(task_id: u64, callback: FfiCallback, message: Bytes) {
+pub extern "C" fn set_source_enabled(task_id: u64, callback: FfiCallback, ptr: *const u8, len: usize) {
     c::queue_blocking_with_message(
         task_id,
         callback,
-        message,
+        ptr,
+        len,
         |set_source_enabled_msg: crate::generated_proto::SetSourceEnabled| {
             sql::set_source_enabled(
                 set_source_enabled_msg.enabled,
