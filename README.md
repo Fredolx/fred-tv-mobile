@@ -11,5 +11,6 @@ Fred TV for Android and iOS
 
 # Please consider donating on [Github](https://github.com/sponsors/Fredolx), [Patreon](https://www.patreon.com/fredol), [Paypal](https://paypal.me/fredolx) or directly by [crypto](#crypto)
 
-![Screenshot 2025-07-07 at 7 36 14 AM](https://github.com/user-attachments/assets/baf0c53b-a33a-4bb7-bf48-24b8dd20fb20)
+<img width="1272" height="714" alt="image" src="https://github.com/user-attachments/assets/34a7aef2-af67-4a84-98c7-bd7aa1859546" />
+
 
