@@ -80,6 +80,11 @@ class MyApp extends StatelessWidget {
       Platform.isWindows ||
       Platform.isMacOS;
 
+  bool get _isTvMode =>
+      settings.forceTVMode ||
+      isTV ||
+      (!hasTouchScreen && (Platform.isAndroid || Platform.isIOS));
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -170,9 +175,7 @@ class MyApp extends StatelessWidget {
       themeMode: ThemeMode.dark,
       debugShowCheckedModeBanner: false,
       home: skipSetup
-          ? (settings.forceTVMode ||
-                    isTV ||
-                    (!hasTouchScreen && (Platform.isAndroid || Platform.isIOS))
+          ? (_isTvMode
                 ? const TvHome()
                 : Home(
                     firstLaunch: true,
@@ -181,7 +184,7 @@ class MyApp extends StatelessWidget {
                       filters: Filters(viewType: settings.defaultView),
                     ),
                   ))
-          : const Setup(),
+          : Setup(tvMode: _isTvMode),
     );
   }
 }

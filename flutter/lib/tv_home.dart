@@ -32,7 +32,7 @@ class _TvHomeState extends State<TvHome> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) =>
-            Home(home: HomeManager(filters: filters), hasTouchScreen: false),
+            Home(home: HomeManager(filters: filters), tvMode: true),
       ),
     );
   }
@@ -48,7 +48,7 @@ class _TvHomeState extends State<TvHome> {
   void navSettings() {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => const SettingsView(showNavBar: false),
+        builder: (context) => const SettingsView(tvMode: true),
       ),
     );
   }
