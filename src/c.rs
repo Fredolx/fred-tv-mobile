@@ -7,30 +7,6 @@ use crate::generated_proto::{self, FfiResult};
 
 use anyhow::Result;
 
-#[repr(C)]
-pub struct Bytes {
-    pub ptr: *mut u8,
-    pub len: usize,
-}
-
-impl From<Vec<u8>> for Bytes {
-    fn from(vec: Vec<u8>) -> Self {
-        let boxed = vec.into_boxed_slice();
-        let len = boxed.len();
-        let ptr = Box::into_raw(boxed) as *mut u8;
-        Bytes { ptr, len }
-    }
-}
-
-impl Bytes {
-    pub unsafe fn free(self) {
-        if !self.ptr.is_null() && self.len > 0 {
-            let fat_ptr = std::ptr::slice_from_raw_parts_mut(self.ptr, self.len);
-            let _ = unsafe { Box::from_raw(fat_ptr) };
-        }
-    }
-}
-
 pub trait ResultFfiExt {
     fn into_ffi(self) -> FfiResult;
 }
@@ -93,7 +69,7 @@ where
     }
 }
 
-pub type FfiCallback = extern "C" fn(task_id: u64, response: Bytes);
+pub type FfiCallback = extern "C" fn(task_id: u64, ptr: *mut u8, len: usize);
 
 pub fn queue_blocking<R>(
     task_id: u64,
@@ -120,14 +96,15 @@ where
 pub fn queue_async_with_message<M, Fut, R>(
     task_id: u64,
     callback: FfiCallback,
-    message: Bytes,
+    ptr: *const u8,
+    len: usize,
     f: impl FnOnce(M) -> Fut + Send + 'static,
 ) where
     M: prost::Message + Default + 'static,
     Fut: Future<Output = R> + Send + 'static,
     R: ResultFfiExt,
 {
-    let decoded = decode(message).and_then(|bytes| {
+    let decoded = decode(ptr, len).and_then(|bytes| {
         M::decode(bytes.as_slice()).map_err(|e| anyhow::anyhow!("Failed to parse protobuf: {e}"))
     });
 
@@ -142,13 +119,14 @@ pub fn queue_async_with_message<M, Fut, R>(
 pub fn queue_blocking_with_message<M, R>(
     task_id: u64,
     callback: FfiCallback,
-    message: Bytes,
+    ptr: *const u8,
+    len: usize,
     f: impl FnOnce(M) -> R + Send + 'static,
 ) where
     M: prost::Message + Default + 'static,
     R: ResultFfiExt,
 {
-    let decoded = decode(message).and_then(|bytes| {
+    let decoded = decode(ptr, len).and_then(|bytes| {
         M::decode(bytes.as_slice()).map_err(|e| anyhow::anyhow!("Failed to parse protobuf: {e}"))
     });
 
@@ -159,17 +137,21 @@ pub fn queue_blocking_with_message<M, R>(
 }
 
 fn send_to_callback(task_id: u64, callback: FfiCallback, msg: FfiResult) {
-    callback(task_id, Bytes::from(msg.encode_to_vec()));
+    let encoded = msg.encode_to_vec();
+    let boxed = encoded.into_boxed_slice();
+    let len = boxed.len();
+    let ptr = Box::into_raw(boxed) as *mut u8;
+    callback(task_id, ptr, len);
 }
 
-pub fn decode(bytes: Bytes) -> Result<Vec<u8>> {
-    if bytes.ptr.is_null() {
+pub fn decode(ptr: *const u8, len: usize) -> Result<Vec<u8>> {
+    if ptr.is_null() {
         return Err(anyhow::anyhow!("Failed to decode, ptr is null"));
     }
-    if bytes.len == 0 {
+    if len == 0 {
         return Err(anyhow::anyhow!("Failed to decode, no data was sent"));
     }
-    let raw_slice = unsafe { std::slice::from_raw_parts(bytes.ptr, bytes.len) };
+    let raw_slice = unsafe { std::slice::from_raw_parts(ptr, len) };
     Ok(raw_slice.to_vec())
 }
 

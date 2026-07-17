@@ -15,9 +15,13 @@ import 'package:open_tv/native_bridge.dart' as nb;
 import 'package:open_tv/setup.dart';
 import 'package:open_tv/tv_home.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:media_kit/media_kit.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  if (!Platform.isAndroid) {
+    MediaKit.ensureInitialized();
+  }
   final appDir = await getApplicationSupportDirectory();
   final tempDir = await getApplicationCacheDirectory();
   try {

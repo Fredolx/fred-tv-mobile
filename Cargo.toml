@@ -51,6 +51,7 @@ reqwest = { version = "0.13", default-features = false, features = [
 # cargo install cargo-cmd
 [package.metadata.commands]
 build-linux = "cargo build --release && mkdir -p flutter/linux/libs && cp target/release/libfred_tv_lib.so flutter/linux/libs/"
+build-windows = "cargo build --release && (if not exist flutter\\windows\\libs mkdir flutter\\windows\\libs) && copy /y target\\release\\fred_tv_lib.dll flutter\\windows\\libs\\"
 build-android = "ANDROID_NDK_HOME=$HOME/Android/Sdk/ndk/29.0.14206865 cargo ndk -t arm64-v8a -t armeabi-v7a -t x86_64 --platform 24 -o flutter/android/app/src/main/jniLibs build --release"
 build-android-debug = "ANDROID_NDK_HOME=$HOME/Android/Sdk/ndk/29.0.14206865 cargo ndk -t arm64-v8a -t armeabi-v7a -t x86_64 --platform 24 -o flutter/android/app/src/main/jniLibs build"
 # install cbindgen, cargo install cbindgen
