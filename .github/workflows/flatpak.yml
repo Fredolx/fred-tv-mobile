@@ -35,10 +35,3 @@ jobs:
           manifest-path: flatpak/dev.fredol.fred-tv-next.yml
           cache-key: flatpak-builder-${{ github.sha }}
           arch: x86_64
-
-      - name: Upload bundle artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: fred-tv-next-flatpak
-          path: fred-tv-next.flatpak
-          if-no-files-found: error
