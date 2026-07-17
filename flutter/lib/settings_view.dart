@@ -55,6 +55,7 @@ class _SettingsState extends State<SettingsView> {
         context,
         PageRouteBuilder(
           pageBuilder: (_, __, ___) => Home(
+            tvMode: widget.tvMode,
             home: HomeManager(filters: Filters(viewType: view)),
           ),
           transitionDuration: Duration.zero,
