@@ -29,6 +29,7 @@ class _SetupState extends State<Setup> {
   SourceType selectedSourceType = SourceType.xtream;
   bool isForward = true;
   bool formValid = false;
+  bool loading = false;
   final Map<Steps, FocusNode> focusNodes = {
     Steps.name: FocusNode(),
     Steps.url: FocusNode(),
@@ -104,6 +105,7 @@ class _SetupState extends State<Setup> {
   }
 
   Future<void> finish() async {
+    loading = true;
     var result = await Error.tryAsync(
       () async {
         await NativeBridge.instance.processSource(
@@ -127,6 +129,7 @@ class _SetupState extends State<Setup> {
       true,
       false,
     );
+    loading = false;
     if (!result.success) {
       return;
     }
@@ -185,6 +188,7 @@ class _SetupState extends State<Setup> {
   }
 
   void prevStep() {
+    if (loading) return;
     isForward = false;
     if (formPages.contains(step)) {
       formValues[step] =
@@ -205,6 +209,7 @@ class _SetupState extends State<Setup> {
   }
 
   Future<void> handleNext() async {
+    if (loading) return;
     isForward = true;
     if (formPages.contains(step)) {
       formValues[step] =
@@ -259,6 +264,7 @@ class _SetupState extends State<Setup> {
     return PopScope(
       canPop: step == Steps.welcome,
       onPopInvokedWithResult: (didPop, result) {
+        if (step == Steps.finish || loading) return;
         if (!didPop) prevStep();
       },
       child: Scaffold(
