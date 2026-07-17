@@ -9,7 +9,6 @@ import 'package:open_tv/home.dart';
 import 'package:open_tv/loading.dart';
 import 'package:open_tv/models/home_manager.dart';
 import 'package:open_tv/models/id_data.dart';
-import 'package:open_tv/models/device_detector.dart';
 import 'package:open_tv/models/settings.dart';
 import 'package:open_tv/models/source.dart';
 import 'package:open_tv/models/source_type.dart';
@@ -20,9 +19,9 @@ import 'package:open_tv/setup.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SettingsView extends StatefulWidget {
-  final bool showNavBar;
+  final bool tvMode;
 
-  const SettingsView({super.key, this.showNavBar = true});
+  const SettingsView({super.key, this.tvMode = false});
 
   @override
   State<SettingsView> createState() => _SettingsState();
@@ -32,7 +31,6 @@ class _SettingsState extends State<SettingsView> {
   Settings settings = Settings();
   List<Source> sources = [];
   bool loading = true;
-  bool isTv = false;
   @override
   void initState() {
     super.initState();
@@ -40,7 +38,6 @@ class _SettingsState extends State<SettingsView> {
   }
 
   Future<void> initAsync() async {
-    final isTvResult = await DeviceDetector.isTV();
     var results = await Future.wait([
       NativeBridge.instance.getSettings(),
       NativeBridge.instance.getSources(),
@@ -48,7 +45,6 @@ class _SettingsState extends State<SettingsView> {
     setState(() {
       settings = results[0] as Settings;
       sources = results[1] as List<Source>;
-      isTv = isTvResult;
       loading = false;
     });
   }
@@ -180,7 +176,8 @@ class _SettingsState extends State<SettingsView> {
               ),
             ),
             Offstage(
-              offstage: source.sourceType == SourceType.m3u || isTv,
+              offstage:
+                  source.sourceType == SourceType.m3u || widget.tvMode,
               child: IconButton(
                 icon: const Icon(Icons.edit),
                 onPressed: () async => await showEditDialog(context, source),
@@ -214,7 +211,9 @@ class _SettingsState extends State<SettingsView> {
           if (sources.isEmpty) {
             Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (context) => const Setup()),
+              MaterialPageRoute(
+                builder: (context) => Setup(tvMode: widget.tvMode),
+              ),
               (route) => false,
             );
           }
@@ -416,8 +415,10 @@ class _SettingsState extends State<SettingsView> {
                             onPressed: () => Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) =>
-                                    const Setup(showAppBar: true),
+                                builder: (context) => Setup(
+                                  showAppBar: true,
+                                  tvMode: widget.tvMode,
+                                ),
                               ),
                             ),
                             icon: const Icon(Icons.add),
@@ -434,10 +435,11 @@ class _SettingsState extends State<SettingsView> {
           ),
         ),
       ),
-      bottomNavigationBar: widget.showNavBar
+      bottomNavigationBar: !widget.tvMode
           ? BottomNav(
               updateViewMode: updateView,
               startingView: ViewType.settings,
+              tvMode: widget.tvMode,
             )
           : null,
     );

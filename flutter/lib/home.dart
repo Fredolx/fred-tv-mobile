@@ -23,13 +23,13 @@ class Home extends StatefulWidget {
   final HomeManager home;
   final bool refresh;
   final bool firstLaunch;
-  final bool hasTouchScreen;
+  final bool tvMode;
   const Home({
     super.key,
     required this.home,
     this.refresh = false,
     this.firstLaunch = false,
-    this.hasTouchScreen = true,
+    this.tvMode = false,
   });
   @override
   State<Home> createState() => _HomeState();
@@ -317,7 +317,7 @@ class _HomeState extends State<Home> {
     Navigator.of(context).push(
       NoPushAnimationMaterialPageRoute(
         builder: (context) =>
-            Home(home: home, hasTouchScreen: widget.hasTouchScreen),
+            Home(home: home, tvMode: widget.tvMode),
       ),
     );
   }
@@ -328,8 +328,8 @@ class _HomeState extends State<Home> {
       appBar: widget.home.node != null
           ? AppBar(
               title: Text(widget.home.node.toString()),
-              automaticallyImplyLeading: widget.hasTouchScreen,
-              leading: widget.hasTouchScreen
+              automaticallyImplyLeading: !widget.tvMode,
+              leading: !widget.tvMode
                   ? IconButton(
                       icon: const Icon(Icons.arrow_back),
                       onPressed: () => Navigator.of(context).pop(),
@@ -438,14 +438,15 @@ class _HomeState extends State<Home> {
           ),
         ),
       ),
-      bottomNavigationBar: widget.hasTouchScreen
+      bottomNavigationBar: !widget.tvMode
           ? BottomNav(
               startingView: getStartingView(),
               blockSettings: blockSettings,
               updateViewMode: updateViewMode,
+              tvMode: widget.tvMode,
             )
           : null,
-      floatingActionButton: widget.hasTouchScreen
+      floatingActionButton: !widget.tvMode
           ? IgnorePointer(
               ignoring: !scrolledDeepEnough,
               child: AnimatedOpacity(

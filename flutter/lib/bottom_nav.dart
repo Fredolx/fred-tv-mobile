@@ -6,11 +6,13 @@ class BottomNav extends StatefulWidget {
   final Function(ViewType) updateViewMode;
   final ViewType startingView;
   final bool blockSettings;
+  final bool tvMode;
   const BottomNav({
     super.key,
     required this.updateViewMode,
     this.startingView = ViewType.all,
     this.blockSettings = false,
+    this.tvMode = false,
   });
 
   @override
@@ -49,7 +51,8 @@ class _BottomNavState extends State<BottomNav> {
       Navigator.pushAndRemoveUntil(
         context,
         PageRouteBuilder(
-          pageBuilder: (_, __, ___) => const SettingsView(),
+          pageBuilder: (_, __, ___) =>
+              SettingsView(tvMode: widget.tvMode),
           transitionDuration: Duration.zero,
           reverseTransitionDuration: Duration.zero,
           transitionsBuilder: (context, animation, secondaryAnimation, child) =>

@@ -15,10 +15,12 @@ import 'package:open_tv/models/steps.dart';
 import 'package:open_tv/models/view_type.dart';
 import 'package:open_tv/error.dart';
 import 'package:open_tv/native_bridge.dart';
+import 'package:open_tv/tv_home.dart';
 
 class Setup extends StatefulWidget {
   final bool showAppBar;
-  const Setup({super.key, this.showAppBar = false});
+  final bool tvMode;
+  const Setup({super.key, this.showAppBar = false, this.tvMode = false});
 
   @override
   State<Setup> createState() => _SetupState();
@@ -251,9 +253,9 @@ class _SetupState extends State<Setup> {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(
-        builder: (_) => Home(
-          home: HomeManager(filters: Filters(viewType: ViewType.all)),
-        ),
+        builder: (_) => widget.tvMode
+            ? const TvHome()
+            : Home(home: HomeManager(filters: Filters(viewType: ViewType.all))),
       ),
       (route) => false,
     );
