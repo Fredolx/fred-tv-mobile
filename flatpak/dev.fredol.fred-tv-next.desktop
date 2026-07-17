@@ -2,11 +2,11 @@
 Type=Application
 Name=Fred TV Next
 GenericName=IPTV Player
-Comment=Watch IPTV, Xtream and M3U playlists
+Comment=The Next Version of Fred TV. Simple and Fast IPTV Player.
 Exec=open_tv
 Icon=dev.fredol.fred-tv-next
 Terminal=false
 Categories=AudioVideo;Video;Player;TV;
-Keywords=IPTV;M3U;Xtream;TV;Streaming;
+Keywords=IPTV;M3U;Xtream;TV;Streaming;open;tv;opentv
 StartupWMClass=dev.fredol.open_tv
 StartupNotify=true
