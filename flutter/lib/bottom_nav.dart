@@ -39,6 +39,7 @@ class _BottomNavState extends State<BottomNav> {
     if (widget.blockSettings && index == ViewType.settings.index) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
+          persist: false,
           content: Text("Settings disabled while refreshing on start"),
         ),
       );
@@ -51,8 +52,7 @@ class _BottomNavState extends State<BottomNav> {
       Navigator.pushAndRemoveUntil(
         context,
         PageRouteBuilder(
-          pageBuilder: (_, __, ___) =>
-              SettingsView(tvMode: widget.tvMode),
+          pageBuilder: (_, __, ___) => SettingsView(tvMode: widget.tvMode),
           transitionDuration: Duration.zero,
           reverseTransitionDuration: Duration.zero,
           transitionsBuilder: (context, animation, secondaryAnimation, child) =>

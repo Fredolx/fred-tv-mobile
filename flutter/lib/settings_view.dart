@@ -137,6 +137,7 @@ class _SettingsState extends State<SettingsView> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
+        persist: false,
         content: Text("Source ${!source.enabled ? "enabled" : "disabled"}"),
         duration: const Duration(milliseconds: 500),
       ),
@@ -177,8 +178,7 @@ class _SettingsState extends State<SettingsView> {
               ),
             ),
             Offstage(
-              offstage:
-                  source.sourceType == SourceType.m3u || widget.tvMode,
+              offstage: source.sourceType == SourceType.m3u || widget.tvMode,
               child: IconButton(
                 icon: const Icon(Icons.edit),
                 onPressed: () async => await showEditDialog(context, source),
