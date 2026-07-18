@@ -63,7 +63,7 @@ extension FiltersDomainExtension on Filters {
     season: seasonId != null ? Int64(seasonId!) : null,
     groupId: groupId != null ? Int64(groupId!) : null,
     useKeywords: useKeywords,
-    sort: sort.index,
+    sort: sort?.index ?? SortType.provider.index,
   );
 }
 

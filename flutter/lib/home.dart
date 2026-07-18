@@ -66,19 +66,23 @@ class _HomeState extends State<Home> {
       final sources = await NativeBridge.instance.getEnabledSourcesMinimal();
       widget.home.filters.sourceIds = sources;
     }
-    if (widget.home.filters.mediaTypes == null) {
+    if (widget.home.filters.mediaTypes == null ||
+        widget.home.filters.sort == null) {
       final settings = await NativeBridge.instance.getSettings();
-      widget.home.filters.mediaTypes = settings.getMediaTypes();
-      widget.home.filters.sort = settings.defaultSort;
+      widget.home.filters.mediaTypes ??= settings.getMediaTypes();
+      widget.home.filters.sort ??= settings.defaultSort;
     }
+
     await load();
     if (!mounted) return;
     if (widget.firstLaunch) {
-      await Utils.maybeShowWhatsNew(context);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Utils.maybeShowWhatsNew(context);
+      });
     }
     if (!mounted) return;
     if (widget.refresh) {
-      Error.tryAsyncNoLoading(
+      await Error.tryAsyncNoLoading(
         () async {
           setState(() {
             blockSettings = true;
@@ -89,6 +93,7 @@ class _HomeState extends State<Home> {
         true,
         "Refreshed all sources",
       );
+      if (!mounted) return;
       setState(() {
         blockSettings = false;
       });
@@ -288,6 +293,7 @@ class _HomeState extends State<Home> {
               viewType: type,
               mediaTypes: widget.home.filters.mediaTypes,
               sourceIds: widget.home.filters.sourceIds,
+              sort: widget.home.filters.sort,
             ),
           ),
         ),
@@ -303,6 +309,7 @@ class _HomeState extends State<Home> {
         viewType: ViewType.all,
         mediaTypes: widget.home.filters.mediaTypes,
         sourceIds: widget.home.filters.sourceIds,
+        sort: widget.home.filters.sort,
       ),
     );
     if (widget.home.filters.groupId != null) {
@@ -317,8 +324,7 @@ class _HomeState extends State<Home> {
     }
     Navigator.of(context).push(
       NoPushAnimationMaterialPageRoute(
-        builder: (context) =>
-            Home(home: home, tvMode: widget.tvMode),
+        builder: (context) => Home(home: home, tvMode: widget.tvMode),
       ),
     );
   }

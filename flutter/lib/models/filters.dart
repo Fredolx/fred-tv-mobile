@@ -12,7 +12,7 @@ class Filters {
   int? seasonId;
   int? groupId;
   bool useKeywords;
-  SortType sort;
+  SortType? sort;
 
   Filters({
     this.query,
@@ -24,6 +24,6 @@ class Filters {
     this.seasonId,
     this.groupId,
     this.useKeywords = false,
-    this.sort = SortType.provider,
+    this.sort,
   });
 }

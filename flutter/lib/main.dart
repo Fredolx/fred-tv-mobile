@@ -176,7 +176,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: skipSetup
           ? (_isTvMode
-                ? const TvHome()
+                ? const TvHome(firstLaunch: true)
                 : Home(
                     firstLaunch: true,
                     refresh: settings.refreshOnStart,

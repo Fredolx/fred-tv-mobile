@@ -162,6 +162,7 @@ class _ChannelTileState extends State<ChannelTile> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
+          persist: false,
           content: Text("Added to favorites"),
           duration: Duration(milliseconds: 500),
         ),
