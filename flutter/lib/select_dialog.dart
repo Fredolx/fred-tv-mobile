@@ -2,28 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:open_tv/models/id_data.dart';
 
 class SelectDialog extends StatelessWidget {
-  const SelectDialog(
-      {super.key,
-      required this.action,
-      required this.data,
-      required this.title});
+  const SelectDialog({
+    super.key,
+    required this.action,
+    required this.data,
+    required this.title,
+    this.previouslySelectedId,
+  });
   final Function(int id) action;
   final List<IdData<String>> data;
   final String title;
+  final int? previouslySelectedId;
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(title),
       content: SingleChildScrollView(
-          child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: data
-            .asMap()
-            .entries
-            .map((entry) => getItem(entry.value, entry.key == 0))
-            .toList(),
-      )),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: data
+              .asMap()
+              .entries
+              .map((entry) => getItem(entry.value, entry.key == 0))
+              .toList(),
+        ),
+      ),
     );
   }
 
@@ -31,6 +35,7 @@ class SelectDialog extends StatelessWidget {
     return ListTile(
       autofocus: autofocus,
       title: Text(item.data),
+      trailing: item.id == previouslySelectedId ? const Icon(Icons.check) : null,
       onTap: () => action(item.id),
     );
   }

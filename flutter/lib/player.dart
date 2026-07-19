@@ -142,6 +142,9 @@ class _PlayerState extends State<Player> {
               ),
             )
             .toList(),
+        previouslySelectedId: player.state.tracks.subtitle.indexOf(
+          player.state.track.subtitle,
+        ),
       ),
     );
   }
@@ -167,6 +170,9 @@ class _PlayerState extends State<Player> {
               ),
             )
             .toList(),
+        previouslySelectedId: player.state.tracks.audio.indexOf(
+          player.state.track.audio,
+        ),
       ),
     );
   }
@@ -274,16 +280,15 @@ class _PlayerState extends State<Player> {
         ),
         if (!(Platform.isAndroid || Platform.isIOS)) ...[
           const Spacer(),
-          const MaterialFullscreenButton(
-            iconSize: 32,
-            iconColor: Colors.white,
-          ),
+          const MaterialFullscreenButton(iconSize: 32, iconColor: Colors.white),
         ],
       ],
     );
   }
 
-  MaterialDesktopVideoControlsThemeData getDesktopThemeData(BuildContext context) {
+  MaterialDesktopVideoControlsThemeData getDesktopThemeData(
+    BuildContext context,
+  ) {
     return MaterialDesktopVideoControlsThemeData(
       seekBarMargin: const EdgeInsets.only(bottom: 60),
       seekBarThumbSize: 20,
