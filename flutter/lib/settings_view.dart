@@ -98,6 +98,7 @@ class _SettingsState extends State<SettingsView> {
             });
             Navigator.of(context).pop();
           },
+          previouslySelectedId: settings.defaultView.index,
         );
       },
     );
@@ -120,6 +121,7 @@ class _SettingsState extends State<SettingsView> {
             });
             Navigator.of(context).pop();
           },
+          previouslySelectedId: settings.defaultSort.index,
         );
       },
     );

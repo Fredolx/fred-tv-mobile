@@ -116,6 +116,7 @@ class _HomeState extends State<Home> {
           Navigator.of(context).pop();
           load(false);
         },
+        previouslySelectedId: widget.home.filters.sort?.index,
       ),
     );
   }
@@ -293,7 +294,6 @@ class _HomeState extends State<Home> {
               viewType: type,
               mediaTypes: widget.home.filters.mediaTypes,
               sourceIds: widget.home.filters.sourceIds,
-              sort: widget.home.filters.sort,
             ),
           ),
         ),
@@ -309,7 +309,6 @@ class _HomeState extends State<Home> {
         viewType: ViewType.all,
         mediaTypes: widget.home.filters.mediaTypes,
         sourceIds: widget.home.filters.sourceIds,
-        sort: widget.home.filters.sort,
       ),
     );
     if (widget.home.filters.groupId != null) {
@@ -408,7 +407,14 @@ class _HomeState extends State<Home> {
                                 IconButton(
                                   focusNode: _sortFocusNode,
                                   onPressed: showSortDialog,
-                                  icon: const Icon(Icons.sort),
+                                  icon:
+                                      widget.home.filters.sort ==
+                                          SortType.provider
+                                      ? const Icon(Icons.sort)
+                                      : widget.home.filters.sort ==
+                                            SortType.alphabeticalAsc
+                                      ? const Icon(Icons.arrow_upward)
+                                      : const Icon(Icons.arrow_downward),
                                 ),
                               ],
                             ),
