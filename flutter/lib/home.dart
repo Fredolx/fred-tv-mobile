@@ -294,6 +294,7 @@ class _HomeState extends State<Home> {
               viewType: type,
               mediaTypes: widget.home.filters.mediaTypes,
               sourceIds: widget.home.filters.sourceIds,
+              sort: widget.home.filters.sort,
             ),
           ),
         ),
@@ -309,6 +310,7 @@ class _HomeState extends State<Home> {
         viewType: ViewType.all,
         mediaTypes: widget.home.filters.mediaTypes,
         sourceIds: widget.home.filters.sourceIds,
+        sort: widget.home.filters.sort,
       ),
     );
     if (widget.home.filters.groupId != null) {
@@ -408,8 +410,9 @@ class _HomeState extends State<Home> {
                                   focusNode: _sortFocusNode,
                                   onPressed: showSortDialog,
                                   icon:
-                                      widget.home.filters.sort ==
-                                          SortType.provider
+                                      widget.home.filters.sort == null ||
+                                          widget.home.filters.sort ==
+                                              SortType.provider
                                       ? const Icon(Icons.sort)
                                       : widget.home.filters.sort ==
                                             SortType.alphabeticalAsc
