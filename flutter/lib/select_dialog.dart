@@ -16,18 +16,13 @@ class SelectDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
+    return SimpleDialog(
       title: Text(title),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: data
-              .asMap()
-              .entries
-              .map((entry) => getItem(entry.value, entry.key == 0))
-              .toList(),
-        ),
-      ),
+      children: data
+          .asMap()
+          .entries
+          .map((entry) => getItem(entry.value, entry.key == 0))
+          .toList(),
     );
   }
 
@@ -35,7 +30,9 @@ class SelectDialog extends StatelessWidget {
     return ListTile(
       autofocus: autofocus,
       title: Text(item.data),
-      trailing: item.id == previouslySelectedId ? const Icon(Icons.check) : null,
+      trailing: previouslySelectedId == null
+          ? (item.icon != null ? Icon(item.icon) : null)
+          : (item.id == previouslySelectedId ? const Icon(Icons.check) : null),
       onTap: () => action(item.id),
     );
   }

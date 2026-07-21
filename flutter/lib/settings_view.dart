@@ -148,50 +148,80 @@ class _SettingsState extends State<SettingsView> {
 
   Widget getSource(Source source) {
     return Card(
-      margin: const EdgeInsets.symmetric(
-        horizontal: 10,
-        vertical: 5,
-      ), // Spacing around the tile
+      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       elevation: 5,
       child: ListTile(
         leading: Icon(source.enabled ? Icons.tv : Icons.tv_off),
         horizontalTitleGap: 25,
-        onLongPress: () => toggleSource(source),
         contentPadding: const EdgeInsets.only(left: 20),
         title: Text(source.name),
         subtitle: Text(source.sourceType.label),
-        trailing: Row(
-          mainAxisSize:
-              MainAxisSize.min, // Ensures the row takes up minimal space
-          children: [
-            Offstage(
-              offstage: source.sourceType == SourceType.m3u,
-              child: IconButton(
-                icon: const Icon(Icons.refresh),
-                onPressed: () async {
-                  await Error.tryAsync(
-                    () async {
-                      await NativeBridge.instance.refreshSource(source);
-                    },
-                    context,
-                    "Source has been refreshed successfully",
-                  );
-                },
+        onTap: widget.tvMode ? () => showSourceActions(source) : null,
+        onLongPress: widget.tvMode ? null : () => toggleSource(source),
+        trailing: widget.tvMode
+            ? null
+            : Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (source.sourceType != SourceType.m3u)
+                    IconButton(
+                      icon: const Icon(Icons.refresh),
+                      onPressed: () => refreshSource(source),
+                    ),
+                  if (source.sourceType != SourceType.m3u)
+                    IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () async => await showEditDialog(context, source),
+                    ),
+                  IconButton(
+                    icon: const Icon(Icons.delete),
+                    onPressed: () async => await showConfirmDeleteDialog(source),
+                  ),
+                ],
               ),
-            ),
-            Offstage(
-              offstage: source.sourceType == SourceType.m3u || widget.tvMode,
-              child: IconButton(
-                icon: const Icon(Icons.edit),
-                onPressed: () async => await showEditDialog(context, source),
-              ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete),
-              onPressed: () async => await showConfirmDeleteDialog(source),
-            ),
-          ],
-        ),
+      ),
+    );
+  }
+
+  Future<void> refreshSource(Source source) async {
+    await Error.tryAsync(
+      () async => await NativeBridge.instance.refreshSource(source),
+      context,
+      "Source has been refreshed successfully",
+    );
+  }
+
+  Future<void> showSourceActions(Source source) async {
+    final actions = <IdData<String>>[
+      IdData(
+        id: 0,
+        data: source.enabled ? "Disable" : "Enable",
+        icon: source.enabled ? Icons.tv_off : Icons.tv,
+      ),
+      if (source.sourceType != SourceType.m3u)
+        IdData(id: 1, data: "Refresh", icon: Icons.refresh),
+      IdData(id: 2, data: "Delete", icon: Icons.delete),
+    ];
+    final name = source.name.length > 20
+        ? "${source.name.substring(0, 20)}…"
+        : source.name;
+    await showDialog(
+      barrierDismissible: true,
+      context: context,
+      builder: (context) => SelectDialog(
+        title: "Select action for $name",
+        data: actions,
+        action: (id) {
+          Navigator.of(context).pop();
+          switch (id) {
+            case 0:
+              toggleSource(source);
+            case 1:
+              refreshSource(source);
+            case 2:
+              showConfirmDeleteDialog(source);
+          }
+        },
       ),
     );
   }
