@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:open_tv/extensions/int_extensions.dart';
 import 'package:open_tv/native_bridge.dart';
 import 'package:open_tv/bottom_nav.dart';
 import 'package:open_tv/confirm_delete.dart';
@@ -129,7 +130,7 @@ class _SettingsState extends State<SettingsView> {
 
   Future<void> toggleSource(Source source) async {
     await Error.tryAsyncNoLoading(
-      () async => await NativeBridge.instance.setSourceEnabled(
+      () => NativeBridge.instance.setSourceEnabled(
         source.id!,
         !source.enabled,
       ),
@@ -156,36 +157,18 @@ class _SettingsState extends State<SettingsView> {
         contentPadding: const EdgeInsets.only(left: 20),
         title: Text(source.name),
         subtitle: Text(source.sourceType.label),
-        onTap: widget.tvMode ? () => showSourceActions(source) : null,
+        onTap: () => showSourceActions(source),
         onLongPress: widget.tvMode ? null : () => toggleSource(source),
-        trailing: widget.tvMode
-            ? null
-            : Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (source.sourceType != SourceType.m3u)
-                    IconButton(
-                      icon: const Icon(Icons.refresh),
-                      onPressed: () => refreshSource(source),
-                    ),
-                  if (source.sourceType != SourceType.m3u)
-                    IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: () async => await showEditDialog(context, source),
-                    ),
-                  IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: () async => await showConfirmDeleteDialog(source),
-                  ),
-                ],
-              ),
+        trailing: source.lastUpdated != null
+            ? Text(source.lastUpdated!.toTimeAgo())
+            : null,
       ),
     );
   }
 
   Future<void> refreshSource(Source source) async {
     await Error.tryAsync(
-      () async => await NativeBridge.instance.refreshSource(source),
+      () => NativeBridge.instance.refreshSource(source),
       context,
       "Source has been refreshed successfully",
     );
@@ -235,7 +218,7 @@ class _SettingsState extends State<SettingsView> {
         name: source.name,
         confirm: () async {
           await Error.tryAsync(
-            () async => await NativeBridge.instance.deleteSource(source.id!),
+            () => NativeBridge.instance.deleteSource(source.id!),
             context,
             "Successfully deleted source",
           );
@@ -267,7 +250,7 @@ class _SettingsState extends State<SettingsView> {
 
   Future<void> updateSettings() async {
     await Error.tryAsyncNoLoading(
-      () async => await NativeBridge.instance.updateSettings(settings),
+      () => NativeBridge.instance.updateSettings(settings),
       context,
     );
   }
@@ -300,7 +283,7 @@ class _SettingsState extends State<SettingsView> {
                     subtitle: const Text(
                       "Fred TV needs your help! Consider donating ❤️",
                     ),
-                    onTap: () async => await launchUrl(
+                    onTap: () => launchUrl(
                       Uri.parse(
                         "https://github.com/Fredolx/fred-tv-mobile/discussions/1",
                       ),
@@ -310,12 +293,12 @@ class _SettingsState extends State<SettingsView> {
                   ListTile(
                     title: const Text("Default view"),
                     subtitle: Text(viewTypeToString(settings.defaultView)),
-                    onTap: () async => await _showDefaultViewDialog(context),
+                    onTap: () => _showDefaultViewDialog(context),
                   ),
                   ListTile(
                     title: const Text("Default sort"),
                     subtitle: Text(sortTypeToString(settings.defaultSort)),
-                    onTap: () async => await _showDefaultSortDialog(context),
+                    onTap: () => _showDefaultSortDialog(context),
                   ),
                   ListTile(
                     title: const Text("Force TV Mode"),
@@ -436,9 +419,8 @@ class _SettingsState extends State<SettingsView> {
                       Row(
                         children: [
                           IconButton(
-                            onPressed: () async => await Error.tryAsync(
-                              () async =>
-                                  await NativeBridge.instance.refreshAll(),
+                            onPressed: () => Error.tryAsync(
+                              () => NativeBridge.instance.refreshAll(),
                               context,
                               "Successfully refreshed all sources",
                             ),

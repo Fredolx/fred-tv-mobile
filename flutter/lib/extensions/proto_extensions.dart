@@ -35,6 +35,7 @@ extension SourceProtoExtension on pb.Source {
     username: hasUsername() ? username : null,
     password: hasPassword() ? password : null,
     sourceType: SourceType.values[sourceType],
+    lastUpdated: hasLastUpdated() ? lastUpdated.toInt() : null,
     enabled: enabled,
   );
 }
