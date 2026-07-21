@@ -257,7 +257,7 @@ class _ChannelTileState extends State<ChannelTile> {
             statesController: _statesController,
             borderRadius: BorderRadius.circular(12),
             onLongPress: favorite,
-            onTap: () async => await play(),
+            onTap: play,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [

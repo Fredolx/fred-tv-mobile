@@ -196,7 +196,7 @@ class _PlayerState extends State<Player> {
               key: key,
               controller: videoController,
               onExitFullscreen: (Platform.isAndroid || Platform.isIOS)
-                  ? () async => onExit()
+                  ? onExit
                   : defaultExitNativeFullscreen,
               controls: AdaptiveVideoControls,
             ),
@@ -206,7 +206,7 @@ class _PlayerState extends State<Player> {
     );
   }
 
-  void onExit() async {
+  Future<void> onExit() async {
     if (exiting) return;
     exiting = true;
     if (widget.channel.mediaType == MediaType.movie) {

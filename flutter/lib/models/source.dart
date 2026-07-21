@@ -9,6 +9,7 @@ class Source {
   String? password;
   SourceType sourceType;
   bool enabled;
+  int? lastUpdated;
 
   Source({
     this.id,
@@ -19,5 +20,6 @@ class Source {
     this.password,
     required this.sourceType,
     this.enabled = true,
+    this.lastUpdated,
   });
 }

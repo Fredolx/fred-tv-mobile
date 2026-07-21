@@ -18,79 +18,77 @@ class Error {
           action: SnackBarAction(
             label: 'Details',
             textColor: Colors.white,
-            onPressed: () async => {
-              await showDialog(
-                barrierDismissible: true,
-                context: context,
-                builder: (builder) => AlertDialog(
-                  title: const Text('Error'),
-                  content: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text(
-                        "The following error occured. If this error persists, please report it.\n",
+            onPressed: () => showDialog(
+              barrierDismissible: true,
+              context: context,
+              builder: (builder) => AlertDialog(
+                title: const Text('Error'),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      "The following error occured. If this error persists, please report it.\n",
+                    ),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(
+                        8.0,
+                      ), // Padding inside the box
+                      decoration: BoxDecoration(
+                        color: Colors.black,
+                        borderRadius: BorderRadius.circular(8.0),
                       ),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(
-                          8.0,
-                        ), // Padding inside the box
-                        decoration: BoxDecoration(
-                          color: Colors.black,
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxHeight: 200),
-                          child: SingleChildScrollView(
-                            child: Text(
-                              error,
-                              style: const TextStyle(color: Colors.white),
-                            ),
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxHeight: 200),
+                        child: SingleChildScrollView(
+                          child: Text(
+                            error,
+                            style: const TextStyle(color: Colors.white),
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                  actions: <Widget>[
-                    TextButton(
-                      style: TextButton.styleFrom(
-                        textStyle: Theme.of(context).textTheme.labelLarge,
-                      ),
-                      child: const Text('Report issue'),
-                      onPressed: () async {
-                        final Uri url = Uri.parse(
-                          'https://github.com/fredolx/fred-tv-mobile/issues/new?template=Blank+issue',
-                        );
-                        await launchUrl(
-                          url,
-                          mode: LaunchMode.externalApplication,
-                        );
-                      },
-                    ),
-                    TextButton(
-                      style: TextButton.styleFrom(
-                        textStyle: Theme.of(context).textTheme.labelLarge,
-                      ),
-                      child: const Text('Copy'),
-                      onPressed: () {
-                        Clipboard.setData(
-                          ClipboardData(text: error.toString()),
-                        );
-                      },
-                    ),
-                    TextButton(
-                      style: TextButton.styleFrom(
-                        textStyle: Theme.of(context).textTheme.labelLarge,
-                      ),
-                      child: const Text('Close'),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
                     ),
                   ],
                 ),
+                actions: <Widget>[
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      textStyle: Theme.of(context).textTheme.labelLarge,
+                    ),
+                    child: const Text('Report issue'),
+                    onPressed: () async {
+                      final Uri url = Uri.parse(
+                        'https://github.com/fredolx/fred-tv-mobile/issues/new?template=Blank+issue',
+                      );
+                      await launchUrl(
+                        url,
+                        mode: LaunchMode.externalApplication,
+                      );
+                    },
+                  ),
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      textStyle: Theme.of(context).textTheme.labelLarge,
+                    ),
+                    child: const Text('Copy'),
+                    onPressed: () {
+                      Clipboard.setData(
+                        ClipboardData(text: error.toString()),
+                      );
+                    },
+                  ),
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      textStyle: Theme.of(context).textTheme.labelLarge,
+                    ),
+                    child: const Text('Close'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
               ),
-            },
+            ),
           ),
         ),
       );
