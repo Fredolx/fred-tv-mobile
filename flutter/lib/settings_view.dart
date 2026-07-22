@@ -39,7 +39,18 @@ class _SettingsState extends State<SettingsView> {
   @override
   void initState() {
     super.initState();
+    TaskService.instance.runningTask.addListener(reloadAfterTask);
     initAsync();
+  }
+
+  @override
+  void dispose() {
+    TaskService.instance.runningTask.removeListener(reloadAfterTask);
+    super.dispose();
+  }
+
+  void reloadAfterTask() {
+    if (!TaskService.instance.busy) reloadSources();
   }
 
   Future<void> initAsync() async {
@@ -260,12 +271,10 @@ class _SettingsState extends State<SettingsView> {
   }
 
   Future<void> reloadSources() async {
-    expiriesFuture = NativeBridge.instance.getAllExpiries().catchError(
-      (_) => <int, int>{},
-    );
     await Error.tryAsyncNoLoading(
       () async => sources = await NativeBridge.instance.getSources(),
     );
+    if (!mounted) return;
     setState(() {
       sources;
     });
