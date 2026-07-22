@@ -142,7 +142,9 @@ class _ExoPlayerScreenState extends State<ExoPlayerScreen> {
           creationParamsCodec: const StandardMessageCodec(),
           onFocus: () => params.onFocusChanged(true),
         );
-        controller.addOnPlatformViewCreatedListener(params.onPlatformViewCreated);
+        controller.addOnPlatformViewCreatedListener(
+          params.onPlatformViewCreated,
+        );
         controller.addOnPlatformViewCreatedListener(_onPlatformViewCreated);
         controller.create();
         return controller;

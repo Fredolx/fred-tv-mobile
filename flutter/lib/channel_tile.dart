@@ -11,7 +11,7 @@ import 'package:open_tv/models/node_type.dart';
 import 'package:open_tv/native_bridge.dart';
 import 'package:open_tv/player.dart';
 import 'package:open_tv/exo_player.dart';
-import 'package:open_tv/refresh_service.dart';
+import 'package:open_tv/task_service.dart';
 import 'dart:io' show Platform;
 
 class ChannelTile extends StatefulWidget {
@@ -224,7 +224,7 @@ class _ChannelTileState extends State<ChannelTile> {
       var settings = await NativeBridge.instance.getSettings();
       NativeBridge.instance.addLastWatched(widget.channel.id!);
       if (!mounted) return;
-      RefreshService.instance.playerVisible.value = true;
+      TaskService.instance.playerVisible.value = true;
       await Navigator.push(
         context,
         MaterialPageRoute(
@@ -233,7 +233,7 @@ class _ChannelTileState extends State<ChannelTile> {
               : Player(channel: widget.channel, settings: settings),
         ),
       );
-      RefreshService.instance.playerVisible.value = false;
+      TaskService.instance.playerVisible.value = false;
       if (mounted) _focusNode.requestFocus();
     }
   }

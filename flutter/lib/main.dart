@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:open_tv/app_keys.dart';
 import 'package:open_tv/generated/generated_proto.pb.dart' as gen;
-import 'package:open_tv/refresh_banner.dart';
-import 'package:open_tv/refresh_service.dart';
+import 'package:open_tv/task_banner.dart';
+import 'package:open_tv/task_service.dart';
 import 'package:open_tv/home.dart';
 import 'package:open_tv/models/custom_shortcut.dart';
 import 'package:open_tv/models/device_detector.dart';
@@ -54,7 +54,7 @@ Future<void> main() async {
     ),
   );
   if (hasSources && settings.refreshOnStart) {
-    RefreshService.instance.refreshAll();
+    TaskService.instance.refreshAll();
   }
 }
 
@@ -114,7 +114,7 @@ class MyApp extends StatelessWidget {
           child: Stack(
             children: [
               child ?? const SizedBox.shrink(),
-              RefreshBanner(hasBottomNav: !_isTvMode),
+              TaskBanner(hasBottomNav: !_isTvMode),
             ],
           ),
         );

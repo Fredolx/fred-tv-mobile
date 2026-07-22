@@ -16,7 +16,7 @@ import 'package:open_tv/models/source_type.dart';
 import 'package:open_tv/models/sort_type.dart';
 import 'package:open_tv/models/view_type.dart';
 import 'package:open_tv/error.dart';
-import 'package:open_tv/refresh_service.dart';
+import 'package:open_tv/task_service.dart';
 import 'package:open_tv/setup.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -148,21 +148,12 @@ class _SettingsState extends State<SettingsView> {
     );
   }
 
-  void showRefreshInProgress() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        persist: false,
-        content: Text("Refresh in progress, please wait"),
-      ),
-    );
-  }
-
-  Widget getSource(Source source, bool refreshing) {
+  Widget getSource(Source source, bool busy) {
     final subtitleStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
       color: Theme.of(context).colorScheme.onSurfaceVariant,
     );
     return Opacity(
-      opacity: refreshing ? 0.4 : 1,
+      opacity: busy ? 0.4 : 1,
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         elevation: 5,
@@ -172,8 +163,9 @@ class _SettingsState extends State<SettingsView> {
           contentPadding: const EdgeInsets.symmetric(horizontal: 20),
           title: Text(source.name),
           subtitle: Text(source.sourceType.label),
-          onTap: () =>
-              refreshing ? showRefreshInProgress() : showSourceActions(source),
+          onTap: () => busy
+              ? TaskService.instance.notifyBusy()
+              : showSourceActions(source),
           trailing: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -205,7 +197,7 @@ class _SettingsState extends State<SettingsView> {
   }
 
   Future<void> refreshSource(Source source) =>
-      RefreshService.instance.refreshSource(source);
+      TaskService.instance.refreshSource(source);
 
   Future<void> showSourceActions(Source source) async {
     final actions = <IdData<String>>[
@@ -250,11 +242,7 @@ class _SettingsState extends State<SettingsView> {
         type: "source",
         name: source.name,
         confirm: () async {
-          await Error.tryAsync(
-            () => NativeBridge.instance.deleteSource(source.id!),
-            context,
-            "Successfully deleted source",
-          );
+          await TaskService.instance.deleteSource(source.id!);
           await reloadSources();
           if (!mounted) return;
           if (sources.isEmpty) {
@@ -291,220 +279,232 @@ class _SettingsState extends State<SettingsView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Visibility(
-        visible: !loading,
-        child: Loading(
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsetsDirectional.symmetric(vertical: 10),
-              child: ValueListenableBuilder<bool>(
-                valueListenable: RefreshService.instance.isRefreshing,
-                builder: (context, refreshing, _) => ListView(
-                  children: [
-                    const SizedBox(height: 10),
-                    const Padding(
-                      padding: EdgeInsets.only(left: 10),
-                      child: Text(
-                        'Settings',
-                        style: TextStyle(
-                          fontSize: 30,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+    return ValueListenableBuilder<String?>(
+      valueListenable: TaskService.instance.runningTask,
+      builder: (context, task, _) {
+        final busy = task != null;
+        return PopScope(
+          canPop: !TaskService.instance.isDeletingSource,
+          child: Scaffold(
+            body: Visibility(
+              visible: !loading,
+              child: Loading(
+                child: SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsetsDirectional.symmetric(
+                      vertical: 10,
                     ),
-                    const SizedBox(height: 10),
-                    ListTile(
-                      title: const Text("Donate"),
-                      subtitle: const Text(
-                        "Fred TV needs your help! Consider donating ❤️",
-                      ),
-                      onTap: () => launchUrl(
-                        Uri.parse(
-                          "https://github.com/Fredolx/fred-tv-mobile/discussions/1",
-                        ),
-                        mode: LaunchMode.externalApplication,
-                      ),
-                    ),
-                    if (!widget.tvMode)
-                      ListTile(
-                        title: const Text("Default view"),
-                        subtitle: Text(viewTypeToString(settings.defaultView)),
-                        onTap: () => _showDefaultViewDialog(context),
-                      ),
-                    ListTile(
-                      title: const Text("Default sort"),
-                      subtitle: Text(sortTypeToString(settings.defaultSort)),
-                      onTap: () => _showDefaultSortDialog(context),
-                    ),
-                    ListTile(
-                      title: const Text("Force TV Mode"),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Switch(
-                            value: settings.forceTVMode,
-                            onChanged: (bool value) {
-                              setState(() {
-                                settings.forceTVMode = value;
-                              });
-                              updateSettings();
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (!widget.tvMode)
-                      ListTile(
-                        title: const Text("Low latency livestreams"),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Switch(
-                              value: settings.lowLatency,
-                              onChanged: (bool value) {
-                                setState(() {
-                                  settings.lowLatency = value;
-                                });
-                                updateSettings();
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    ListTile(
-                      title: const Text("Refresh sources on start"),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Switch(
-                            value: settings.refreshOnStart,
-                            onChanged: (bool value) {
-                              setState(() {
-                                settings.refreshOnStart = value;
-                              });
-                              updateSettings();
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (!widget.tvMode)
-                      ListTile(
-                        title: const Text("Show livestreams"),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Switch(
-                              value: settings.showLivestreams,
-                              onChanged: (bool value) {
-                                setState(() {
-                                  settings.showLivestreams = value;
-                                });
-                                updateSettings();
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    if (!widget.tvMode)
-                      ListTile(
-                        title: const Text("Show movies"),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Switch(
-                              value: settings.showMovies,
-                              onChanged: (bool value) {
-                                setState(() {
-                                  settings.showMovies = value;
-                                });
-                                updateSettings();
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    if (!widget.tvMode)
-                      ListTile(
-                        title: const Text("Show series"),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Switch(
-                              value: settings.showSeries,
-                              onChanged: (bool value) {
-                                setState(() {
-                                  settings.showSeries = value;
-                                });
-                                updateSettings();
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    const Divider(),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    child: ListView(
                       children: [
+                        const SizedBox(height: 10),
                         const Padding(
                           padding: EdgeInsets.only(left: 10),
                           child: Text(
-                            'Sources',
+                            'Settings',
                             style: TextStyle(
                               fontSize: 30,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
-                        Row(
-                          children: [
-                            IconButton(
-                              color: refreshing
-                                  ? Theme.of(context).disabledColor
-                                  : null,
-                              onPressed: () => refreshing
-                                  ? showRefreshInProgress()
-                                  : RefreshService.instance.refreshAll(),
-                              icon: const Icon(Icons.refresh),
+                        const SizedBox(height: 10),
+                        ListTile(
+                          title: const Text("Donate"),
+                          subtitle: const Text(
+                            "Fred TV needs your help! Consider donating ❤️",
+                          ),
+                          onTap: () => launchUrl(
+                            Uri.parse(
+                              "https://github.com/Fredolx/fred-tv-mobile/discussions/1",
                             ),
-                            IconButton(
-                              color: refreshing
-                                  ? Theme.of(context).disabledColor
-                                  : null,
-                              onPressed: () => refreshing
-                                  ? showRefreshInProgress()
-                                  : Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => Setup(
-                                          showAppBar: true,
-                                          tvMode: widget.tvMode,
+                            mode: LaunchMode.externalApplication,
+                          ),
+                        ),
+                        if (!widget.tvMode)
+                          ListTile(
+                            title: const Text("Default view"),
+                            subtitle: Text(
+                              viewTypeToString(settings.defaultView),
+                            ),
+                            onTap: () => _showDefaultViewDialog(context),
+                          ),
+                        ListTile(
+                          title: const Text("Default sort"),
+                          subtitle: Text(
+                            sortTypeToString(settings.defaultSort),
+                          ),
+                          onTap: () => _showDefaultSortDialog(context),
+                        ),
+                        ListTile(
+                          title: const Text("Force TV Mode"),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Switch(
+                                value: settings.forceTVMode,
+                                onChanged: (bool value) {
+                                  setState(() {
+                                    settings.forceTVMode = value;
+                                  });
+                                  updateSettings();
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (!widget.tvMode)
+                          ListTile(
+                            title: const Text("Low latency livestreams"),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Switch(
+                                  value: settings.lowLatency,
+                                  onChanged: (bool value) {
+                                    setState(() {
+                                      settings.lowLatency = value;
+                                    });
+                                    updateSettings();
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ListTile(
+                          title: const Text("Refresh sources on start"),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Switch(
+                                value: settings.refreshOnStart,
+                                onChanged: (bool value) {
+                                  setState(() {
+                                    settings.refreshOnStart = value;
+                                  });
+                                  updateSettings();
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (!widget.tvMode)
+                          ListTile(
+                            title: const Text("Show livestreams"),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Switch(
+                                  value: settings.showLivestreams,
+                                  onChanged: (bool value) {
+                                    setState(() {
+                                      settings.showLivestreams = value;
+                                    });
+                                    updateSettings();
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        if (!widget.tvMode)
+                          ListTile(
+                            title: const Text("Show movies"),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Switch(
+                                  value: settings.showMovies,
+                                  onChanged: (bool value) {
+                                    setState(() {
+                                      settings.showMovies = value;
+                                    });
+                                    updateSettings();
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        if (!widget.tvMode)
+                          ListTile(
+                            title: const Text("Show series"),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Switch(
+                                  value: settings.showSeries,
+                                  onChanged: (bool value) {
+                                    setState(() {
+                                      settings.showSeries = value;
+                                    });
+                                    updateSettings();
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        const Divider(),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Padding(
+                              padding: EdgeInsets.only(left: 10),
+                              child: Text(
+                                'Sources',
+                                style: TextStyle(
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                IconButton(
+                                  color: busy
+                                      ? Theme.of(context).disabledColor
+                                      : null,
+                                  onPressed: () => busy
+                                      ? TaskService.instance.notifyBusy()
+                                      : TaskService.instance.refreshAll(),
+                                  icon: const Icon(Icons.refresh),
+                                ),
+                                IconButton(
+                                  color: busy
+                                      ? Theme.of(context).disabledColor
+                                      : null,
+                                  onPressed: () => busy
+                                      ? TaskService.instance.notifyBusy()
+                                      : Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => Setup(
+                                              showAppBar: true,
+                                              tvMode: widget.tvMode,
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                    ),
-                              icon: const Icon(Icons.add),
+                                  icon: const Icon(Icons.add),
+                                ),
+                              ],
                             ),
                           ],
                         ),
+                        const SizedBox(height: 10),
+                        ...sources.map((x) => getSource(x, busy)),
                       ],
                     ),
-                    const SizedBox(height: 10),
-                    ...sources.map((x) => getSource(x, refreshing)),
-                  ],
+                  ),
                 ),
               ),
             ),
+            bottomNavigationBar: !widget.tvMode
+                ? BottomNav(
+                    updateViewMode: updateView,
+                    startingView: ViewType.settings,
+                    tvMode: widget.tvMode,
+                  )
+                : null,
           ),
-        ),
-      ),
-      bottomNavigationBar: !widget.tvMode
-          ? BottomNav(
-              updateViewMode: updateView,
-              startingView: ViewType.settings,
-              tvMode: widget.tvMode,
-            )
-          : null,
+        );
+      },
     );
   }
 }
