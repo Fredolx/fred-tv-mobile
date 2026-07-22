@@ -990,3 +990,13 @@ pub fn has_sources() -> Result<bool> {
         .optional()?
         .is_some())
 }
+
+pub fn get_sources_by_type(source_type: u8) -> Result<Vec<Source>> {
+    let sql = get_conn()?;
+    let sources: Vec<Source> = sql
+        .prepare("SELECT * FROM sources WHERE source_type = ?")?
+        .query_map([source_type], row_to_source)?
+        .filter_map(Result::ok)
+        .collect();
+    Ok(sources)
+}

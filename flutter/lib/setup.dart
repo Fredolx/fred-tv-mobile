@@ -4,7 +4,6 @@ import 'package:animations/animations.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
-import 'package:loader_overlay/loader_overlay.dart';
 import 'package:open_tv/correction_modal.dart';
 import 'package:open_tv/home.dart';
 import 'package:open_tv/models/filters.dart';
@@ -107,7 +106,9 @@ class _SetupState extends State<Setup> {
   }
 
   Future<void> finish() async {
-    loading = true;
+    setState(() {
+      loading = true;
+    });
     var result = await Error.tryAsync(
       () async {
         await NativeBridge.instance.processSource(
@@ -128,10 +129,12 @@ class _SetupState extends State<Setup> {
       },
       context,
       null,
-      true,
+      false,
       false,
     );
-    loading = false;
+    setState(() {
+      loading = false;
+    });
     if (!result.success) {
       return;
     }
@@ -255,7 +258,9 @@ class _SetupState extends State<Setup> {
       MaterialPageRoute(
         builder: (_) => widget.tvMode
             ? const TvHome()
-            : Home(home: HomeManager(filters: Filters(viewType: ViewType.all))),
+            : Home(
+                home: HomeManager(filters: Filters(viewType: ViewType.all)),
+              ),
       ),
       (route) => false,
     );
@@ -270,122 +275,137 @@ class _SetupState extends State<Setup> {
         if (!didPop) prevStep();
       },
       child: Scaffold(
-        appBar: widget.showAppBar ? AppBar() : null,
+        appBar: widget.showAppBar
+            ? AppBar(automaticallyImplyLeading: step != Steps.finish)
+            : null,
         body: SafeArea(
-          child: LoaderOverlay(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24.0,
-                    vertical: 16,
-                  ),
-                  child: TweenAnimationBuilder<double>(
-                    tween: Tween<double>(
-                      begin: 0,
-                      end: (step.index + 1) / Steps.values.length,
-                    ),
-                    duration: const Duration(milliseconds: 400),
-                    curve: Curves.easeInOut,
-                    builder: (context, value, child) {
-                      return ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: LinearProgressIndicator(
-                          value: value,
-                          minHeight: 6,
-                        ),
-                      );
-                    },
-                  ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24.0,
+                  vertical: 16,
                 ),
-                Expanded(
-                  child: PageTransitionSwitcher(
-                    duration: const Duration(milliseconds: 400),
-                    reverse: !isForward,
-                    transitionBuilder:
-                        (child, primaryAnimation, secondaryAnimation) {
-                          return SharedAxisTransition(
-                            animation: primaryAnimation,
-                            secondaryAnimation: secondaryAnimation,
-                            transitionType: SharedAxisTransitionType.horizontal,
-                            child: child,
-                          );
-                        },
-                    child: currentPage,
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween<double>(
+                    begin: 0,
+                    end: (step.index + 1) / Steps.values.length,
                   ),
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.easeInOut,
+                  builder: (context, value, child) {
+                    return ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: value,
+                        minHeight: 6,
+                      ),
+                    );
+                  },
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: FocusTraversalGroup(
-                    policy: OrderedTraversalPolicy(),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        AnimatedOpacity(
-                          opacity: step != Steps.welcome && step != Steps.finish
-                              ? 1
-                              : 0,
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                          child: IgnorePointer(
-                            ignoring:
-                                step == Steps.welcome || step == Steps.finish,
-                            child: FocusTraversalOrder(
-                              order: const NumericFocusOrder(2.0),
-                              child: FilledButton.tonal(
-                                onPressed: prevStep,
-                                style: FilledButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 24,
-                                    vertical: 16,
-                                  ),
+              ),
+              Expanded(
+                child: PageTransitionSwitcher(
+                  duration: const Duration(milliseconds: 400),
+                  reverse: !isForward,
+                  transitionBuilder:
+                      (child, primaryAnimation, secondaryAnimation) {
+                        return SharedAxisTransition(
+                          animation: primaryAnimation,
+                          secondaryAnimation: secondaryAnimation,
+                          transitionType: SharedAxisTransitionType.horizontal,
+                          child: child,
+                        );
+                      },
+                  child: currentPage,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: FocusTraversalGroup(
+                  policy: OrderedTraversalPolicy(),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      AnimatedOpacity(
+                        opacity: showBackButton ? 1 : 0,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                        child: IgnorePointer(
+                          ignoring: !showBackButton,
+                          child: FocusTraversalOrder(
+                            order: const NumericFocusOrder(2.0),
+                            child: FilledButton.tonal(
+                              onPressed: prevStep,
+                              style: FilledButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                  vertical: 16,
                                 ),
-                                child: const Text(
-                                  "Back",
-                                  style: TextStyle(fontSize: 18),
-                                ),
+                              ),
+                              child: const Text(
+                                "Back",
+                                style: TextStyle(fontSize: 18),
                               ),
                             ),
                           ),
                         ),
-                        FocusTraversalOrder(
-                          order: const NumericFocusOrder(1.0),
-                          child: FilledButton(
-                            focusNode: nextButtonFocusNode,
-                            onPressed: !formPages.contains(step) || formValid
-                                ? handleNext
-                                : null,
-                            style: FilledButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 24,
-                                vertical: 16,
-                              ),
-                            ),
-                            child: Text(
-                              step == Steps.name &&
-                                      selectedSourceType == SourceType.m3u
-                                  ? "Select file"
-                                  : step == Steps.finish
-                                  ? "Finish"
-                                  : "Next",
-                              style: const TextStyle(fontSize: 18),
+                      ),
+                      FocusTraversalOrder(
+                        order: const NumericFocusOrder(1.0),
+                        child: FilledButton(
+                          focusNode: nextButtonFocusNode,
+                          onPressed:
+                              !loading &&
+                                  (!formPages.contains(step) || formValid)
+                              ? handleNext
+                              : null,
+                          style: FilledButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 16,
                             ),
                           ),
+                          child: Text(
+                            step == Steps.name &&
+                                    selectedSourceType == SourceType.m3u
+                                ? "Select file"
+                                : step == Steps.finish
+                                ? "Finish"
+                                : "Next",
+                            style: const TextStyle(fontSize: 18),
+                          ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
+  bool get showBackButton =>
+      !loading && step != Steps.welcome && step != Steps.finish;
+
+  Widget get loadingPage => getPage(
+    "Adding your source",
+    "This can take a moment, hang tight",
+    const [
+      SizedBox(
+        width: 36,
+        height: 36,
+        child: CircularProgressIndicator(strokeWidth: 3),
+      ),
+    ],
+  );
+
   Widget get currentPage {
+    if (loading) return loadingPage;
     switch (step) {
       case Steps.welcome:
         return getPage(

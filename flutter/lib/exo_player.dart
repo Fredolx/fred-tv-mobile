@@ -47,15 +47,19 @@ class _ExoPlayerScreenState extends State<ExoPlayerScreen> {
   }
 
   Future<void> _init() async {
-    final ChannelHttpHeaders? headers = (await Error.tryAsyncNoLoading(() async {
-      return await NativeBridge.instance.getChannelHeaders(widget.channel.id!);
-    }, context)).data;
+    final ChannelHttpHeaders? headers = (await Error.tryAsyncNoLoading(
+      () async {
+        return await NativeBridge.instance.getChannelHeaders(
+          widget.channel.id!,
+        );
+      },
+    )).data;
     final seconds = widget.channel.mediaType == MediaType.movie
         ? (await Error.tryAsyncNoLoading(() async {
             return await NativeBridge.instance.getMoviePosition(
               widget.channel.id!,
             );
-          }, context)).data
+          })).data
         : null;
     if (!mounted) return;
     setState(() {
@@ -138,7 +142,9 @@ class _ExoPlayerScreenState extends State<ExoPlayerScreen> {
           creationParamsCodec: const StandardMessageCodec(),
           onFocus: () => params.onFocusChanged(true),
         );
-        controller.addOnPlatformViewCreatedListener(params.onPlatformViewCreated);
+        controller.addOnPlatformViewCreatedListener(
+          params.onPlatformViewCreated,
+        );
         controller.addOnPlatformViewCreatedListener(_onPlatformViewCreated);
         controller.create();
         return controller;

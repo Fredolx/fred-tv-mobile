@@ -698,6 +698,38 @@ final $typed_data.Uint8List setSourceEnabledDescriptor = $convert.base64Decode(
     'ChBTZXRTb3VyY2VFbmFibGVkEhsKCXNvdXJjZV9pZBgBIAEoA1IIc291cmNlSWQSGAoHZW5hYm'
     'xlZBgCIAEoCFIHZW5hYmxlZA==');
 
+@$core.Deprecated('Use expiriesDescriptor instead')
+const Expiries$json = {
+  '1': 'Expiries',
+  '2': [
+    {
+      '1': 'expiries',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.generated_proto.Expiries.ExpiriesEntry',
+      '10': 'expiries'
+    },
+  ],
+  '3': [Expiries_ExpiriesEntry$json],
+};
+
+@$core.Deprecated('Use expiriesDescriptor instead')
+const Expiries_ExpiriesEntry$json = {
+  '1': 'ExpiriesEntry',
+  '2': [
+    {'1': 'key', '3': 1, '4': 1, '5': 3, '10': 'key'},
+    {'1': 'value', '3': 2, '4': 1, '5': 3, '10': 'value'},
+  ],
+  '7': {'7': true},
+};
+
+/// Descriptor for `Expiries`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List expiriesDescriptor = $convert.base64Decode(
+    'CghFeHBpcmllcxJDCghleHBpcmllcxgBIAMoCzInLmdlbmVyYXRlZF9wcm90by5FeHBpcmllcy'
+    '5FeHBpcmllc0VudHJ5UghleHBpcmllcxo7Cg1FeHBpcmllc0VudHJ5EhAKA2tleRgBIAEoA1ID'
+    'a2V5EhQKBXZhbHVlGAIgASgDUgV2YWx1ZToCOAE=');
+
 @$core.Deprecated('Use fFIResultDescriptor instead')
 const FFIResult$json = {
   '1': 'FFIResult',
@@ -784,6 +816,15 @@ const FFIResult$json = {
       '9': 0,
       '10': 'sourceList'
     },
+    {
+      '1': 'expiries',
+      '3': 12,
+      '4': 1,
+      '5': 11,
+      '6': '.generated_proto.Expiries',
+      '9': 0,
+      '10': 'expiries'
+    },
   ],
   '8': [
     {'1': 'data'},
@@ -804,4 +845,5 @@ final $typed_data.Uint8List fFIResultDescriptor = $convert.base64Decode(
     'SGVhZGVyc0gAUgdoZWFkZXJzEmMKF2VuYWJsZWRfc291cmNlc19taW5pbWFsGAogASgLMikuZ2'
     'VuZXJhdGVkX3Byb3RvLkdldEVuYWJsZWRTb3VyY2VzTWluaW1hbEgAUhVlbmFibGVkU291cmNl'
     'c01pbmltYWwSPgoLc291cmNlX2xpc3QYCyABKAsyGy5nZW5lcmF0ZWRfcHJvdG8uU291cmNlTG'
-    'lzdEgAUgpzb3VyY2VMaXN0QgYKBGRhdGFCEAoOX2Vycm9yX21lc3NhZ2U=');
+    'lzdEgAUgpzb3VyY2VMaXN0EjcKCGV4cGlyaWVzGAwgASgLMhkuZ2VuZXJhdGVkX3Byb3RvLkV4'
+    'cGlyaWVzSABSCGV4cGlyaWVzQgYKBGRhdGFCEAoOX2Vycm9yX21lc3NhZ2U=');

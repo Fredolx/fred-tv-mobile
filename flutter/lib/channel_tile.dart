@@ -11,6 +11,7 @@ import 'package:open_tv/models/node_type.dart';
 import 'package:open_tv/native_bridge.dart';
 import 'package:open_tv/player.dart';
 import 'package:open_tv/exo_player.dart';
+import 'package:open_tv/task_service.dart';
 import 'dart:io' show Platform;
 
 class ChannelTile extends StatefulWidget {
@@ -162,28 +163,22 @@ class _ChannelTileState extends State<ChannelTile> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
+          persist: false,
           content: Text("Added to favorites"),
           duration: Duration(milliseconds: 500),
         ),
       );
-    }, context);
+    });
   }
 
   Future<int?> _handleSeries() async {
     if (widget.channel.url?.isEmpty == true) {
-      if (context.mounted) {
-        Error.handleError(context, "Invalid series: series ID is null");
-      }
+      Error.handleError("Invalid series: series ID is null");
       return null;
     }
     final seriesId = int.tryParse(widget.channel.url!);
     if (seriesId == null) {
-      if (context.mounted) {
-        Error.handleError(
-          context,
-          "Invalid series: series ID is not a valid number",
-        );
-      }
+      Error.handleError("Invalid series: series ID is not a valid number");
       return null;
     }
     await Error.tryAsync(
@@ -229,6 +224,7 @@ class _ChannelTileState extends State<ChannelTile> {
       var settings = await NativeBridge.instance.getSettings();
       NativeBridge.instance.addLastWatched(widget.channel.id!);
       if (!mounted) return;
+      TaskService.instance.playerVisible.value = true;
       await Navigator.push(
         context,
         MaterialPageRoute(
@@ -237,6 +233,7 @@ class _ChannelTileState extends State<ChannelTile> {
               : Player(channel: widget.channel, settings: settings),
         ),
       );
+      TaskService.instance.playerVisible.value = false;
       if (mounted) _focusNode.requestFocus();
     }
   }
@@ -256,7 +253,7 @@ class _ChannelTileState extends State<ChannelTile> {
             statesController: _statesController,
             borderRadius: BorderRadius.circular(12),
             onLongPress: favorite,
-            onTap: () async => await play(),
+            onTap: play,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [

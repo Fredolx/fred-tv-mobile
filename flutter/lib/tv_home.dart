@@ -11,7 +11,13 @@ import 'package:open_tv/utils.dart';
 class TvHome extends StatefulWidget {
   final bool nested;
   final ViewType? previousViewType;
-  const TvHome({super.key, this.nested = false, this.previousViewType});
+  final bool firstLaunch;
+  const TvHome({
+    super.key,
+    this.nested = false,
+    this.previousViewType,
+    this.firstLaunch = false,
+  });
 
   @override
   State<TvHome> createState() => _TvHomeState();
@@ -21,7 +27,7 @@ class _TvHomeState extends State<TvHome> {
   @override
   void initState() {
     super.initState();
-    if (!widget.nested) {
+    if (widget.firstLaunch) {
       WidgetsBinding.instance.addPostFrameCallback(
         (_) => Utils.maybeShowWhatsNew(context),
       );
@@ -47,9 +53,7 @@ class _TvHomeState extends State<TvHome> {
 
   void navSettings() {
     Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const SettingsView(tvMode: true),
-      ),
+      MaterialPageRoute(builder: (context) => const SettingsView(tvMode: true)),
     );
   }
 

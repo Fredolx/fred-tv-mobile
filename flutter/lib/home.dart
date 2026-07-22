@@ -21,13 +21,11 @@ import 'package:open_tv/utils.dart';
 
 class Home extends StatefulWidget {
   final HomeManager home;
-  final bool refresh;
   final bool firstLaunch;
   final bool tvMode;
   const Home({
     super.key,
     required this.home,
-    this.refresh = false,
     this.firstLaunch = false,
     this.tvMode = false,
   });
@@ -47,7 +45,6 @@ class _HomeState extends State<Home> {
   final ScrollController _scrollController = ScrollController();
   int currentlyFocusedChannel = 0;
   bool isLoading = false;
-  bool blockSettings = false;
   int? previousScroll;
   bool scrolledDeepEnough = false;
 
@@ -66,31 +63,18 @@ class _HomeState extends State<Home> {
       final sources = await NativeBridge.instance.getEnabledSourcesMinimal();
       widget.home.filters.sourceIds = sources;
     }
-    if (widget.home.filters.mediaTypes == null) {
+    if (widget.home.filters.mediaTypes == null ||
+        widget.home.filters.sort == null) {
       final settings = await NativeBridge.instance.getSettings();
-      widget.home.filters.mediaTypes = settings.getMediaTypes();
-      widget.home.filters.sort = settings.defaultSort;
+      widget.home.filters.mediaTypes ??= settings.getMediaTypes();
+      widget.home.filters.sort ??= settings.defaultSort;
     }
+
     await load();
     if (!mounted) return;
     if (widget.firstLaunch) {
-      await Utils.maybeShowWhatsNew(context);
-    }
-    if (!mounted) return;
-    if (widget.refresh) {
-      Error.tryAsyncNoLoading(
-        () async {
-          setState(() {
-            blockSettings = true;
-          });
-          await NativeBridge.instance.refreshAll();
-        },
-        context,
-        true,
-        "Refreshed all sources",
-      );
-      setState(() {
-        blockSettings = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Utils.maybeShowWhatsNew(context);
       });
     }
   }
@@ -111,6 +95,7 @@ class _HomeState extends State<Home> {
           Navigator.of(context).pop();
           load(false);
         },
+        previouslySelectedId: widget.home.filters.sort?.index,
       ),
     );
   }
@@ -143,7 +128,7 @@ class _HomeState extends State<Home> {
         });
       }
       reachedMax = channels.length < pageSize;
-    }, context);
+    });
   }
 
   @override
@@ -288,6 +273,7 @@ class _HomeState extends State<Home> {
               viewType: type,
               mediaTypes: widget.home.filters.mediaTypes,
               sourceIds: widget.home.filters.sourceIds,
+              sort: widget.home.filters.sort,
             ),
           ),
         ),
@@ -303,6 +289,7 @@ class _HomeState extends State<Home> {
         viewType: ViewType.all,
         mediaTypes: widget.home.filters.mediaTypes,
         sourceIds: widget.home.filters.sourceIds,
+        sort: widget.home.filters.sort,
       ),
     );
     if (widget.home.filters.groupId != null) {
@@ -317,8 +304,7 @@ class _HomeState extends State<Home> {
     }
     Navigator.of(context).push(
       NoPushAnimationMaterialPageRoute(
-        builder: (context) =>
-            Home(home: home, tvMode: widget.tvMode),
+        builder: (context) => Home(home: home, tvMode: widget.tvMode),
       ),
     );
   }
@@ -402,7 +388,15 @@ class _HomeState extends State<Home> {
                                 IconButton(
                                   focusNode: _sortFocusNode,
                                   onPressed: showSortDialog,
-                                  icon: const Icon(Icons.sort),
+                                  icon:
+                                      widget.home.filters.sort == null ||
+                                          widget.home.filters.sort ==
+                                              SortType.provider
+                                      ? const Icon(Icons.sort)
+                                      : widget.home.filters.sort ==
+                                            SortType.alphabeticalAsc
+                                      ? const Icon(Icons.arrow_upward)
+                                      : const Icon(Icons.arrow_downward),
                                 ),
                               ],
                             ),
@@ -442,7 +436,6 @@ class _HomeState extends State<Home> {
       bottomNavigationBar: !widget.tvMode
           ? BottomNav(
               startingView: getStartingView(),
-              blockSettings: blockSettings,
               updateViewMode: updateViewMode,
               tvMode: widget.tvMode,
             )

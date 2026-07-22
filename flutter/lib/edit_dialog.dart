@@ -39,7 +39,7 @@ class _EditDialogState extends State<EditDialog> {
                 }
                 Navigator.of(context).pop();
                 await Error.tryAsyncNoLoading(
-                  () async => await NativeBridge.instance.updateSource(
+                  () => NativeBridge.instance.updateSource(
                     Source(
                       id: widget.source.id,
                       name: widget.source.name,
@@ -53,7 +53,6 @@ class _EditDialogState extends State<EditDialog> {
                           : null,
                     ),
                   ),
-                  widget.parentContext,
                 );
                 await widget.afterSave();
               },

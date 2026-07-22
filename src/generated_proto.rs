@@ -191,12 +191,17 @@ pub struct SetSourceEnabled {
     pub enabled: bool,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
+pub struct Expiries {
+    #[prost(map = "int64, int64", tag = "1")]
+    pub expiries: ::std::collections::HashMap<i64, i64>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct FfiResult {
     #[prost(bool, tag = "1")]
     pub success: bool,
     #[prost(string, optional, tag = "2")]
     pub error_message: ::core::option::Option<::prost::alloc::string::String>,
-    #[prost(oneof = "ffi_result::Data", tags = "3, 4, 6, 7, 8, 9, 10, 11")]
+    #[prost(oneof = "ffi_result::Data", tags = "3, 4, 6, 7, 8, 9, 10, 11, 12")]
     pub data: ::core::option::Option<ffi_result::Data>,
 }
 /// Nested message and enum types in `FFIResult`.
@@ -219,6 +224,8 @@ pub mod ffi_result {
         EnabledSourcesMinimal(super::GetEnabledSourcesMinimal),
         #[prost(message, tag = "11")]
         SourceList(super::SourceList),
+        #[prost(message, tag = "12")]
+        Expiries(super::Expiries),
     }
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
