@@ -53,7 +53,6 @@ class _EditDialogState extends State<EditDialog> {
                           : null,
                     ),
                   ),
-                  widget.parentContext,
                 );
                 await widget.afterSave();
               },

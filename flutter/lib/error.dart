@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:loader_overlay/loader_overlay.dart';
+import 'package:open_tv/app_keys.dart';
 import 'package:open_tv/models/result.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class Error {
-  static Future<void> handleError(BuildContext context, String error) async {
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
+  static Future<void> handleError(String error) async {
+    final context = navigatorKey.currentContext;
+    if (context != null && context.mounted) {
+      scaffoldMessengerKey.currentState?.showSnackBar(
         SnackBar(
           persist: false,
           backgroundColor: Colors.red[700],
@@ -72,9 +74,7 @@ class Error {
                     ),
                     child: const Text('Copy'),
                     onPressed: () {
-                      Clipboard.setData(
-                        ClipboardData(text: error.toString()),
-                      );
+                      Clipboard.setData(ClipboardData(text: error.toString()));
                     },
                   ),
                   TextButton(
@@ -95,47 +95,47 @@ class Error {
     }
   }
 
-  static void showSuccess(BuildContext context, String message) {
-    if (context.mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(message), persist: false));
-    }
+  static void showSuccess(String message) {
+    scaffoldMessengerKey.currentState?.showSnackBar(
+      SnackBar(content: Text(message), persist: false),
+    );
   }
 
   static Future<Result<T>> tryAsync<T>(
     Future<T?> Function() fn,
-    BuildContext context, [
+    BuildContext? context, [
     String? successMessage = "Action completed successfully",
     bool useLoading = true,
     bool useSuccess = true,
   ]) async {
     var success = false;
     T? result;
-    if (useLoading && context.mounted) {
+    if (useLoading && context != null && context.mounted) {
       context.loaderOverlay.show();
     }
     try {
       result = await fn();
-      if (useSuccess) showSuccess(context, successMessage!);
+      if (useSuccess) showSuccess(successMessage!);
       success = true;
     } catch (e, stackTrace) {
       final error =
           "${e.toString()}\n\n-- Dart Stack Trace --\n${stackTrace.toString()}";
-      await handleError(context, error);
+      await handleError(error);
     }
-    if (useLoading && context.mounted && context.loaderOverlay.visible) {
+    if (useLoading &&
+        context != null &&
+        context.mounted &&
+        context.loaderOverlay.visible) {
       context.loaderOverlay.hide();
     }
     return Result(success: success, data: result);
   }
 
   static Future<Result<T>> tryAsyncNoLoading<T>(
-    Future<T?> Function() fn,
-    BuildContext context, [
+    Future<T?> Function() fn, [
     bool useSuccess = false,
     String? successMessage,
   ]) async {
-    return await tryAsync(fn, context, successMessage, false, useSuccess);
+    return await tryAsync(fn, null, successMessage, false, useSuccess);
   }
 }

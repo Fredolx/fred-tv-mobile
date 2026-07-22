@@ -11,6 +11,7 @@ import 'package:open_tv/models/node_type.dart';
 import 'package:open_tv/native_bridge.dart';
 import 'package:open_tv/player.dart';
 import 'package:open_tv/exo_player.dart';
+import 'package:open_tv/refresh_service.dart';
 import 'dart:io' show Platform;
 
 class ChannelTile extends StatefulWidget {
@@ -167,24 +168,17 @@ class _ChannelTileState extends State<ChannelTile> {
           duration: Duration(milliseconds: 500),
         ),
       );
-    }, context);
+    });
   }
 
   Future<int?> _handleSeries() async {
     if (widget.channel.url?.isEmpty == true) {
-      if (context.mounted) {
-        Error.handleError(context, "Invalid series: series ID is null");
-      }
+      Error.handleError("Invalid series: series ID is null");
       return null;
     }
     final seriesId = int.tryParse(widget.channel.url!);
     if (seriesId == null) {
-      if (context.mounted) {
-        Error.handleError(
-          context,
-          "Invalid series: series ID is not a valid number",
-        );
-      }
+      Error.handleError("Invalid series: series ID is not a valid number");
       return null;
     }
     await Error.tryAsync(
@@ -230,6 +224,7 @@ class _ChannelTileState extends State<ChannelTile> {
       var settings = await NativeBridge.instance.getSettings();
       NativeBridge.instance.addLastWatched(widget.channel.id!);
       if (!mounted) return;
+      RefreshService.instance.playerVisible.value = true;
       await Navigator.push(
         context,
         MaterialPageRoute(
@@ -238,6 +233,7 @@ class _ChannelTileState extends State<ChannelTile> {
               : Player(channel: widget.channel, settings: settings),
         ),
       );
+      RefreshService.instance.playerVisible.value = false;
       if (mounted) _focusNode.requestFocus();
     }
   }

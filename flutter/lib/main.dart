@@ -3,7 +3,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:open_tv/app_keys.dart';
 import 'package:open_tv/generated/generated_proto.pb.dart' as gen;
+import 'package:open_tv/refresh_banner.dart';
+import 'package:open_tv/refresh_service.dart';
 import 'package:open_tv/home.dart';
 import 'package:open_tv/models/custom_shortcut.dart';
 import 'package:open_tv/models/device_detector.dart';
@@ -50,6 +53,9 @@ Future<void> main() async {
       isTV: isTV,
     ),
   );
+  if (hasSources && settings.refreshOnStart) {
+    RefreshService.instance.refreshAllOnStart();
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -57,8 +63,6 @@ class MyApp extends StatelessWidget {
   final Settings settings;
   final bool hasTouchScreen;
   final bool isTV;
-  static final GlobalKey<NavigatorState> navigatorKey =
-      GlobalKey<NavigatorState>();
 
   const MyApp({
     super.key,
@@ -90,6 +94,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Fred TV',
       navigatorKey: navigatorKey,
+      scaffoldMessengerKey: scaffoldMessengerKey,
       builder: (context, child) {
         return CallbackShortcuts(
           bindings: {
@@ -106,7 +111,12 @@ class MyApp extends StatelessWidget {
               navigatorKey.currentState?.maybePop();
             },
           },
-          child: child ?? const SizedBox.shrink(),
+          child: Stack(
+            children: [
+              child ?? const SizedBox.shrink(),
+              RefreshBanner(hasBottomNav: !_isTvMode),
+            ],
+          ),
         );
       },
       theme: ThemeData(
@@ -179,7 +189,6 @@ class MyApp extends StatelessWidget {
                 ? const TvHome(firstLaunch: true)
                 : Home(
                     firstLaunch: true,
-                    refresh: settings.refreshOnStart,
                     home: HomeManager(
                       filters: Filters(viewType: settings.defaultView),
                     ),

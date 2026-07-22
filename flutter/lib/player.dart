@@ -47,7 +47,7 @@ class _PlayerState extends State<Player> {
             return await NativeBridge.instance.getMoviePosition(
               widget.channel.id!,
             );
-          }, context)).data
+          })).data
         : null;
     await _startPlayback(seconds != null ? Duration(seconds: seconds) : null);
     subscriptions.add(
@@ -86,7 +86,7 @@ class _PlayerState extends State<Player> {
           return await NativeBridge.instance.getChannelHeaders(
             widget.channel.id!,
           );
-        }, context)).data;
+        })).data;
         await player.open(
           mk.Media(
             widget.channel.url!,
