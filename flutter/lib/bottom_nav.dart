@@ -5,13 +5,11 @@ import 'package:open_tv/settings_view.dart';
 class BottomNav extends StatefulWidget {
   final Function(ViewType) updateViewMode;
   final ViewType startingView;
-  final bool blockSettings;
   final bool tvMode;
   const BottomNav({
     super.key,
     required this.updateViewMode,
     this.startingView = ViewType.all,
-    this.blockSettings = false,
     this.tvMode = false,
   });
 
@@ -36,15 +34,6 @@ class _BottomNavState extends State<BottomNav> {
   }
 
   void onBarTapped(int index) {
-    if (widget.blockSettings && index == ViewType.settings.index) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          persist: false,
-          content: Text("Settings disabled while refreshing on start"),
-        ),
-      );
-      return;
-    }
     setState(() {
       _selectedIndex = index;
     });
