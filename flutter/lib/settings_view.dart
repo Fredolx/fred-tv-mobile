@@ -152,7 +152,7 @@ class _SettingsState extends State<SettingsView> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         persist: false,
-        content: Text("Refresh on start in progress, please wait"),
+        content: Text("Refresh in progress, please wait"),
       ),
     );
   }
@@ -204,13 +204,8 @@ class _SettingsState extends State<SettingsView> {
     );
   }
 
-  Future<void> refreshSource(Source source) async {
-    await Error.tryAsync(
-      () => NativeBridge.instance.refreshSource(source),
-      context,
-      "Source has been refreshed successfully",
-    );
-  }
+  Future<void> refreshSource(Source source) =>
+      RefreshService.instance.refreshSource(source);
 
   Future<void> showSourceActions(Source source) async {
     final actions = <IdData<String>>[
@@ -470,11 +465,7 @@ class _SettingsState extends State<SettingsView> {
                                   : null,
                               onPressed: () => refreshing
                                   ? showRefreshInProgress()
-                                  : Error.tryAsync(
-                                      () => NativeBridge.instance.refreshAll(),
-                                      context,
-                                      "Successfully refreshed all sources",
-                                    ),
+                                  : RefreshService.instance.refreshAll(),
                               icon: const Icon(Icons.refresh),
                             ),
                             IconButton(
