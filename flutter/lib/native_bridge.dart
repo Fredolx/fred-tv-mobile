@@ -293,6 +293,15 @@ class NativeBridge {
     });
   }
 
+  Future<Map<int, int>> getAllExpiries() async {
+    final result = await _executeAsync((id, cb) {
+      _bindings.get_all_expiries(id, cb);
+    });
+    return result.expiries.expiries.map(
+      (key, value) => MapEntry(key.toInt(), value.toInt()),
+    );
+  }
+
   void dispose() {
     _globalCallback.close();
     for (final completer in _pendingRequests.values) {

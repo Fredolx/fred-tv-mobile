@@ -1,5 +1,5 @@
 extension IntExtensions on int {
-  DateTime get _asDateTime => DateTime.fromMillisecondsSinceEpoch(this);
+  DateTime get _asDateTime => DateTime.fromMillisecondsSinceEpoch(this * 1000);
 
   String toTimeAgo() {
     final seconds = DateTime.now().difference(_asDateTime).inSeconds;

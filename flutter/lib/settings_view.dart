@@ -21,7 +21,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 class SettingsView extends StatefulWidget {
   final bool tvMode;
-
   const SettingsView({super.key, this.tvMode = false});
 
   @override
@@ -32,6 +31,10 @@ class _SettingsState extends State<SettingsView> {
   Settings settings = Settings();
   List<Source> sources = [];
   bool loading = true;
+  Future<Map<int, int>> expiriesFuture = NativeBridge.instance
+      .getAllExpiries()
+      .catchError((_) => <int, int>{});
+
   @override
   void initState() {
     super.initState();
@@ -43,6 +46,7 @@ class _SettingsState extends State<SettingsView> {
       NativeBridge.instance.getSettings(),
       NativeBridge.instance.getSources(),
     ]);
+    if (!mounted) return;
     setState(() {
       settings = results[0] as Settings;
       sources = results[1] as List<Source>;
@@ -130,10 +134,7 @@ class _SettingsState extends State<SettingsView> {
 
   Future<void> toggleSource(Source source) async {
     await Error.tryAsyncNoLoading(
-      () => NativeBridge.instance.setSourceEnabled(
-        source.id!,
-        !source.enabled,
-      ),
+      () => NativeBridge.instance.setSourceEnabled(source.id!, !source.enabled),
       context,
     );
     await reloadSources();
@@ -148,20 +149,44 @@ class _SettingsState extends State<SettingsView> {
   }
 
   Widget getSource(Source source) {
+    final subtitleStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
+      color: Theme.of(context).colorScheme.onSurfaceVariant,
+    );
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       elevation: 5,
       child: ListTile(
         leading: Icon(source.enabled ? Icons.tv : Icons.tv_off),
         horizontalTitleGap: 25,
-        contentPadding: const EdgeInsets.only(left: 20),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20),
         title: Text(source.name),
         subtitle: Text(source.sourceType.label),
         onTap: () => showSourceActions(source),
-        onLongPress: widget.tvMode ? null : () => toggleSource(source),
-        trailing: source.lastUpdated != null
-            ? Text(source.lastUpdated!.toTimeAgo())
-            : null,
+        trailing: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (source.lastUpdated != null)
+              Text(
+                "Last updated: ${source.lastUpdated!.toTimeAgo()}",
+                style: subtitleStyle,
+              ),
+            if (source.sourceType == SourceType.xtream)
+              FutureBuilder<Map<int, int>>(
+                future: expiriesFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData &&
+                      snapshot.data!.containsKey(source.id)) {
+                    return Text(
+                      "Expires: ${snapshot.data![source.id]!.toTimeUntil()}",
+                      style: subtitleStyle,
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -239,6 +264,9 @@ class _SettingsState extends State<SettingsView> {
   }
 
   Future<void> reloadSources() async {
+    expiriesFuture = NativeBridge.instance.getAllExpiries().catchError(
+      (_) => <int, int>{},
+    );
     await Error.tryAsyncNoLoading(
       () async => sources = await NativeBridge.instance.getSources(),
       context,
@@ -290,11 +318,12 @@ class _SettingsState extends State<SettingsView> {
                       mode: LaunchMode.externalApplication,
                     ),
                   ),
-                  ListTile(
-                    title: const Text("Default view"),
-                    subtitle: Text(viewTypeToString(settings.defaultView)),
-                    onTap: () => _showDefaultViewDialog(context),
-                  ),
+                  if (!widget.tvMode)
+                    ListTile(
+                      title: const Text("Default view"),
+                      subtitle: Text(viewTypeToString(settings.defaultView)),
+                      onTap: () => _showDefaultViewDialog(context),
+                    ),
                   ListTile(
                     title: const Text("Default sort"),
                     subtitle: Text(sortTypeToString(settings.defaultSort)),
@@ -317,23 +346,24 @@ class _SettingsState extends State<SettingsView> {
                       ],
                     ),
                   ),
-                  ListTile(
-                    title: const Text("Low latency livestreams"),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Switch(
-                          value: settings.lowLatency,
-                          onChanged: (bool value) {
-                            setState(() {
-                              settings.lowLatency = value;
-                            });
-                            updateSettings();
-                          },
-                        ),
-                      ],
+                  if (!widget.tvMode)
+                    ListTile(
+                      title: const Text("Low latency livestreams"),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Switch(
+                            value: settings.lowLatency,
+                            onChanged: (bool value) {
+                              setState(() {
+                                settings.lowLatency = value;
+                              });
+                              updateSettings();
+                            },
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
                   ListTile(
                     title: const Text("Refresh sources on start"),
                     trailing: Row(
@@ -351,57 +381,60 @@ class _SettingsState extends State<SettingsView> {
                       ],
                     ),
                   ),
-                  ListTile(
-                    title: const Text("Show livestreams"),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Switch(
-                          value: settings.showLivestreams,
-                          onChanged: (bool value) {
-                            setState(() {
-                              settings.showLivestreams = value;
-                            });
-                            updateSettings();
-                          },
-                        ),
-                      ],
+                  if (!widget.tvMode)
+                    ListTile(
+                      title: const Text("Show livestreams"),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Switch(
+                            value: settings.showLivestreams,
+                            onChanged: (bool value) {
+                              setState(() {
+                                settings.showLivestreams = value;
+                              });
+                              updateSettings();
+                            },
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  ListTile(
-                    title: const Text("Show movies"),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Switch(
-                          value: settings.showMovies,
-                          onChanged: (bool value) {
-                            setState(() {
-                              settings.showMovies = value;
-                            });
-                            updateSettings();
-                          },
-                        ),
-                      ],
+                  if (!widget.tvMode)
+                    ListTile(
+                      title: const Text("Show movies"),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Switch(
+                            value: settings.showMovies,
+                            onChanged: (bool value) {
+                              setState(() {
+                                settings.showMovies = value;
+                              });
+                              updateSettings();
+                            },
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  ListTile(
-                    title: const Text("Show series"),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Switch(
-                          value: settings.showSeries,
-                          onChanged: (bool value) {
-                            setState(() {
-                              settings.showSeries = value;
-                            });
-                            updateSettings();
-                          },
-                        ),
-                      ],
+                  if (!widget.tvMode)
+                    ListTile(
+                      title: const Text("Show series"),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Switch(
+                            value: settings.showSeries,
+                            onChanged: (bool value) {
+                              setState(() {
+                                settings.showSeries = value;
+                              });
+                              updateSettings();
+                            },
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
                   const Divider(),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
