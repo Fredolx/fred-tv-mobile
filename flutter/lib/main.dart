@@ -54,7 +54,7 @@ Future<void> main() async {
     ),
   );
   if (hasSources && settings.refreshOnStart) {
-    RefreshService.instance.refreshAllOnStart();
+    RefreshService.instance.refreshAll();
   }
 }
 
