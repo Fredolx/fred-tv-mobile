@@ -95,7 +95,7 @@ class Error {
     }
   }
 
-  static void showSuccess(String message) {
+  static void showMessage(String message) {
     scaffoldMessengerKey.currentState?.showSnackBar(
       SnackBar(content: Text(message), persist: false),
     );
@@ -115,7 +115,7 @@ class Error {
     }
     try {
       result = await fn();
-      if (useSuccess) showSuccess(successMessage!);
+      if (useSuccess) showMessage(successMessage!);
       success = true;
     } catch (e, stackTrace) {
       final error =

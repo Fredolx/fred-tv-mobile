@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:open_tv/refresh_service.dart';
+import 'package:open_tv/task_service.dart';
 
 const _bottomNavHeight = 80.0;
 
-class RefreshBanner extends StatelessWidget {
+class TaskBanner extends StatelessWidget {
   final bool hasBottomNav;
-  const RefreshBanner({super.key, this.hasBottomNav = false});
+  const TaskBanner({super.key, this.hasBottomNav = false});
 
   @override
   Widget build(BuildContext context) {
-    final service = RefreshService.instance;
+    final service = TaskService.instance;
     return Positioned.fill(
       child: IgnorePointer(
         child: SafeArea(
@@ -17,12 +17,15 @@ class RefreshBanner extends StatelessWidget {
             alignment: Alignment.bottomLeft,
             child: ListenableBuilder(
               listenable: Listenable.merge([
-                service.isRefreshing,
+                service.runningTask,
                 service.playerVisible,
               ]),
               builder: (context, _) =>
-                  service.isRefreshing.value && !service.playerVisible.value
-                  ? _Banner(hasBottomNav: hasBottomNav)
+                  service.busy && !service.playerVisible.value
+                  ? _Banner(
+                      label: service.runningTask.value!,
+                      hasBottomNav: hasBottomNav,
+                    )
                   : const SizedBox.shrink(),
             ),
           ),
@@ -33,8 +36,9 @@ class RefreshBanner extends StatelessWidget {
 }
 
 class _Banner extends StatelessWidget {
+  final String label;
   final bool hasBottomNav;
-  const _Banner({required this.hasBottomNav});
+  const _Banner({required this.label, required this.hasBottomNav});
 
   @override
   Widget build(BuildContext context) {
@@ -58,10 +62,7 @@ class _Banner extends StatelessWidget {
                 child: CircularProgressIndicator(strokeWidth: 2),
               ),
               const SizedBox(width: 10),
-              Text(
-                "Refresh in progress",
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
+              Text(label, style: Theme.of(context).textTheme.bodyMedium),
             ],
           ),
         ),

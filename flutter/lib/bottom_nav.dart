@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:open_tv/models/view_type.dart';
 import 'package:open_tv/settings_view.dart';
+import 'package:open_tv/task_service.dart';
 
 class BottomNav extends StatefulWidget {
   final Function(ViewType) updateViewMode;
@@ -34,6 +35,10 @@ class _BottomNavState extends State<BottomNav> {
   }
 
   void onBarTapped(int index) {
+    if (TaskService.instance.isDeletingSource) {
+      TaskService.instance.notifyBusy();
+      return;
+    }
     setState(() {
       _selectedIndex = index;
     });
