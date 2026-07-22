@@ -3,6 +3,7 @@ import 'package:open_tv/extensions/int_extensions.dart';
 import 'package:open_tv/native_bridge.dart';
 import 'package:open_tv/bottom_nav.dart';
 import 'package:open_tv/confirm_delete.dart';
+import 'package:open_tv/donate_view.dart';
 import 'package:open_tv/models/filters.dart';
 import 'package:open_tv/select_dialog.dart';
 import 'package:open_tv/edit_dialog.dart';
@@ -18,7 +19,6 @@ import 'package:open_tv/models/view_type.dart';
 import 'package:open_tv/error.dart';
 import 'package:open_tv/task_service.dart';
 import 'package:open_tv/setup.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class SettingsView extends StatefulWidget {
   final bool tvMode;
@@ -322,11 +322,12 @@ class _SettingsState extends State<SettingsView> {
                           subtitle: const Text(
                             "Fred TV needs your help! Consider donating ❤️",
                           ),
-                          onTap: () => launchUrl(
-                            Uri.parse(
-                              "https://github.com/Fredolx/fred-tv-mobile/discussions/1",
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  DonateView(tvMode: widget.tvMode),
                             ),
-                            mode: LaunchMode.externalApplication,
                           ),
                         ),
                         if (!widget.tvMode)
