@@ -10,28 +10,29 @@ class TaskService {
   final ValueNotifier<String?> runningTask = ValueNotifier(null);
   final ValueNotifier<bool> playerVisible = ValueNotifier(false);
 
-  static const _deletingSource = "Deleting source";
+  static const _refreshLabel = "Refresh in progress";
+  static const _deleteSourceLabel = "Deleting source";
 
   bool get busy => runningTask.value != null;
 
-  bool get isDeletingSource => runningTask.value == _deletingSource;
+  bool get isDeletingSource => runningTask.value == _deleteSourceLabel;
 
   void notifyBusy() => Error.showMessage("${runningTask.value}, please wait");
 
   Future<void> refreshAll() => _run(
-    "Refresh in progress",
+    _refreshLabel,
     () => NativeBridge.instance.refreshAll(),
     "Successfully refreshed all sources",
   );
 
   Future<void> refreshSource(Source source) => _run(
-    "Refresh in progress",
+    _refreshLabel,
     () => NativeBridge.instance.refreshSource(source),
     "Source has been refreshed successfully",
   );
 
   Future<void> deleteSource(int id) => _run(
-    _deletingSource,
+    _deleteSourceLabel,
     () => NativeBridge.instance.deleteSource(id),
     "Successfully deleted source",
   );
