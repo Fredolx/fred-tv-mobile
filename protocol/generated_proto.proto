@@ -139,6 +139,10 @@ message SetSourceEnabled {
   bool enabled = 2;
 }
 
+message Expiries {
+  map<int64, int64> expiries = 1;
+}
+
 message FFIResult {
   bool success = 1;
   optional string error_message = 2;
@@ -151,6 +155,7 @@ message FFIResult {
     ChannelHttpHeaders headers = 9;
     GetEnabledSourcesMinimal enabled_sources_minimal = 10;
     SourceList source_list = 11;
+    Expiries expiries = 12;
   }
 }
 

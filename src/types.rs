@@ -103,3 +103,13 @@ pub struct ChannelPreserve {
     #[serde(default)]
     pub is_group: bool,
 }
+
+#[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
+pub struct XtreamStatus {
+    pub user_info: XtreamStatusUserInfo,
+}
+
+#[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
+pub struct XtreamStatusUserInfo {
+    pub exp_date: serde_json::Value,
+}

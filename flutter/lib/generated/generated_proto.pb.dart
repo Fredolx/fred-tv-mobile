@@ -1588,6 +1588,58 @@ class SetSourceEnabled extends $pb.GeneratedMessage {
   void clearEnabled() => $_clearField(2);
 }
 
+class Expiries extends $pb.GeneratedMessage {
+  factory Expiries({
+    $core.Iterable<$core.MapEntry<$fixnum.Int64, $fixnum.Int64>>? expiries,
+  }) {
+    final result = create();
+    if (expiries != null) result.expiries.addEntries(expiries);
+    return result;
+  }
+
+  Expiries._();
+
+  factory Expiries.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory Expiries.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'Expiries',
+      package:
+          const $pb.PackageName(_omitMessageNames ? '' : 'generated_proto'),
+      createEmptyInstance: create)
+    ..m<$fixnum.Int64, $fixnum.Int64>(1, _omitFieldNames ? '' : 'expiries',
+        entryClassName: 'Expiries.ExpiriesEntry',
+        keyFieldType: $pb.PbFieldType.O6,
+        valueFieldType: $pb.PbFieldType.O6,
+        packageName: const $pb.PackageName('generated_proto'))
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  Expiries clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  Expiries copyWith(void Function(Expiries) updates) =>
+      super.copyWith((message) => updates(message as Expiries)) as Expiries;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static Expiries create() => Expiries._();
+  @$core.override
+  Expiries createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static Expiries getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Expiries>(create);
+  static Expiries? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $pb.PbMap<$fixnum.Int64, $fixnum.Int64> get expiries => $_getMap(0);
+}
+
 enum FFIResult_Data {
   settings,
   source,
@@ -1597,6 +1649,7 @@ enum FFIResult_Data {
   headers,
   enabledSourcesMinimal,
   sourceList,
+  expiries,
   notSet
 }
 
@@ -1612,6 +1665,7 @@ class FFIResult extends $pb.GeneratedMessage {
     ChannelHttpHeaders? headers,
     GetEnabledSourcesMinimal? enabledSourcesMinimal,
     SourceList? sourceList,
+    Expiries? expiries,
   }) {
     final result = create();
     if (success != null) result.success = success;
@@ -1625,6 +1679,7 @@ class FFIResult extends $pb.GeneratedMessage {
     if (enabledSourcesMinimal != null)
       result.enabledSourcesMinimal = enabledSourcesMinimal;
     if (sourceList != null) result.sourceList = sourceList;
+    if (expiries != null) result.expiries = expiries;
     return result;
   }
 
@@ -1646,6 +1701,7 @@ class FFIResult extends $pb.GeneratedMessage {
     9: FFIResult_Data.headers,
     10: FFIResult_Data.enabledSourcesMinimal,
     11: FFIResult_Data.sourceList,
+    12: FFIResult_Data.expiries,
     0: FFIResult_Data.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
@@ -1653,7 +1709,7 @@ class FFIResult extends $pb.GeneratedMessage {
       package:
           const $pb.PackageName(_omitMessageNames ? '' : 'generated_proto'),
       createEmptyInstance: create)
-    ..oo(0, [3, 4, 6, 7, 8, 9, 10, 11])
+    ..oo(0, [3, 4, 6, 7, 8, 9, 10, 11, 12])
     ..aOB(1, _omitFieldNames ? '' : 'success')
     ..aOS(2, _omitFieldNames ? '' : 'errorMessage')
     ..aOM<Settings>(3, _omitFieldNames ? '' : 'settings',
@@ -1672,6 +1728,8 @@ class FFIResult extends $pb.GeneratedMessage {
         subBuilder: GetEnabledSourcesMinimal.create)
     ..aOM<SourceList>(11, _omitFieldNames ? '' : 'sourceList',
         subBuilder: SourceList.create)
+    ..aOM<Expiries>(12, _omitFieldNames ? '' : 'expiries',
+        subBuilder: Expiries.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1700,6 +1758,7 @@ class FFIResult extends $pb.GeneratedMessage {
   @$pb.TagNumber(9)
   @$pb.TagNumber(10)
   @$pb.TagNumber(11)
+  @$pb.TagNumber(12)
   FFIResult_Data whichData() => _FFIResult_DataByTag[$_whichOneof(0)]!;
   @$pb.TagNumber(3)
   @$pb.TagNumber(4)
@@ -1709,6 +1768,7 @@ class FFIResult extends $pb.GeneratedMessage {
   @$pb.TagNumber(9)
   @$pb.TagNumber(10)
   @$pb.TagNumber(11)
+  @$pb.TagNumber(12)
   void clearData() => $_clearField($_whichOneof(0));
 
   @$pb.TagNumber(1)
@@ -1817,6 +1877,17 @@ class FFIResult extends $pb.GeneratedMessage {
   void clearSourceList() => $_clearField(11);
   @$pb.TagNumber(11)
   SourceList ensureSourceList() => $_ensure(9);
+
+  @$pb.TagNumber(12)
+  Expiries get expiries => $_getN(10);
+  @$pb.TagNumber(12)
+  set expiries(Expiries value) => $_setField(12, value);
+  @$pb.TagNumber(12)
+  $core.bool hasExpiries() => $_has(10);
+  @$pb.TagNumber(12)
+  void clearExpiries() => $_clearField(12);
+  @$pb.TagNumber(12)
+  Expiries ensureExpiries() => $_ensure(10);
 }
 
 const $core.bool _omitFieldNames =

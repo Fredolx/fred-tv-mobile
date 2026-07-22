@@ -1,13 +1,16 @@
 use crate::media_type;
+use crate::source_type;
 use crate::sql;
 use crate::sql::insert_season;
 use crate::types::Channel;
 use crate::types::ChannelPreserve;
 use crate::types::Season;
 use crate::types::Source;
+use crate::types::XtreamStatus;
 use crate::utils::get_user_agent_from_source;
 use anyhow::anyhow;
 use anyhow::{Context, Result};
+use futures::future::join_all;
 use reqwest::Client;
 use reqwest::Url;
 use rusqlite::Transaction;
@@ -474,4 +477,28 @@ fn episode_to_channel(
         favorite: false,
         tv_archive: None,
     })
+}
+
+async fn get_status(source: &mut Source) -> Result<(i64, XtreamStatus)> {
+    let url = build_xtream_url(source)?;
+    let user_agent = get_user_agent_from_source(&source)?;
+    let client = Client::builder().user_agent(user_agent).build()?;
+    let data = client.get(url).send().await?.json::<XtreamStatus>().await?;
+    Ok((source.id.context("no id")?, data))
+}
+
+pub async fn get_all_expiries() -> Result<HashMap<i64, i64>> {
+    let mut sources = sql::get_sources_by_type(source_type::XTREAM)?;
+    let to_await = sources.iter_mut().map(|source| get_status(source));
+    let results: Vec<std::result::Result<(i64, XtreamStatus), anyhow::Error>> =
+        join_all(to_await).await;
+    let statuses: HashMap<i64, i64> = results
+        .into_iter()
+        .flatten()
+        .filter_map(|(id, status)| {
+            let exp_date = get_serde_json_i64(&status.user_info.exp_date)?;
+            Some((id, exp_date))
+        })
+        .collect();
+    Ok(statuses)
 }
