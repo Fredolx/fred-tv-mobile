@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:open_tv/error.dart';
 import 'package:open_tv/task_service.dart';
 
 const _bottomNavHeight = 80.0;
+const _snackBarClearance = 50.0;
+const _edgeMargin = 12.0;
 
 class TaskBanner extends StatelessWidget {
   final bool hasBottomNav;
@@ -19,12 +22,14 @@ class TaskBanner extends StatelessWidget {
               listenable: Listenable.merge([
                 service.runningTask,
                 service.playerVisible,
+                Error.visibleSnackBars,
               ]),
               builder: (context, _) =>
                   service.busy && !service.playerVisible.value
                   ? _Banner(
                       label: service.runningTask.value!,
                       hasBottomNav: hasBottomNav,
+                      hasSnackBar: Error.visibleSnackBars.value > 0,
                     )
                   : const SizedBox.shrink(),
             ),
@@ -38,14 +43,21 @@ class TaskBanner extends StatelessWidget {
 class _Banner extends StatelessWidget {
   final String label;
   final bool hasBottomNav;
-  const _Banner({required this.label, required this.hasBottomNav});
+  final bool hasSnackBar;
+  const _Banner({
+    required this.label,
+    required this.hasBottomNav,
+    required this.hasSnackBar,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(
-        left: 12,
-        bottom: hasBottomNav ? _bottomNavHeight + 12 : 12,
+        left: _edgeMargin,
+        bottom:
+            (hasBottomNav ? _bottomNavHeight : 0) +
+            (hasSnackBar ? _snackBarClearance : _edgeMargin),
       ),
       child: Material(
         elevation: 6,

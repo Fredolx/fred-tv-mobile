@@ -150,7 +150,7 @@ class _SettingsState extends State<SettingsView> {
     );
     await reloadSources();
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
+    Error.showSnackBar(
       SnackBar(
         persist: false,
         content: Text("Source ${!source.enabled ? "enabled" : "disabled"}"),

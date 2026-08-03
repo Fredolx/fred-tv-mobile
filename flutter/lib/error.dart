@@ -6,10 +6,19 @@ import 'package:open_tv/models/result.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class Error {
+  static final ValueNotifier<int> visibleSnackBars = ValueNotifier(0);
+
+  static void showSnackBar(SnackBar snackBar) {
+    final controller = scaffoldMessengerKey.currentState?.showSnackBar(snackBar);
+    if (controller == null) return;
+    visibleSnackBars.value++;
+    controller.closed.then((_) => visibleSnackBars.value--);
+  }
+
   static Future<void> handleError(String error) async {
     final context = navigatorKey.currentContext;
     if (context != null && context.mounted) {
-      scaffoldMessengerKey.currentState?.showSnackBar(
+      showSnackBar(
         SnackBar(
           persist: false,
           backgroundColor: Colors.red[700],
@@ -96,9 +105,7 @@ class Error {
   }
 
   static void showMessage(String message) {
-    scaffoldMessengerKey.currentState?.showSnackBar(
-      SnackBar(content: Text(message), persist: false),
-    );
+    showSnackBar(SnackBar(content: Text(message), persist: false));
   }
 
   static Future<Result<T>> tryAsync<T>(

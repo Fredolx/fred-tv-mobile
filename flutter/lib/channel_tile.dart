@@ -161,7 +161,7 @@ class _ChannelTileState extends State<ChannelTile> {
       setState(() {
         widget.channel.favorite = !widget.channel.favorite;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
+      Error.showSnackBar(
         const SnackBar(
           persist: false,
           content: Text("Added to favorites"),
