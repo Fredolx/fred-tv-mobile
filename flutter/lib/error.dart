@@ -35,7 +35,7 @@ class Error {
                       width: double.infinity,
                       padding: const EdgeInsets.all(
                         8.0,
-                      ), // Padding inside the box
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.black,
                         borderRadius: BorderRadius.circular(8.0),
