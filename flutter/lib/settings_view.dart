@@ -219,7 +219,8 @@ class _SettingsState extends State<SettingsView> {
       ),
       if (source.sourceType != SourceType.m3u)
         IdData(id: 1, data: "Refresh", icon: Icons.refresh),
-      IdData(id: 2, data: "Delete", icon: Icons.delete),
+      if (!widget.tvMode) IdData(id: 2, data: "Edit", icon: Icons.edit),
+      IdData(id: 3, data: "Delete", icon: Icons.delete),
     ];
     final name = source.name.length > 20
         ? "${source.name.substring(0, 20)}…"
@@ -238,6 +239,8 @@ class _SettingsState extends State<SettingsView> {
             case 1:
               refreshSource(source);
             case 2:
+              showEditDialog(context, source);
+            case 3:
               showConfirmDeleteDialog(source);
           }
         },
