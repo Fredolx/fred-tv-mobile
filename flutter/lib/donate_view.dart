@@ -17,7 +17,7 @@ Hi! It's me, Fred, the developer of Fred TV. I made Fred TV with the sole and un
 
 I want to dedicate myself to making open-source apps for a living. Help my dream become true, and be part of an open-source revolution to free us from the shackles of exploitative spyware ridden apps. Every donation helps towards this goal and funds future development.
 
-From the bottom of my heart, thank you for using this app. If you enjoy Fred TV, please share it far and wide, and consider making a donation of any amount, even a dollar. Your trust, support and continued use of my applications are greatly appreciated.
+Thank you for using Fred TV. Please share this app far and wide if you enjoy it and consider making a donation of any amount, even a dollar. Your trust, support and continued use of my applications are greatly appreciated.
 
 IPTV is not the first or last domain we will change together. Expect more Fred apps in the future!
 
