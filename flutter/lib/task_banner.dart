@@ -5,6 +5,7 @@ import 'package:open_tv/task_service.dart';
 const _bottomNavHeight = 80.0;
 const _snackBarClearance = 50.0;
 const _edgeMargin = 12.0;
+const _snackBarTransition = Duration(milliseconds: 250);
 
 class TaskBanner extends StatelessWidget {
   final bool hasBottomNav;
@@ -52,7 +53,9 @@ class _Banner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return AnimatedPadding(
+      duration: _snackBarTransition,
+      curve: Curves.fastOutSlowIn,
       padding: EdgeInsets.only(
         left: _edgeMargin,
         bottom:
