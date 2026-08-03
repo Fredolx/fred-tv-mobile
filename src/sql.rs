@@ -19,29 +19,44 @@ use rusqlite_migration::{M, Migrations};
 
 const PAGE_SIZE: u8 = 36;
 pub const DB_NAME: &str = "db_rust.sqlite";
+pub const DB_SETTINGS_NAME: &str = "db_rust_settings.sqlite";
 pub const LAST_SEEN_VERSION_KEY: &str = "last_seen_version";
 pub static DB_PATH_OVERRIDE: OnceLock<String> = OnceLock::new();
-static CONN: LazyLock<Pool<SqliteConnectionManager>> = LazyLock::new(|| create_connection_pool());
+static CONN: LazyLock<Pool<SqliteConnectionManager>> =
+    LazyLock::new(|| create_connection_pool(DB_NAME));
+static SETTINGS_CONN: LazyLock<Pool<SqliteConnectionManager>> =
+    LazyLock::new(|| create_connection_pool(DB_SETTINGS_NAME));
 
 pub fn get_conn() -> Result<PooledConnection<SqliteConnectionManager>> {
     CONN.try_get().context("No sqlite conns available")
 }
 
-fn create_connection_pool() -> Pool<SqliteConnectionManager> {
-    let manager = SqliteConnectionManager::file(get_and_create_sqlite_db_path());
+pub fn get_settings_conn() -> Result<PooledConnection<SqliteConnectionManager>> {
+    SETTINGS_CONN.try_get().context("No sqlite conns available")
+}
+
+fn create_connection_pool(db_name: &str) -> Pool<SqliteConnectionManager> {
+    let manager = SqliteConnectionManager::file(get_and_create_db_path(db_name))
+        .with_init(|c| c.pragma_update_and_check(None, "journal_mode", "WAL", |_| Ok(())));
     r2d2::Pool::builder().max_size(20).build(manager).unwrap()
 }
 
-fn get_and_create_sqlite_db_path() -> String {
+fn get_and_create_db_path(db_name: &str) -> String {
     let mut path = PathBuf::from_str(DB_PATH_OVERRIDE.get().unwrap()).unwrap();
     if !path.exists() {
         std::fs::create_dir_all(&path).unwrap();
     }
-    path.push(DB_NAME);
+    path.push(db_name);
     return path.to_string_lossy().to_string();
 }
 
 pub fn apply_migrations() -> Result<()> {
+    apply_main_migrations()?;
+    migrate_settings_database()?;
+    Ok(())
+}
+
+fn apply_main_migrations() -> Result<()> {
     let mut sql = get_conn()?;
     let migrations = Migrations::new(vec![M::up(
         r#"
@@ -147,8 +162,31 @@ CREATE UNIQUE INDEX unique_seasons ON seasons(season_number, series_id, source_i
 
 ANALYZE;
 "#,
+    ),
+    M::up(
+        r#"
+DROP TABLE IF EXISTS settings;
+
+ANALYZE;
+"#,
     )]);
     migrations.to_latest(&mut sql)?;
+    Ok(())
+}
+
+fn migrate_settings_database() -> Result<()> {
+    let mut conn = get_settings_conn()?;
+    let migrations = Migrations::new(vec![M::up(
+        r#"
+CREATE TABLE "settings" (
+  "key"   VARCHAR(50) PRIMARY KEY,
+  "value" VARCHAR(100)
+);
+
+ANALYZE;
+"#,
+    )]);
+    migrations.to_latest(&mut conn)?;
     Ok(())
 }
 
@@ -326,7 +364,7 @@ fn row_to_channel_headers(row: &Row) -> Result<ChannelHttpHeaders, rusqlite::Err
 }
 
 pub fn get_settings() -> Result<HashMap<String, String>> {
-    let sql = get_conn()?;
+    let sql = get_settings_conn()?;
     let map = sql
         .prepare("SELECT key, value FROM Settings")?
         .query_map([], |row| {
@@ -340,7 +378,7 @@ pub fn get_settings() -> Result<HashMap<String, String>> {
 }
 
 pub fn update_settings(map: HashMap<String, Option<String>>) -> Result<()> {
-    let mut sql: PooledConnection<SqliteConnectionManager> = get_conn()?;
+    let mut sql: PooledConnection<SqliteConnectionManager> = get_settings_conn()?;
     let tx = sql.transaction()?;
     for (key, value) in map {
         tx.execute(
@@ -965,7 +1003,7 @@ pub fn get_movie_position(channel_id: i64) -> Result<Option<i64>> {
 }
 
 pub fn get_whats_new() -> Result<Option<String>> {
-    let sql = get_conn()?;
+    let sql = get_settings_conn()?;
     let version: Option<String> = sql
         .query_row(
             r#"

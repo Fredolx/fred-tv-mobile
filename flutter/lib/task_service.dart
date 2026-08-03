@@ -19,6 +19,25 @@ class TaskService {
 
   void notifyBusy() => Error.showMessage("${runningTask.value}, please wait");
 
+  Future<bool> favorite(int channelId, bool value) async {
+    if (busy) {
+      notifyBusy();
+      return false;
+    }
+    await NativeBridge.instance.favorite(channelId, value);
+    return true;
+  }
+
+  Future<void> addLastWatched(int channelId) async {
+    if (busy) return;
+    await NativeBridge.instance.addLastWatched(channelId);
+  }
+
+  Future<void> setMoviePosition(int channelId, int position) async {
+    if (busy) return;
+    await NativeBridge.instance.setMoviePosition(channelId, position);
+  }
+
   Future<void> refreshAll() => _run(
     _refreshLabel,
     () => NativeBridge.instance.refreshAll(),
