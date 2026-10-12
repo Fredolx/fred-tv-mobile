@@ -47,7 +47,7 @@ class _PlayerState extends State<Player> {
             return await NativeBridge.instance.getMoviePosition(
               widget.channel.id!,
             );
-          }, context)).data
+          })).data
         : null;
     await _startPlayback(seconds != null ? Duration(seconds: seconds) : null);
     subscriptions.add(
@@ -86,7 +86,7 @@ class _PlayerState extends State<Player> {
           return await NativeBridge.instance.getChannelHeaders(
             widget.channel.id!,
           );
-        }, context)).data;
+        })).data;
         await player.open(
           mk.Media(
             widget.channel.url!,
@@ -142,6 +142,9 @@ class _PlayerState extends State<Player> {
               ),
             )
             .toList(),
+        previouslySelectedId: player.state.tracks.subtitle.indexOf(
+          player.state.track.subtitle,
+        ),
       ),
     );
   }
@@ -167,6 +170,9 @@ class _PlayerState extends State<Player> {
               ),
             )
             .toList(),
+        previouslySelectedId: player.state.tracks.audio.indexOf(
+          player.state.track.audio,
+        ),
       ),
     );
   }
@@ -190,7 +196,7 @@ class _PlayerState extends State<Player> {
               key: key,
               controller: videoController,
               onExitFullscreen: (Platform.isAndroid || Platform.isIOS)
-                  ? () async => onExit()
+                  ? onExit
                   : defaultExitNativeFullscreen,
               controls: AdaptiveVideoControls,
             ),
@@ -200,7 +206,7 @@ class _PlayerState extends State<Player> {
     );
   }
 
-  void onExit() async {
+  Future<void> onExit() async {
     if (exiting) return;
     exiting = true;
     if (widget.channel.mediaType == MediaType.movie) {
@@ -274,16 +280,15 @@ class _PlayerState extends State<Player> {
         ),
         if (!(Platform.isAndroid || Platform.isIOS)) ...[
           const Spacer(),
-          const MaterialFullscreenButton(
-            iconSize: 32,
-            iconColor: Colors.white,
-          ),
+          const MaterialFullscreenButton(iconSize: 32, iconColor: Colors.white),
         ],
       ],
     );
   }
 
-  MaterialDesktopVideoControlsThemeData getDesktopThemeData(BuildContext context) {
+  MaterialDesktopVideoControlsThemeData getDesktopThemeData(
+    BuildContext context,
+  ) {
     return MaterialDesktopVideoControlsThemeData(
       seekBarMargin: const EdgeInsets.only(bottom: 60),
       seekBarThumbSize: 20,

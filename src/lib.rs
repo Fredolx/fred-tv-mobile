@@ -257,7 +257,12 @@ pub extern "C" fn update_settings(task_id: u64, callback: FfiCallback, ptr: *con
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn add_last_watched(task_id: u64, callback: FfiCallback, ptr: *const u8, len: usize) {
+pub extern "C" fn add_last_watched(
+    task_id: u64,
+    callback: FfiCallback,
+    ptr: *const u8,
+    len: usize,
+) {
     c::queue_blocking_with_message(
         task_id,
         callback,
@@ -268,7 +273,12 @@ pub extern "C" fn add_last_watched(task_id: u64, callback: FfiCallback, ptr: *co
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn set_movie_position(task_id: u64, callback: FfiCallback, ptr: *const u8, len: usize) {
+pub extern "C" fn set_movie_position(
+    task_id: u64,
+    callback: FfiCallback,
+    ptr: *const u8,
+    len: usize,
+) {
     c::queue_blocking_with_message(
         task_id,
         callback,
@@ -281,7 +291,12 @@ pub extern "C" fn set_movie_position(task_id: u64, callback: FfiCallback, ptr: *
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn get_movie_position(task_id: u64, callback: FfiCallback, ptr: *const u8, len: usize) {
+pub extern "C" fn get_movie_position(
+    task_id: u64,
+    callback: FfiCallback,
+    ptr: *const u8,
+    len: usize,
+) {
     c::queue_blocking_with_message(
         task_id,
         callback,
@@ -303,7 +318,12 @@ pub extern "C" fn clear_history(task_id: u64, callback: FfiCallback) {
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn source_name_exists(task_id: u64, callback: FfiCallback, ptr: *const u8, len: usize) {
+pub extern "C" fn source_name_exists(
+    task_id: u64,
+    callback: FfiCallback,
+    ptr: *const u8,
+    len: usize,
+) {
     c::queue_blocking_with_message(
         task_id,
         callback,
@@ -338,7 +358,12 @@ pub extern "C" fn get_episodes(task_id: u64, callback: FfiCallback, ptr: *const 
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn should_show_whats_new(task_id: u64, callback: FfiCallback, ptr: *const u8, len: usize) {
+pub extern "C" fn should_show_whats_new(
+    task_id: u64,
+    callback: FfiCallback,
+    ptr: *const u8,
+    len: usize,
+) {
     c::queue_blocking_with_message(
         task_id,
         callback,
@@ -355,7 +380,12 @@ pub extern "C" fn should_show_whats_new(task_id: u64, callback: FfiCallback, ptr
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn update_last_seen_version(task_id: u64, callback: FfiCallback, ptr: *const u8, len: usize) {
+pub extern "C" fn update_last_seen_version(
+    task_id: u64,
+    callback: FfiCallback,
+    ptr: *const u8,
+    len: usize,
+) {
     c::queue_blocking_with_message(
         task_id,
         callback,
@@ -375,7 +405,12 @@ pub extern "C" fn refresh_all(task_id: u64, callback: FfiCallback) {
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn get_channel_headers(task_id: u64, callback: FfiCallback, ptr: *const u8, len: usize) {
+pub extern "C" fn get_channel_headers(
+    task_id: u64,
+    callback: FfiCallback,
+    ptr: *const u8,
+    len: usize,
+) {
     c::queue_blocking_with_message(
         task_id,
         callback,
@@ -439,7 +474,12 @@ pub extern "C" fn get_sources(task_id: u64, callback: FfiCallback) {
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn set_source_enabled(task_id: u64, callback: FfiCallback, ptr: *const u8, len: usize) {
+pub extern "C" fn set_source_enabled(
+    task_id: u64,
+    callback: FfiCallback,
+    ptr: *const u8,
+    len: usize,
+) {
     c::queue_blocking_with_message(
         task_id,
         callback,
@@ -452,6 +492,18 @@ pub extern "C" fn set_source_enabled(task_id: u64, callback: FfiCallback, ptr: *
             )
         },
     )
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn get_all_expiries(task_id: u64, callback: FfiCallback) {
+    c::queue_async(task_id, callback, async move {
+        let result = xtream::get_all_expiries().await;
+        result.map(|res| {
+            crate::generated_proto::ffi_result::Data::Expiries(generated_proto::Expiries {
+                expiries: res,
+            })
+        })
+    })
 }
 
 #[unsafe(no_mangle)]

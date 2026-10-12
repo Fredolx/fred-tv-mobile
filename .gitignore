@@ -1,2 +1,5 @@
 /target
 out
+*.aab
+*.so
+*.dll

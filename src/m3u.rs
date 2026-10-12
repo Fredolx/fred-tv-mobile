@@ -13,7 +13,6 @@ use regex::{Captures, Regex};
 use rusqlite::Transaction;
 use types::{Channel, Source};
 
-use crate::types::ChannelPreserve;
 use crate::utils;
 use crate::{
     media_type, source_type,
@@ -47,10 +46,11 @@ struct M3UProcessing {
     last_non_empty_line: Option<String>,
     groups: HashMap<String, i64>,
     source_id: i64,
+    modified: i64,
     line_count: usize,
 }
 
-pub fn read_m3u8(mut source: Source, wipe: bool) -> Result<()> {
+pub fn read_m3u8(mut source: Source) -> Result<()> {
     let path = match source.source_type {
         source_type::M3U_LINK => get_tmp_path()?,
         _ => source.url.clone().context("no file path found")?,
@@ -59,15 +59,8 @@ pub fn read_m3u8(mut source: Source, wipe: bool) -> Result<()> {
     let reader = BufReader::new(file);
     let mut lines = reader.lines().enumerate();
     let mut sql = sql::get_conn()?;
-    let mut channel_preserve: Vec<ChannelPreserve> = Vec::new();
     let tx = sql.transaction()?;
-    if wipe {
-        channel_preserve =
-            sql::get_preserve(&tx, source.id.context("no source id")?).unwrap_or_default();
-        sql::wipe(&tx, source.id.context("no source id")?)?;
-    } else {
-        source.id = Some(sql::create_or_find_source_by_name(&tx, &source)?);
-    }
+    let modified = sql::start_refresh(&tx, &mut source)?;
     let mut processing = M3UProcessing {
         channel_headers: None,
         channel_headers_set: false,
@@ -75,6 +68,7 @@ pub fn read_m3u8(mut source: Source, wipe: bool) -> Result<()> {
         groups: HashMap::new(),
         last_non_empty_line: None,
         source_id: source.id.context("no source id")?,
+        modified,
         line_count: 0,
     };
     while let Some((c1, l1)) = lines.next() {
@@ -108,9 +102,7 @@ pub fn read_m3u8(mut source: Source, wipe: bool) -> Result<()> {
         }
     }
     try_commit_channel(&mut processing, &tx);
-    if wipe {
-        sql::restore_preserve(&tx, source.id.context("no source id")?, channel_preserve)?;
-    }
+    sql::delete_stale(&tx, processing.source_id, modified)?;
     sql::analyze(&tx)?;
     tx.commit()?;
     Ok(())
@@ -127,6 +119,7 @@ fn try_commit_channel(processing: &mut M3UProcessing, tx: &Transaction) {
             &mut processing.groups,
             processing.channel_headers.take(),
             processing.source_id,
+            processing.modified,
             &tx,
         )
         .with_context(|| {
@@ -147,6 +140,7 @@ fn commit_channel(
     groups: &mut HashMap<String, i64>,
     headers: Option<ChannelHttpHeaders>,
     source_id: i64,
+    modified: i64,
     tx: &Transaction,
 ) -> Result<()> {
     let mut channel = get_channel_from_lines(
@@ -154,22 +148,19 @@ fn commit_channel(
         last_line.context("missing last line")?,
         source_id,
     )?;
-    set_channel_group_id(groups, &mut channel, tx, &source_id).unwrap_or_else(|e| {
+    set_channel_group_id(groups, &mut channel, tx, &source_id, modified).unwrap_or_else(|e| {
         tracing::error!(
             "Failed to set group id for channel: {}, Error: {:?}",
             channel.name,
             e
         )
     });
-    sql::insert_channel(tx, channel)?;
-    if let Some(mut headers) = headers {
-        headers.channel_id = Some(tx.last_insert_rowid());
-        sql::insert_channel_headers(tx, headers)?;
-    }
+    let channel_id = sql::insert_channel(tx, channel, modified)?;
+    sql::set_channel_headers(tx, channel_id, headers)?;
     Ok(())
 }
 
-pub async fn get_m3u8_from_link(source: Source, wipe: bool) -> Result<()> {
+pub async fn get_m3u8_from_link(source: Source) -> Result<()> {
     let user_agent = get_user_agent_from_source(&source)?;
     let client = reqwest::Client::builder().user_agent(user_agent).build()?;
     let url = source.url.clone().context("Invalid source")?;
@@ -188,7 +179,7 @@ pub async fn get_m3u8_from_link(source: Source, wipe: bool) -> Result<()> {
     while let Some(chunk) = response.chunk().await? {
         file.write_all(&chunk)?;
     }
-    read_m3u8(source, wipe)
+    read_m3u8(source)
 }
 
 fn get_tmp_path() -> Result<String> {

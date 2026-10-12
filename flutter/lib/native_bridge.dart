@@ -12,7 +12,7 @@ import 'package:open_tv/models/channel.dart';
 import 'package:open_tv/models/source.dart';
 import 'package:open_tv/models/filters.dart';
 import 'package:open_tv/models/settings.dart';
-import 'package:open_tv/models/proto_extensions.dart';
+import 'package:open_tv/extensions/proto_extensions.dart';
 import 'package:open_tv/models/channel_http_headers.dart';
 
 class NativeBridge {
@@ -21,7 +21,8 @@ class NativeBridge {
   final ffi.RustLibBindings _bindings;
   int _nextTaskId = 0;
   final Map<int, Completer<pb.FFIResult>> _pendingRequests = {};
-  late final NativeCallable<Void Function(Uint64, Pointer<Uint8>, Size)> _globalCallback;
+  late final NativeCallable<Void Function(Uint64, Pointer<Uint8>, Size)>
+  _globalCallback;
 
   static NativeBridge get instance => _instance ??= NativeBridge._internal(
     ffi.RustLibBindings(_openDynamicLibrary()),
@@ -41,26 +42,29 @@ class NativeBridge {
   }
 
   NativeBridge._internal(this._bindings) {
-    _globalCallback = NativeCallable<Void Function(Uint64, Pointer<Uint8>, Size)>.listener(
-      (int taskId, Pointer<Uint8> ptr, int len) {
-        final completer = _pendingRequests.remove(taskId);
-        if (completer == null) return;
+    _globalCallback =
+        NativeCallable<Void Function(Uint64, Pointer<Uint8>, Size)>.listener((
+          int taskId,
+          Pointer<Uint8> ptr,
+          int len,
+        ) {
+          final completer = _pendingRequests.remove(taskId);
+          if (completer == null) return;
 
-        try {
-          final Uint8List copiedBytes;
           try {
-            final u8List = ptr.asTypedList(len);
-            copiedBytes = Uint8List.fromList(u8List);
-          } finally {
-            _bindings.free_message(ptr, len);
+            final Uint8List copiedBytes;
+            try {
+              final u8List = ptr.asTypedList(len);
+              copiedBytes = Uint8List.fromList(u8List);
+            } finally {
+              _bindings.free_message(ptr, len);
+            }
+            final result = pb.FFIResult.fromBuffer(copiedBytes);
+            completer.complete(result);
+          } catch (e, stackTrace) {
+            completer.completeError(e, stackTrace);
           }
-          final result = pb.FFIResult.fromBuffer(copiedBytes);
-          completer.complete(result);
-        } catch (e, stackTrace) {
-          completer.completeError(e, stackTrace);
-        }
-      },
-    );
+        });
   }
 
   Future<pb.FFIResult> _executeAsync(
@@ -72,14 +76,21 @@ class NativeBridge {
     ffiAction(taskId, _globalCallback.nativeFunction);
     final result = await completer.future;
     if (!result.success) {
-      throw Exception(result.hasErrorMessage() ? result.errorMessage : "Unknown FFI error");
+      throw Exception(
+        result.hasErrorMessage() ? result.errorMessage : "Unknown FFI error",
+      );
     }
     return result;
   }
 
   Future<pb.FFIResult> _executeWithMsg<T extends $pb.GeneratedMessage>(
     T request,
-    void Function(int taskId, Pointer<Uint8> ptr, int len, ffi.FfiCallback callback)
+    void Function(
+      int taskId,
+      Pointer<Uint8> ptr,
+      int len,
+      ffi.FfiCallback callback,
+    )
     ffiAction,
   ) async {
     final pbBytes = request.writeToBuffer();
@@ -202,7 +213,12 @@ class NativeBridge {
   }
 
   Future<int?> getMoviePosition(int id) async {
-    final result = await _executeWithMsg(pb.IdMessage(value: Int64(id)), (id, ptr, len, cb) {
+    final result = await _executeWithMsg(pb.IdMessage(value: Int64(id)), (
+      id,
+      ptr,
+      len,
+      cb,
+    ) {
       _bindings.get_movie_position(id, cb, ptr, len);
     });
     return result.hasMoviePosition() && result.moviePosition.hasPosition()
@@ -211,13 +227,22 @@ class NativeBridge {
   }
 
   Future<ChannelHttpHeaders?> getChannelHeaders(int id) async {
-    final result = await _executeWithMsg(pb.IdMessage(value: Int64(id)), (id, ptr, len, cb) {
+    final result = await _executeWithMsg(pb.IdMessage(value: Int64(id)), (
+      id,
+      ptr,
+      len,
+      cb,
+    ) {
       _bindings.get_channel_headers(id, cb, ptr, len);
     });
     return result.hasHeaders() ? result.headers.toDomain() : null;
   }
 
-  Future<void> getEpisodes(int seriesId, int sourceId, String? fallbackImage) async {
+  Future<void> getEpisodes(
+    int seriesId,
+    int sourceId,
+    String? fallbackImage,
+  ) async {
     final msg = pb.GetEpisodes(
       seriesId: Int64(seriesId),
       sourceId: Int64(sourceId),
@@ -241,16 +266,24 @@ class NativeBridge {
   }
 
   Future<bool> sourceNameExists(String name) async {
-    final result = await _executeWithMsg(pb.StrMessage(value: name), (id, ptr, len, cb) {
+    final result = await _executeWithMsg(pb.StrMessage(value: name), (
+      id,
+      ptr,
+      len,
+      cb,
+    ) {
       _bindings.source_name_exists(id, cb, ptr, len);
     });
     return result.boolMessage.value;
   }
 
   Future<bool> shouldShowWhatsNew(String? currentVersion) async {
-    final result = await _executeWithMsg(pb.OptStrMessage(value: currentVersion), (id, ptr, len, cb) {
-      _bindings.should_show_whats_new(id, cb, ptr, len);
-    });
+    final result = await _executeWithMsg(
+      pb.OptStrMessage(value: currentVersion),
+      (id, ptr, len, cb) {
+        _bindings.should_show_whats_new(id, cb, ptr, len);
+      },
+    );
     return result.boolMessage.value;
   }
 
@@ -258,6 +291,15 @@ class NativeBridge {
     await _executeWithMsg(pb.StrMessage(value: version), (id, ptr, len, cb) {
       _bindings.update_last_seen_version(id, cb, ptr, len);
     });
+  }
+
+  Future<Map<int, int>> getAllExpiries() async {
+    final result = await _executeAsync((id, cb) {
+      _bindings.get_all_expiries(id, cb);
+    });
+    return result.expiries.expiries.map(
+      (key, value) => MapEntry(key.toInt(), value.toInt()),
+    );
   }
 
   void dispose() {

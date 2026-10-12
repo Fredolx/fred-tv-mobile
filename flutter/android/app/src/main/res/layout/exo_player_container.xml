@@ -12,6 +12,6 @@
         app:surface_type="surface_view"
         app:resize_mode="fit"
         app:show_subtitle_button="true"
-        app:auto_show="true"
+        app:auto_show="false"
         app:controller_layout_id="@layout/custom_player_control_view" />
 </FrameLayout>
