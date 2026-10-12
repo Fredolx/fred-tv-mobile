@@ -153,11 +153,11 @@ class _ChannelTileState extends State<ChannelTile> {
   Future<void> favorite() async {
     if (widget.channel.mediaType == MediaType.group) return;
     await Error.tryAsyncNoLoading(() async {
-      final applied = await TaskService.instance.favorite(
+      await NativeBridge.instance.favorite(
         widget.channel.id!,
         !widget.channel.favorite,
       );
-      if (!applied || !mounted) return;
+      if (!mounted) return;
       setState(() {
         widget.channel.favorite = !widget.channel.favorite;
       });
@@ -222,7 +222,7 @@ class _ChannelTileState extends State<ChannelTile> {
       );
     } else {
       var settings = await NativeBridge.instance.getSettings();
-      TaskService.instance.addLastWatched(widget.channel.id!);
+      NativeBridge.instance.addLastWatched(widget.channel.id!);
       if (!mounted) return;
       TaskService.instance.playerVisible.value = true;
       await Navigator.push(

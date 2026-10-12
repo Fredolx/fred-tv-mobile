@@ -96,15 +96,6 @@ pub struct ChannelHttpHeaders {
 }
 
 #[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
-pub struct ChannelPreserve {
-    pub name: String,
-    pub favorite: bool,
-    pub last_watched: Option<i64>,
-    #[serde(default)]
-    pub is_group: bool,
-}
-
-#[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
 pub struct XtreamStatus {
     pub user_info: XtreamStatusUserInfo,
 }

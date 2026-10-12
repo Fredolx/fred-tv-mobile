@@ -3,7 +3,6 @@ use crate::source_type;
 use crate::sql;
 use crate::sql::insert_season;
 use crate::types::Channel;
-use crate::types::ChannelPreserve;
 use crate::types::Season;
 use crate::types::Source;
 use crate::types::XtreamStatus;
@@ -100,7 +99,7 @@ fn build_xtream_url(source: &mut Source) -> Result<Url> {
     Ok(url)
 }
 
-pub async fn get_xtream(mut source: Source, wipe: bool) -> Result<()> {
+pub async fn get_xtream(mut source: Source) -> Result<()> {
     let url = build_xtream_url(&mut source)?;
     let user_agent = get_user_agent_from_source(&source)?;
     let (live, live_cats, vods, vods_cats, series, series_cats) = join!(
@@ -119,47 +118,33 @@ pub async fn get_xtream(mut source: Source, wipe: bool) -> Result<()> {
             &user_agent
         ),
     );
+    let live = live.context("Failed to fetch live streams")?;
+    let live_cats = live_cats.context("Failed to fetch live categories")?;
+    let vods = vods.context("Failed to fetch vods")?;
+    let vods_cats = vods_cats.context("Failed to fetch vod categories")?;
+    let series = series.context("Failed to fetch series")?;
+    let series_cats = series_cats.context("Failed to fetch series categories")?;
     let mut sql = sql::get_conn()?;
     let tx = sql.transaction()?;
-    let mut channel_preserve: Vec<ChannelPreserve> = Vec::new();
-    if wipe {
-        channel_preserve =
-            sql::get_preserve(&tx, source.id.context("no source id")?).unwrap_or_default();
-        sql::wipe(&tx, source.id.context("Source should have id")?)?;
-    } else {
-        source.id = Some(sql::create_or_find_source_by_name(&tx, &source)?);
-    }
-    let mut fail_count = 0;
-    live.and_then(|live| process_xtream(&tx, live, live_cats?, &source, media_type::LIVESTREAM))
-        .unwrap_or_else(|e| {
-            tracing::error!("{:?}", e.context("Failed to process live"));
-            fail_count += 1;
-        });
-    vods.and_then(|vods: Vec<XtreamStream>| {
-        process_xtream(&tx, vods, vods_cats?, &source, media_type::MOVIE)
-    })
-    .unwrap_or_else(|e| {
-        tracing::error!("{:?}", e.context("Failed to process vods"));
-        fail_count += 1;
-    });
-    series
-        .and_then(|series: Vec<XtreamStream>| {
-            process_xtream(&tx, series, series_cats?, &source, media_type::SERIE)
-        })
-        .unwrap_or_else(|e| {
-            tracing::error!("{:?}", e.context("Failed to process series"));
-            fail_count += 1;
-        });
-    if fail_count > 2 {
-        match tx.rollback() {
-            Ok(_) => {}
-            Err(e) => tracing::error!("Failed to rollback tx: {:?}", e),
-        }
-        return Err(anyhow::anyhow!("Too many Xtream requests failed"));
-    }
-    if wipe {
-        sql::restore_preserve(&tx, source.id.context("no source id")?, channel_preserve)?;
-    }
+    let modified = sql::start_refresh(&tx, &mut source)?;
+    process_xtream(
+        &tx,
+        live,
+        live_cats,
+        &source,
+        media_type::LIVESTREAM,
+        modified,
+    )?;
+    process_xtream(&tx, vods, vods_cats, &source, media_type::MOVIE, modified)?;
+    process_xtream(
+        &tx,
+        series,
+        series_cats,
+        &source,
+        media_type::SERIE,
+        modified,
+    )?;
+    sql::delete_stale(&tx, source.id.context("no source id")?, modified)?;
     sql::analyze(&tx)?;
     tx.commit()?;
     Ok(())
@@ -181,6 +166,7 @@ fn process_xtream(
     cats: Vec<XtreamCategory>,
     source: &Source,
     stream_type: u8,
+    modified: i64,
 ) -> Result<()> {
     let cats: HashMap<String, String> = cats
         .into_iter()
@@ -199,9 +185,10 @@ fn process_xtream(
                     &mut channel,
                     &tx,
                     source.id.as_ref().unwrap(),
+                    modified,
                 )
                 .unwrap_or_else(|e| tracing::error!("{:?}", e));
-                sql::insert_channel(&tx, channel)?;
+                sql::insert_channel(&tx, channel, modified)?;
                 Ok(())
             })
             .unwrap_or_else(|e| tracing::error!("{:?}", e));
@@ -326,6 +313,7 @@ pub async fn get_episodes(
                 get_serde_json_i64(&a.episode_num).cmp(&get_serde_json_i64(&b.episode_num))
             })
     });
+    sql::delete_orphan_user_data()?;
     insert_episodes(&source, seasons, episodes, series_id, fallback_image)?;
     Ok(())
 }
@@ -398,7 +386,7 @@ fn insert_episode(
         }
     };
     let episode = episode_to_channel(episode, &source, series_id, season_id)?;
-    sql::insert_channel(&tx, episode)?;
+    sql::insert_channel(&tx, episode, chrono::Utc::now().timestamp())?;
     Ok(())
 }
 

@@ -5,7 +5,7 @@ use std::vec;
 use std::{collections::HashMap, sync::LazyLock};
 
 use crate::sort_type;
-use crate::types::{ChannelPreserve, Season};
+use crate::types::Season;
 use crate::{
     media_type,
     types::{Channel, ChannelHttpHeaders, Filters, Source},
@@ -19,25 +19,34 @@ use rusqlite_migration::{M, Migrations};
 
 const PAGE_SIZE: u8 = 36;
 pub const DB_NAME: &str = "db_rust.sqlite";
-pub const DB_SETTINGS_NAME: &str = "db_rust_settings.sqlite";
+pub const DB_USER_NAME: &str = "db_rust_user.sqlite";
 pub const LAST_SEEN_VERSION_KEY: &str = "last_seen_version";
 pub static DB_PATH_OVERRIDE: OnceLock<String> = OnceLock::new();
 static CONN: LazyLock<Pool<SqliteConnectionManager>> =
-    LazyLock::new(|| create_connection_pool(DB_NAME));
-static SETTINGS_CONN: LazyLock<Pool<SqliteConnectionManager>> =
-    LazyLock::new(|| create_connection_pool(DB_SETTINGS_NAME));
+    LazyLock::new(|| create_connection_pool(DB_NAME, true));
+static USER_CONN: LazyLock<Pool<SqliteConnectionManager>> =
+    LazyLock::new(|| create_connection_pool(DB_USER_NAME, false));
 
 pub fn get_conn() -> Result<PooledConnection<SqliteConnectionManager>> {
     CONN.try_get().context("No sqlite conns available")
 }
 
-pub fn get_settings_conn() -> Result<PooledConnection<SqliteConnectionManager>> {
-    SETTINGS_CONN.try_get().context("No sqlite conns available")
+pub fn get_user_conn() -> Result<PooledConnection<SqliteConnectionManager>> {
+    USER_CONN.try_get().context("No sqlite conns available")
 }
 
-fn create_connection_pool(db_name: &str) -> Pool<SqliteConnectionManager> {
-    let manager = SqliteConnectionManager::file(get_and_create_db_path(db_name))
-        .with_init(|c| c.pragma_update_and_check(None, "journal_mode", "WAL", |_| Ok(())));
+fn create_connection_pool(db_name: &str, attach_user_db: bool) -> Pool<SqliteConnectionManager> {
+    let user_db_path = get_and_create_db_path(DB_USER_NAME);
+    let manager =
+        SqliteConnectionManager::file(get_and_create_db_path(db_name)).with_init(move |c| {
+            c.pragma_update_and_check(None, "journal_mode", "WAL", |_| Ok(()))?;
+            c.pragma_update(None, "temp_store", "MEMORY")?;
+            if attach_user_db {
+                c.execute("ATTACH DATABASE ?1 AS user_db", [&user_db_path])?;
+                c.pragma_update_and_check(Some("user_db"), "journal_mode", "WAL", |_| Ok(()))?;
+            }
+            Ok(())
+        });
     r2d2::Pool::builder().max_size(20).build(manager).unwrap()
 }
 
@@ -51,15 +60,42 @@ fn get_and_create_db_path(db_name: &str) -> String {
 }
 
 pub fn apply_migrations() -> Result<()> {
+    apply_user_migrations()?;
     apply_main_migrations()?;
-    migrate_settings_database()?;
+    Ok(())
+}
+
+fn apply_user_migrations() -> Result<()> {
+    let mut conn = get_user_conn()?;
+    let migrations = Migrations::new(vec![M::up(
+        r#"
+CREATE TABLE "settings" (
+  "key"   VARCHAR(50) PRIMARY KEY,
+  "value" VARCHAR(100)
+);
+
+CREATE TABLE "channel_user_data" (
+  "channel_id"   INTEGER PRIMARY KEY,
+  "favorite"     integer NOT NULL DEFAULT 0,
+  "last_watched" integer,
+  "position"     integer
+);
+
+CREATE INDEX index_channel_user_data_favorite ON channel_user_data(favorite);
+CREATE INDEX index_channel_user_data_last_watched ON channel_user_data(last_watched);
+
+ANALYZE;
+"#,
+    )]);
+    migrations.to_latest(&mut conn)?;
     Ok(())
 }
 
 fn apply_main_migrations() -> Result<()> {
     let mut sql = get_conn()?;
-    let migrations = Migrations::new(vec![M::up(
-        r#"
+    let migrations = Migrations::new(vec![
+        M::up(
+            r#"
 CREATE TABLE "sources" (
   "id"                INTEGER PRIMARY KEY,
   "name"              varchar(100),
@@ -162,35 +198,64 @@ CREATE UNIQUE INDEX unique_seasons ON seasons(season_number, series_id, source_i
 
 ANALYZE;
 "#,
-    ),
-    M::up(
-        r#"
-DROP TABLE IF EXISTS settings;
+        ),
+        M::up(
+            r#"
+INSERT OR IGNORE INTO user_db.settings (key, value)
+SELECT key, value FROM main.settings WHERE true;
+
+CREATE TEMP TABLE channel_keep AS
+SELECT id, MIN(id) OVER (
+  PARTITION BY name, source_id, url, COALESCE(series_id, -1), COALESCE(season_id, -1)
+) AS keep_id
+FROM channels;
+
+INSERT INTO user_db.channel_user_data (channel_id, favorite, last_watched)
+SELECT k.keep_id, MAX(COALESCE(c.favorite, 0)), MAX(c.last_watched)
+FROM channels c
+JOIN temp.channel_keep k ON k.id = c.id
+WHERE c.favorite = 1 OR c.last_watched IS NOT NULL
+GROUP BY k.keep_id
+ON CONFLICT (channel_id) DO UPDATE SET
+  favorite = excluded.favorite,
+  last_watched = excluded.last_watched;
+
+INSERT INTO user_db.channel_user_data (channel_id, position)
+SELECT k.keep_id, MAX(m.position)
+FROM movie_positions m
+JOIN temp.channel_keep k ON k.id = m.channel_id
+WHERE m.position IS NOT NULL
+GROUP BY k.keep_id
+ON CONFLICT (channel_id) DO UPDATE SET position = excluded.position;
+
+DELETE FROM channels
+WHERE id IN (SELECT id FROM temp.channel_keep WHERE id != keep_id);
+
+DROP TABLE temp.channel_keep;
+
+DROP INDEX index_channel_favorite;
+DROP INDEX index_channels_last_watched;
+DROP INDEX channels_unique;
+ALTER TABLE channels DROP COLUMN favorite;
+ALTER TABLE channels DROP COLUMN last_watched;
+DROP TABLE movie_positions;
+DROP TABLE settings;
+
+ALTER TABLE channels ADD COLUMN modified integer;
+ALTER TABLE groups ADD COLUMN modified integer;
+
+CREATE UNIQUE INDEX channels_unique
+ON channels(name, source_id, url, COALESCE(series_id, -1), COALESCE(season_id, -1));
 
 ANALYZE;
 "#,
-    )]);
+        ),
+    ]);
     migrations.to_latest(&mut sql)?;
     Ok(())
 }
 
-fn migrate_settings_database() -> Result<()> {
-    let mut conn = get_settings_conn()?;
-    let migrations = Migrations::new(vec![M::up(
-        r#"
-CREATE TABLE "settings" (
-  "key"   VARCHAR(50) PRIMARY KEY,
-  "value" VARCHAR(100)
-);
-
-ANALYZE;
-"#,
-    )]);
-    migrations.to_latest(&mut conn)?;
-    Ok(())
-}
-
-pub fn create_or_find_source_by_name(tx: &Transaction, source: &Source) -> Result<i64> {
+fn create_or_find_source_by_name(tx: &Transaction, source: &Source) -> Result<i64> {
     let id: Option<i64> = tx
         .query_row(
             "SELECT id FROM sources WHERE name = ?1",
@@ -202,10 +267,93 @@ pub fn create_or_find_source_by_name(tx: &Transaction, source: &Source) -> Resul
         return Ok(id);
     }
     tx.execute(
-    "INSERT INTO sources (name, source_type, url, username, password, user_agent, last_updated) VALUES (?, ?, ?, ?, ?, ?, ?)",
-    params![source.name, source.source_type.clone() as u8, source.url, source.username, source.password, source.user_agent, chrono::Utc::now().timestamp()],
+    "INSERT INTO sources (name, source_type, url, username, password, user_agent) VALUES (?, ?, ?, ?, ?, ?)",
+    params![source.name, source.source_type.clone() as u8, source.url, source.username, source.password, source.user_agent],
     )?;
     Ok(tx.last_insert_rowid())
+}
+
+pub fn start_refresh(tx: &Transaction, source: &mut Source) -> Result<i64> {
+    let source_id = match source.id {
+        Some(id) => id,
+        None => create_or_find_source_by_name(tx, source)?,
+    };
+    source.id = Some(source_id);
+    Ok(tx.query_row(
+        r#"
+        UPDATE sources
+        SET last_updated = MAX(?1, COALESCE(last_updated, 0) + 1)
+        WHERE id = ?2
+        RETURNING last_updated
+        "#,
+        params![chrono::Utc::now().timestamp(), source_id],
+        |r| r.get(0),
+    )?)
+}
+
+pub fn delete_stale(tx: &Transaction, source_id: i64, modified: i64) -> Result<()> {
+    tx.execute(
+        r#"
+        DELETE FROM channels
+        WHERE source_id = ?1
+        AND series_id IS NULL
+        AND modified IS NOT ?2
+        "#,
+        params![source_id, modified],
+    )?;
+    tx.execute(
+        r#"
+        DELETE FROM channels
+        WHERE source_id = ?1
+        AND series_id IS NOT NULL
+        AND series_id NOT IN (
+            SELECT CAST(url AS INTEGER)
+            FROM channels
+            WHERE source_id = ?1
+            AND media_type = ?2
+            AND url IS NOT NULL
+        )
+        "#,
+        params![source_id, media_type::SERIE],
+    )?;
+    tx.execute(
+        r#"
+        DELETE FROM seasons
+        WHERE source_id = ?1
+        AND series_id NOT IN (
+            SELECT CAST(url AS INTEGER)
+            FROM channels
+            WHERE source_id = ?1
+            AND media_type = ?2
+            AND url IS NOT NULL
+        )
+        "#,
+        params![source_id, media_type::SERIE],
+    )?;
+    tx.execute(
+        r#"
+        DELETE FROM groups
+        WHERE source_id = ?1
+        AND modified IS NOT ?2
+        "#,
+        params![source_id, modified],
+    )?;
+    Ok(())
+}
+
+pub fn delete_orphan_user_data() -> Result<()> {
+    let sql = get_conn()?;
+    sql.execute(
+        r#"
+        DELETE FROM user_db.channel_user_data
+        WHERE NOT EXISTS (
+            SELECT 1 FROM main.channels c WHERE c.id = channel_user_data.channel_id
+        )
+        OR (favorite = 0 AND last_watched IS NULL AND position IS NULL)
+        "#,
+        params![],
+    )?;
+    Ok(())
 }
 
 pub fn insert_season(tx: &Transaction, season: Season) -> Result<i64> {
@@ -239,21 +387,24 @@ pub fn insert_season(tx: &Transaction, season: Season) -> Result<i64> {
     )?)
 }
 
-pub fn insert_channel(tx: &Transaction, channel: Channel) -> Result<()> {
-    tx.execute(
+pub fn insert_channel(tx: &Transaction, channel: Channel, modified: i64) -> Result<i64> {
+    Ok(tx.prepare_cached(
         r#"
-INSERT INTO channels (name, group_id, image, url, source_id, media_type, series_id, favorite, stream_id, tv_archive, season_id, episode_num)
+INSERT INTO channels (name, group_id, image, url, source_id, media_type, series_id, stream_id, tv_archive, season_id, episode_num, modified)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-ON CONFLICT (name, source_id, url, series_id, season_id)
+ON CONFLICT (name, source_id, url, COALESCE(series_id, -1), COALESCE(season_id, -1))
 DO UPDATE SET
-    url = excluded.url,
+    group_id = excluded.group_id,
     media_type = excluded.media_type,
     stream_id = excluded.stream_id,
     image = excluded.image,
-    series_id = excluded.series_id,
     tv_archive = excluded.tv_archive,
-    season_id = excluded.season_id;
+    episode_num = excluded.episode_num,
+    modified = excluded.modified
+RETURNING id;
 "#,
+    )?
+    .query_row(
         params![
             channel.name,
             channel.group_id,
@@ -262,30 +413,44 @@ DO UPDATE SET
             channel.source_id,
             channel.media_type as u8,
             channel.series_id,
-            channel.favorite,
             channel.stream_id,
             channel.tv_archive,
             channel.season_id,
-            channel.episode_num
+            channel.episode_num,
+            modified
         ],
-    )?;
-    Ok(())
+        |r| r.get(0),
+    )?)
 }
 
-pub fn insert_channel_headers(tx: &Transaction, headers: ChannelHttpHeaders) -> Result<()> {
-    tx.execute(
+pub fn set_channel_headers(
+    tx: &Transaction,
+    channel_id: i64,
+    headers: Option<ChannelHttpHeaders>,
+) -> Result<()> {
+    let Some(headers) = headers else {
+        tx.prepare_cached("DELETE FROM channel_http_headers WHERE channel_id = ?")?
+            .execute(params![channel_id])?;
+        return Ok(());
+    };
+    tx.prepare_cached(
         r#"
-INSERT OR IGNORE INTO channel_http_headers (channel_id, referrer, user_agent, http_origin, ignore_ssl)
-VALUES (?, ?, ?, ?, ?);
+INSERT INTO channel_http_headers (channel_id, referrer, user_agent, http_origin, ignore_ssl)
+VALUES (?, ?, ?, ?, ?)
+ON CONFLICT (channel_id) DO UPDATE SET
+    referrer = excluded.referrer,
+    user_agent = excluded.user_agent,
+    http_origin = excluded.http_origin,
+    ignore_ssl = excluded.ignore_ssl;
 "#,
-        params![
-            headers.channel_id,
-            headers.referrer,
-            headers.user_agent,
-            headers.http_origin,
-            headers.ignore_ssl
-        ],
-    )?;
+    )?
+    .execute(params![
+        channel_id,
+        headers.referrer,
+        headers.user_agent,
+        headers.http_origin,
+        headers.ignore_ssl
+    ])?;
     Ok(())
 }
 
@@ -295,22 +460,18 @@ fn get_or_insert_group(
     image: &Option<String>,
     source_id: &i64,
     media_type: u8,
+    modified: i64,
 ) -> Result<i64> {
-    let rows_changed = tx.execute(
+    Ok(tx.query_row(
         r#"
-        INSERT OR IGNORE INTO groups (name, image, source_id, media_type)
-        VALUES (?, ?, ?, ?);
+        INSERT INTO groups (name, image, source_id, media_type, modified)
+        VALUES (?, ?, ?, ?, ?)
+        ON CONFLICT (name, source_id) DO UPDATE SET modified = excluded.modified
+        RETURNING id;
         "#,
-        params![group, &image, source_id, media_type],
-    )?;
-    if rows_changed == 0 {
-        return Ok(tx.query_row(
-            "SELECT id FROM groups WHERE name = ? and source_id = ?",
-            params![group, source_id],
-            |row| row.get::<_, i64>("id"),
-        )?);
-    }
-    Ok(tx.last_insert_rowid())
+        params![group, &image, source_id, media_type, modified],
+        |row| row.get(0),
+    )?)
 }
 
 pub fn set_channel_group_id(
@@ -318,6 +479,7 @@ pub fn set_channel_group_id(
     channel: &mut Channel,
     tx: &Transaction,
     source_id: &i64,
+    modified: i64,
 ) -> Result<()> {
     if channel.group.is_none() {
         return Ok(());
@@ -329,6 +491,7 @@ pub fn set_channel_group_id(
             &channel.image,
             source_id,
             channel.media_type,
+            modified,
         )?;
         groups.insert(channel.group.clone().unwrap(), id);
         channel.group_id = Some(id);
@@ -364,7 +527,7 @@ fn row_to_channel_headers(row: &Row) -> Result<ChannelHttpHeaders, rusqlite::Err
 }
 
 pub fn get_settings() -> Result<HashMap<String, String>> {
-    let sql = get_settings_conn()?;
+    let sql = get_user_conn()?;
     let map = sql
         .prepare("SELECT key, value FROM Settings")?
         .query_map([], |row| {
@@ -378,7 +541,7 @@ pub fn get_settings() -> Result<HashMap<String, String>> {
 }
 
 pub fn update_settings(map: HashMap<String, Option<String>>) -> Result<()> {
-    let mut sql: PooledConnection<SqliteConnectionManager> = get_settings_conn()?;
+    let mut sql: PooledConnection<SqliteConnectionManager> = get_user_conn()?;
     let tx = sql.transaction()?;
     for (key, value) in map {
         tx.execute(
@@ -420,7 +583,9 @@ pub fn search(filters: Filters) -> Result<Vec<Channel>> {
     };
     let mut sql_query = format!(
         r#"
-        SELECT * FROM CHANNELS
+        SELECT c.*, COALESCE(u.favorite, 0) AS favorite
+        FROM channels c
+        LEFT JOIN user_db.channel_user_data u ON u.channel_id = c.id
         WHERE ({})
         AND media_type IN ({})
         AND source_id IN ({})
@@ -431,7 +596,7 @@ pub fn search(filters: Filters) -> Result<Vec<Channel>> {
     );
     let mut baked_params = 2;
     if filters.view_type == view_type::FAVORITES && filters.series_id.is_none() {
-        sql_query += "\nAND favorite = 1";
+        sql_query += "\nAND u.favorite = 1";
     }
 
     if filters.series_id.is_some() {
@@ -450,8 +615,8 @@ pub fn search(filters: Filters) -> Result<Vec<Channel>> {
         _ => "ASC",
     };
     if filters.view_type == view_type::HISTORY {
-        sql_query += "\nAND last_watched IS NOT NULL";
-        sql_query += "\nORDER BY last_watched DESC";
+        sql_query += "\nAND u.last_watched IS NOT NULL";
+        sql_query += "\nORDER BY u.last_watched DESC";
     } else if filters.season.is_some() {
         sql_query += &format!("\nORDER BY episode_num {0}, name {0}", order)
     } else if filters.sort != sort_type::PROVIDER {
@@ -666,63 +831,31 @@ fn row_to_channel(row: &Row) -> std::result::Result<Channel, rusqlite::Error> {
     Ok(channel)
 }
 
-pub fn delete_channels_by_source(tx: &Transaction, source_id: i64) -> Result<()> {
-    tx.execute(
-        r#"
-        DELETE FROM channels
-        WHERE source_id = ?
-    "#,
-        params![source_id.to_string()],
-    )?;
-    Ok(())
-}
-
-pub fn delete_seasons_by_source(tx: &Transaction, source_id: i64) -> Result<()> {
-    tx.execute(
-        r#"
-        DELETE FROM seasons
-        WHERE source_id = ?
-    "#,
-        params![source_id],
-    )?;
-    Ok(())
-}
-
-pub fn delete_groups_by_source(tx: &Transaction, source_id: i64) -> Result<()> {
-    tx.execute(
-        r#"
-        DELETE FROM groups
-        WHERE source_id = ?
-    "#,
-        params!(source_id),
-    )?;
-    Ok(())
-}
-
 pub fn delete_source(id: i64) -> Result<()> {
-    let sql = get_conn()?;
-    sql.execute(
+    let mut sql = get_conn()?;
+    let tx = sql.transaction()?;
+    tx.execute(
         r#"
         DELETE FROM channels
         WHERE source_id = ?;
     "#,
         params![id],
     )?;
-    sql.execute(
+    tx.execute(
         r#"
         DELETE FROM groups
         WHERE source_id = ?;
     "#,
         params![id],
     )?;
-    sql.execute(
+    tx.execute(
         r#"
         DELETE FROM seasons
         WHERE source_id = ?;
     "#,
         params![id],
     )?;
-    let count = sql.execute(
+    let count = tx.execute(
         r#"
         DELETE FROM sources
         WHERE id = ?;
@@ -732,6 +865,7 @@ pub fn delete_source(id: i64) -> Result<()> {
     if count != 1 {
         return Err(anyhow!("No sources were deleted"));
     }
+    tx.commit()?;
     sql.execute("ANALYZE;", params![])?;
     Ok(())
 }
@@ -753,14 +887,14 @@ pub fn source_name_exists(name: &str) -> Result<bool> {
 }
 
 pub fn favorite_channel(channel_id: i64, favorite: bool) -> Result<()> {
-    let sql = get_conn()?;
+    let sql = get_user_conn()?;
     sql.execute(
         r#"
-        UPDATE channels
-        SET favorite = ?1
-        WHERE id = ?2
+        INSERT INTO channel_user_data (channel_id, favorite)
+        VALUES (?1, ?2)
+        ON CONFLICT (channel_id) DO UPDATE SET favorite = excluded.favorite
     "#,
-        params![favorite, channel_id],
+        params![channel_id, favorite],
     )?;
     Ok(())
 }
@@ -853,93 +987,30 @@ pub fn update_source(source: Source) -> Result<()> {
     Ok(())
 }
 
-pub fn wipe(tx: &Transaction, id: i64) -> Result<()> {
-    delete_seasons_by_source(tx, id)?;
-    delete_channels_by_source(tx, id)?;
-    delete_groups_by_source(tx, id)?;
-    Ok(())
-}
-
-pub fn get_preserve(tx: &Transaction, source_id: i64) -> Result<Vec<ChannelPreserve>> {
-    let channels: Vec<ChannelPreserve> = tx
-        .prepare(
-            r#"
-              SELECT name, favorite, last_watched
-              FROM channels
-              WHERE (favorite = 1 OR last_watched IS NOT NULL)
-              AND series_id IS NULL
-              AND source_id = ?
-            "#,
-        )?
-        .query_map(params![source_id], row_to_channel_preserve)?
-        .filter_map(Result::ok)
-        .collect();
-
-    Ok(channels)
-}
-
-fn row_to_channel_preserve(row: &Row) -> Result<ChannelPreserve, rusqlite::Error> {
-    Ok(ChannelPreserve {
-        name: row.get("name")?,
-        favorite: row.get("favorite")?,
-        last_watched: row.get("last_watched")?,
-        is_group: false,
-    })
-}
-
-pub fn restore_preserve(
-    tx: &Transaction,
-    source_id: i64,
-    preserve: Vec<ChannelPreserve>,
-) -> Result<()> {
-    for item in preserve {
-        if item.is_group {
-            tx.execute(
-                r#"
-                  UPDATE groups
-                  WHERE name = ?
-                  AND source_id = ?
-                "#,
-                params![item.name, source_id],
-            )?;
-        } else {
-            tx.execute(
-                r#"
-                  UPDATE channels
-                  SET favorite = ?, last_watched = ?
-                  WHERE name = ?
-                  AND source_id = ?
-                "#,
-                params![item.favorite, item.last_watched, item.name, source_id],
-            )?;
-        }
-    }
-    Ok(())
-}
-
 pub fn analyze(tx: &Transaction) -> Result<()> {
     tx.execute("ANALYZE;", params![])?;
     Ok(())
 }
 
 pub fn add_last_watched(id: i64) -> Result<()> {
-    let sql = get_conn()?;
-    sql.execute(
+    let mut sql = get_user_conn()?;
+    let tx = sql.transaction()?;
+    tx.execute(
         r#"
-          UPDATE channels
-          SET last_watched = strftime('%s', 'now')
-          WHERE id = ?
+          INSERT INTO channel_user_data (channel_id, last_watched)
+          VALUES (?, strftime('%s', 'now'))
+          ON CONFLICT (channel_id) DO UPDATE SET last_watched = excluded.last_watched
         "#,
         params![id],
     )?;
-    sql.execute(
+    tx.execute(
         r#"
-		  UPDATE channels
+		  UPDATE channel_user_data
           SET last_watched = NULL
           WHERE last_watched IS NOT NULL
-		  AND id NOT IN (
-				SELECT id
-				FROM channels
+		  AND channel_id NOT IN (
+				SELECT channel_id
+				FROM channel_user_data
 				WHERE last_watched IS NOT NULL
 				ORDER BY last_watched DESC
 				LIMIT 36
@@ -947,14 +1018,15 @@ pub fn add_last_watched(id: i64) -> Result<()> {
         "#,
         params![],
     )?;
+    tx.commit()?;
     Ok(())
 }
 
 pub fn clear_history() -> Result<()> {
-    let sql = get_conn()?;
+    let sql = get_user_conn()?;
     sql.execute(
         r#"
-          UPDATE channels
+          UPDATE channel_user_data
           SET last_watched = NULL
           WHERE last_watched IS NOT NULL
         "#,
@@ -963,22 +1035,13 @@ pub fn clear_history() -> Result<()> {
     Ok(())
 }
 
-pub fn update_source_last_updated(source_id: i64) -> Result<()> {
-    let sql = get_conn()?;
-    sql.execute(
-        "UPDATE sources SET last_updated = ? WHERE id = ?",
-        params![chrono::Utc::now().timestamp(), source_id],
-    )?;
-    Ok(())
-}
-
 pub fn set_movie_position(channel_id: i64, movie_position: i64) -> Result<()> {
-    let sql = get_conn()?;
+    let sql = get_user_conn()?;
     sql.execute(
         r#"
-        INSERT INTO movie_positions (channel_id, position)
+        INSERT INTO channel_user_data (channel_id, position)
         VALUES (?, ?)
-        ON CONFLICT(channel_id) DO UPDATE SET position = excluded.position
+        ON CONFLICT (channel_id) DO UPDATE SET position = excluded.position
         "#,
         params![channel_id, movie_position],
     )?;
@@ -986,12 +1049,12 @@ pub fn set_movie_position(channel_id: i64, movie_position: i64) -> Result<()> {
 }
 
 pub fn get_movie_position(channel_id: i64) -> Result<Option<i64>> {
-    let sql = get_conn()?;
-    let position: Option<i64> = sql
+    let sql = get_user_conn()?;
+    let position: Option<Option<i64>> = sql
         .query_row(
             r#"
         SELECT position
-        FROM movie_positions
+        FROM channel_user_data
         WHERE channel_id = ?
         LIMIT 1
     "#,
@@ -999,11 +1062,11 @@ pub fn get_movie_position(channel_id: i64) -> Result<Option<i64>> {
             |row| row.get(0),
         )
         .optional()?;
-    Ok(position)
+    Ok(position.flatten())
 }
 
 pub fn get_whats_new() -> Result<Option<String>> {
-    let sql = get_settings_conn()?;
+    let sql = get_user_conn()?;
     let version: Option<String> = sql
         .query_row(
             r#"

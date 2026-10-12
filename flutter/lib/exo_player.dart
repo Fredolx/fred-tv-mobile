@@ -11,7 +11,6 @@ import 'package:open_tv/models/channel_http_headers.dart';
 import 'package:open_tv/models/media_type.dart';
 import 'package:open_tv/models/settings.dart';
 import 'package:open_tv/native_bridge.dart';
-import 'package:open_tv/task_service.dart';
 
 class ExoPlayerScreen extends StatefulWidget {
   final Channel channel;
@@ -93,7 +92,7 @@ class _ExoPlayerScreenState extends State<ExoPlayerScreen> {
     if (widget.channel.mediaType == MediaType.movie && _channel != null) {
       try {
         final posMs = await _channel!.invokeMethod<int>("getPosition") ?? 0;
-        await TaskService.instance.setMoviePosition(
+        await NativeBridge.instance.setMoviePosition(
           widget.channel.id!,
           posMs ~/ 1000,
         );

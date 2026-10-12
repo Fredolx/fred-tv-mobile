@@ -11,7 +11,6 @@ import 'package:media_kit/media_kit.dart' as mk;
 import 'package:media_kit_video/media_kit_video.dart' as mkvideo;
 import 'package:open_tv/models/settings.dart';
 import 'package:open_tv/native_bridge.dart';
-import 'package:open_tv/task_service.dart';
 import 'package:open_tv/select_dialog.dart';
 import 'package:open_tv/error.dart';
 
@@ -211,7 +210,7 @@ class _PlayerState extends State<Player> {
     if (exiting) return;
     exiting = true;
     if (widget.channel.mediaType == MediaType.movie) {
-      TaskService.instance.setMoviePosition(
+      NativeBridge.instance.setMoviePosition(
         widget.channel.id!,
         player.state.position.inSeconds,
       );
