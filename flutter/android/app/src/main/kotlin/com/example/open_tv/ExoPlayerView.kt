@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.util.Rational
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -42,7 +43,7 @@ class ExoPlayerView(
     params: Map<String, Any?>,
 ) : PlatformView, MethodChannel.MethodCallHandler {
 
-    private val isLive = params["isLive"] as? Boolean ?: false
+    val isLive = params["isLive"] as? Boolean ?: false
     private val url = params["url"] as String
     private val startPositionMs = (params["startPositionMs"] as? Number)?.toLong() ?: 0L
     private val title = params["title"] as? String ?: ""
@@ -57,11 +58,16 @@ class ExoPlayerView(
     private var zoomed = false
     private var reconnecting = false
     private var reconnectAttempts = 0
+    private var stopped = false
+    private var inPip = false
 
     companion object {
         var active: ExoPlayerView? = null
         const val DIAG_TAG = "ExoPlayerDiag"
         const val SEEK_INCREMENT_MS = 10_000L
+        const val CONTROLLER_TIMEOUT_MS = 1500
+        const val PIP_MIN_RATIO = 0.42f
+        const val PIP_MAX_RATIO = 2.39f
         val RECONNECT_DELAYS_MS = longArrayOf(1_000L, 3_000L, 5_000L)
         const val BUFFER_MIN_MS = 30_000
         const val BUFFER_MAX_MS = 60_000
@@ -116,7 +122,7 @@ class ExoPlayerView(
         playerView.setShowNextButton(false)
         playerView.setShowPreviousButton(false)
         playerView.setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS)
-        playerView.controllerShowTimeoutMs = 1500
+        playerView.controllerShowTimeoutMs = CONTROLLER_TIMEOUT_MS
         playerView.isFocusable = true
         makeSeekBarGranular()
         syncControllerVisibility()
@@ -170,8 +176,63 @@ class ExoPlayerView(
                     Player.STATE_READY -> reconnectAttempts = 0
                     Player.STATE_ENDED -> if (isLive) scheduleReconnect()
                 }
+                holdControllerWhenIdle()
+            }
+
+            override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+                holdControllerWhenIdle()
             }
         })
+    }
+
+    private fun holdControllerWhenIdle() {
+        val hold = !isLive && (!player.playWhenReady || player.playbackState == Player.STATE_ENDED)
+        playerView.controllerShowTimeoutMs = if (hold) 0 else CONTROLLER_TIMEOUT_MS
+        if (hold && !inPip) playerView.showController()
+    }
+
+    fun onHostStop() {
+        stopped = true
+        reconnecting = false
+        handler.removeCallbacksAndMessages(null)
+        if (isLive) {
+            player.stop()
+        } else {
+            player.pause()
+            methodChannel.invokeMethod("savePosition", player.currentPosition)
+        }
+    }
+
+    fun onHostStart() {
+        if (!stopped) return
+        stopped = false
+        if (isLive) {
+            reconnectAttempts = 0
+            startPlayback()
+        }
+    }
+
+    fun shouldEnterPip(): Boolean = player.playWhenReady
+
+    fun isPlaying(): Boolean = player.playWhenReady
+
+    fun togglePlayPause() {
+        if (player.playWhenReady) player.pause() else player.play()
+    }
+
+    fun pipAspectRatio(): Rational {
+        val size = player.videoSize
+        if (size.width <= 0 || size.height <= 0) return Rational(16, 9)
+        val ratio = (size.width * size.pixelWidthHeightRatio / size.height)
+            .coerceIn(PIP_MIN_RATIO, PIP_MAX_RATIO)
+        return Rational((ratio * 1000).toInt(), 1000)
+    }
+
+    fun onPipModeChanged(inPip: Boolean) {
+        this.inPip = inPip
+        if (inPip) playerView.hideController()
+        playerView.useController = !inPip
+        if (!inPip) holdControllerWhenIdle()
     }
 
     private fun stateName(state: Int): String = when (state) {
@@ -348,16 +409,14 @@ class ExoPlayerView(
     }
 
     private fun scheduleReconnect() {
-        if (reconnecting) return
+        if (reconnecting || stopped) return
         reconnecting = true
         val delay = RECONNECT_DELAYS_MS[reconnectAttempts.coerceAtMost(RECONNECT_DELAYS_MS.lastIndex)]
         if (debug) Log.w(DIAG_TAG, "scheduleReconnect attempt=$reconnectAttempts delayMs=$delay")
         reconnectAttempts++
         handler.postDelayed({
             reconnecting = false
-            player.setMediaItem(MediaItem.fromUri(Uri.parse(url)))
-            player.playWhenReady = true
-            player.prepare()
+            startPlayback()
         }, delay)
     }
 

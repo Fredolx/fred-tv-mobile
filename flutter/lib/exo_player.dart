@@ -81,6 +81,8 @@ class _ExoPlayerScreenState extends State<ExoPlayerScreen> {
     _channel!.setMethodCallHandler((call) async {
       if (call.method == "onBack") {
         _onExit();
+      } else if (call.method == "savePosition") {
+        await _savePosition(call.arguments as int);
       }
       return null;
     });
@@ -91,10 +93,8 @@ class _ExoPlayerScreenState extends State<ExoPlayerScreen> {
     _exiting = true;
     if (widget.channel.mediaType == MediaType.movie && _channel != null) {
       try {
-        final posMs = await _channel!.invokeMethod<int>("getPosition") ?? 0;
-        await NativeBridge.instance.setMoviePosition(
-          widget.channel.id!,
-          posMs ~/ 1000,
+        await _savePosition(
+          await _channel!.invokeMethod<int>("getPosition") ?? 0,
         );
       } catch (_) {}
     }
@@ -107,6 +107,14 @@ class _ExoPlayerScreenState extends State<ExoPlayerScreen> {
       DeviceOrientation.landscapeRight,
     ]);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  }
+
+  Future<void> _savePosition(int positionMs) async {
+    if (widget.channel.mediaType != MediaType.movie) return;
+    await NativeBridge.instance.setMoviePosition(
+      widget.channel.id!,
+      positionMs ~/ 1000,
+    );
   }
 
   @override
