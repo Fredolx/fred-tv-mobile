@@ -163,45 +163,58 @@ class _SettingsState extends State<SettingsView> {
     final subtitleStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
       color: Theme.of(context).colorScheme.onSurfaceVariant,
     );
+    final details = <Widget>[
+      if (source.lastUpdated != null)
+        Text(
+          "Last updated: ${source.lastUpdated!.toTimeAgo()}",
+          style: subtitleStyle,
+        ),
+      if (source.sourceType == SourceType.xtream)
+        FutureBuilder<Map<int, int>>(
+          future: expiriesFuture,
+          builder: (context, snapshot) {
+            if (snapshot.hasData && snapshot.data!.containsKey(source.id)) {
+              return Text(
+                "Expires: ${snapshot.data![source.id]!.toTimeUntil()}",
+                style: subtitleStyle,
+              );
+            }
+            return const SizedBox.shrink();
+          },
+        ),
+    ];
     return Opacity(
       opacity: busy ? 0.4 : 1,
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         elevation: 5,
-        child: ListTile(
-          leading: Icon(source.enabled ? Icons.tv : Icons.tv_off),
-          horizontalTitleGap: 25,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-          title: Text(source.name),
-          subtitle: Text(source.sourceType.label),
-          onTap: () => busy
-              ? TaskService.instance.notifyBusy()
-              : showSourceActions(source),
-          trailing: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (source.lastUpdated != null)
-                Text(
-                  "Last updated: ${source.lastUpdated!.toTimeAgo()}",
-                  style: subtitleStyle,
-                ),
-              if (source.sourceType == SourceType.xtream)
-                FutureBuilder<Map<int, int>>(
-                  future: expiriesFuture,
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData &&
-                        snapshot.data!.containsKey(source.id)) {
-                      return Text(
-                        "Expires: ${snapshot.data![source.id]!.toTimeUntil()}",
-                        style: subtitleStyle,
-                      );
-                    }
-                    return const SizedBox.shrink();
-                  },
-                ),
-            ],
-          ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final narrow = constraints.maxWidth < 600;
+            return ListTile(
+              leading: Icon(source.enabled ? Icons.tv : Icons.tv_off),
+              horizontalTitleGap: 25,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+              title: Text(source.name),
+              subtitle: narrow
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [Text(source.sourceType.label), ...details],
+                    )
+                  : Text(source.sourceType.label),
+              onTap: () => busy
+                  ? TaskService.instance.notifyBusy()
+                  : showSourceActions(source),
+              trailing: narrow
+                  ? null
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: details,
+                    ),
+            );
+          },
         ),
       ),
     );
