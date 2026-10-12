@@ -14,7 +14,7 @@ use crate::{
 use anyhow::{Context, Result, anyhow};
 use r2d2::{Pool, PooledConnection};
 use r2d2_sqlite::SqliteConnectionManager;
-use rusqlite::{OptionalExtension, Row, Transaction, params, params_from_iter};
+use rusqlite::{Connection, OptionalExtension, Row, Transaction, params, params_from_iter};
 use rusqlite_migration::{M, Migrations};
 
 const PAGE_SIZE: u8 = 36;
@@ -62,6 +62,13 @@ fn get_and_create_db_path(db_name: &str) -> String {
 pub fn apply_migrations() -> Result<()> {
     apply_user_migrations()?;
     apply_main_migrations()?;
+    truncate_wal(&*get_user_conn()?)?;
+    truncate_wal(&*get_conn()?)?;
+    Ok(())
+}
+
+fn truncate_wal(sql: &Connection) -> Result<()> {
+    sql.query_row("PRAGMA wal_checkpoint(TRUNCATE)", [], |_| Ok(()))?;
     Ok(())
 }
 
@@ -93,6 +100,14 @@ ANALYZE;
 
 fn apply_main_migrations() -> Result<()> {
     let mut sql = get_conn()?;
+    sql.pragma_update(None, "temp_store", "FILE")?;
+    let result = run_main_migrations(&mut sql);
+    sql.pragma_update(None, "temp_store", "MEMORY")?;
+    result
+}
+
+fn run_main_migrations(sql: &mut Connection) -> Result<()> {
+    copy_user_data_from_main(sql)?;
     let migrations = Migrations::new(vec![
         M::up(
             r#"
@@ -201,14 +216,63 @@ ANALYZE;
         ),
         M::up(
             r#"
+DELETE FROM channels
+WHERE EXISTS (
+  SELECT 1 FROM channels d INDEXED BY channels_unique
+  WHERE d.name = channels.name
+  AND d.source_id = channels.source_id
+  AND d.url = channels.url
+  AND COALESCE(d.series_id, -1) = COALESCE(channels.series_id, -1)
+  AND COALESCE(d.season_id, -1) = COALESCE(channels.season_id, -1)
+  AND d.id < channels.id
+);
+
+DROP INDEX index_channel_favorite;
+DROP INDEX index_channels_last_watched;
+DROP INDEX channels_unique;
+ALTER TABLE channels RENAME COLUMN favorite TO legacy_favorite;
+ALTER TABLE channels RENAME COLUMN last_watched TO legacy_last_watched;
+DROP TABLE movie_positions;
+DROP TABLE settings;
+
+ALTER TABLE channels ADD COLUMN modified integer;
+ALTER TABLE groups ADD COLUMN modified integer;
+
+CREATE UNIQUE INDEX channels_unique
+ON channels(name, source_id, url, COALESCE(series_id, -1), COALESCE(season_id, -1));
+
+ANALYZE;
+"#,
+        ),
+    ]);
+    migrations.to_latest(sql)?;
+    Ok(())
+}
+
+fn copy_user_data_from_main(sql: &mut Connection) -> Result<()> {
+    let version: i64 = sql.pragma_query_value(None, "user_version", |r| r.get(0))?;
+    if version != 1 {
+        return Ok(());
+    }
+    let tx = sql.transaction()?;
+    tx.execute_batch(
+        r#"
 INSERT OR IGNORE INTO user_db.settings (key, value)
 SELECT key, value FROM main.settings WHERE true;
 
 CREATE TEMP TABLE channel_keep AS
-SELECT id, MIN(id) OVER (
-  PARTITION BY name, source_id, url, COALESCE(series_id, -1), COALESCE(season_id, -1)
-) AS keep_id
-FROM channels;
+SELECT c.id, COALESCE((
+  SELECT MIN(d.id) FROM channels d INDEXED BY channels_unique
+  WHERE d.name = c.name
+  AND d.source_id = c.source_id
+  AND d.url = c.url
+  AND COALESCE(d.series_id, -1) = COALESCE(c.series_id, -1)
+  AND COALESCE(d.season_id, -1) = COALESCE(c.season_id, -1)
+), c.id) AS keep_id
+FROM channels c
+WHERE c.favorite = 1
+OR c.last_watched IS NOT NULL
+OR c.id IN (SELECT channel_id FROM movie_positions);
 
 INSERT INTO user_db.channel_user_data (channel_id, favorite, last_watched)
 SELECT k.keep_id, MAX(COALESCE(c.favorite, 0)), MAX(c.last_watched)
@@ -228,30 +292,10 @@ WHERE m.position IS NOT NULL
 GROUP BY k.keep_id
 ON CONFLICT (channel_id) DO UPDATE SET position = excluded.position;
 
-DELETE FROM channels
-WHERE id IN (SELECT id FROM temp.channel_keep WHERE id != keep_id);
-
 DROP TABLE temp.channel_keep;
-
-DROP INDEX index_channel_favorite;
-DROP INDEX index_channels_last_watched;
-DROP INDEX channels_unique;
-ALTER TABLE channels DROP COLUMN favorite;
-ALTER TABLE channels DROP COLUMN last_watched;
-DROP TABLE movie_positions;
-DROP TABLE settings;
-
-ALTER TABLE channels ADD COLUMN modified integer;
-ALTER TABLE groups ADD COLUMN modified integer;
-
-CREATE UNIQUE INDEX channels_unique
-ON channels(name, source_id, url, COALESCE(series_id, -1), COALESCE(season_id, -1));
-
-ANALYZE;
 "#,
-        ),
-    ]);
-    migrations.to_latest(&mut sql)?;
+    )?;
+    tx.commit()?;
     Ok(())
 }
 
@@ -282,7 +326,7 @@ pub fn start_refresh(tx: &Transaction, source: &mut Source) -> Result<i64> {
     Ok(tx.query_row(
         r#"
         UPDATE sources
-        SET last_updated = MAX(?1, COALESCE(last_updated, 0) + 1)
+        SET last_updated = ?1
         WHERE id = ?2
         RETURNING last_updated
         "#,
