@@ -92,7 +92,7 @@ class DonateView extends StatelessWidget {
         color: Theme.of(context).colorScheme.surfaceContainer,
         border: Border.all(
           color: focused
-              ? Theme.of(context).colorScheme.primary
+              ? Colors.blue
               : Colors.transparent,
           width: 2,
         ),
@@ -140,12 +140,12 @@ class DonateView extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
-          color: Theme.of(context).colorScheme.primary,
+          color: Colors.blue,
           width: 3,
         ),
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+            color: Colors.blue.withValues(alpha: 0.3),
             blurRadius: 24,
             spreadRadius: 2,
           ),
@@ -176,7 +176,7 @@ class DonateView extends StatelessWidget {
             fontSize: bodySize + 1,
             fontWeight: FontWeight.bold,
             fontStyle: FontStyle.normal,
-            color: Theme.of(context).colorScheme.primary,
+            color: Colors.blue,
           ),
         ),
       ],
@@ -238,7 +238,7 @@ class _QrCard extends StatelessWidget {
       child: Builder(
         builder: (context) {
           final focused = Focus.of(context).hasFocus;
-          final highlight = Theme.of(context).colorScheme.primary;
+          const highlight = Colors.blue;
           return AnimatedScale(
             scale: focused ? 1.08 : 1,
             duration: const Duration(milliseconds: 150),
