@@ -217,12 +217,6 @@ class DonateView extends StatelessWidget {
         style: style,
         label: const Text("GitHub Sponsors"),
       ),
-      OutlinedButton.icon(
-        onPressed: copyBtcAddress,
-        icon: const Icon(Icons.copy),
-        style: style,
-        label: const Text("Copy Bitcoin address"),
-      ),
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
