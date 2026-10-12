@@ -78,8 +78,10 @@
             android:layoutDirection="ltr">
 
             <ImageButton
-                android:id="@id/exo_subtitle"
-                style="@style/ExoStyledControls.Button.Bottom.CC" />
+                android:id="@+id/subtitle_button"
+                style="@style/ExoStyledControls.Button.Bottom.CC"
+                android:contentDescription="@string/exo_subtitles"
+                android:visibility="gone" />
 
             <ImageButton
                 android:id="@+id/audio_button"

@@ -12,6 +12,7 @@ import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.media3.common.C
 import androidx.media3.common.Format
@@ -20,6 +21,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.TrackSelectionOverride
+import androidx.media3.common.Tracks
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
@@ -118,11 +120,11 @@ class ExoPlayerView(
 
     private fun attachPlayer() {
         playerView.player = restrictedPlayer(player, isLive)
-        playerView.setShowSubtitleButton(true)
         playerView.setShowNextButton(false)
         playerView.setShowPreviousButton(false)
         playerView.setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS)
         playerView.controllerShowTimeoutMs = CONTROLLER_TIMEOUT_MS
+        playerView.setControllerAnimationEnabled(false)
         playerView.isFocusable = true
         makeSeekBarGranular()
         syncControllerVisibility()
@@ -149,8 +151,16 @@ class ExoPlayerView(
         playerView.findViewById<View>(R.id.back_button).setOnClickListener {
             methodChannel.invokeMethod("onBack", null)
         }
-        playerView.findViewById<View>(R.id.audio_button).setOnClickListener { showAudioTrackDialog() }
-        playerView.findViewById<View>(R.id.zoom_button).setOnClickListener { toggleZoom() }
+        playerView.findViewById<View>(R.id.audio_button).setOnClickListener {
+            showTrackDialog(C.TRACK_TYPE_AUDIO, R.string.exo_audio)
+        }
+        playerView.findViewById<View>(R.id.subtitle_button).setOnClickListener {
+            showTrackDialog(C.TRACK_TYPE_TEXT, R.string.exo_subtitles)
+        }
+        playerView.findViewById<View>(R.id.zoom_button).setOnClickListener {
+            toggleZoom()
+            playerView.showController()
+        }
     }
 
     private fun tolerantLoadControl(): LoadControl =
@@ -181,6 +191,10 @@ class ExoPlayerView(
 
             override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
                 holdControllerWhenIdle()
+            }
+
+            override fun onTracksChanged(tracks: Tracks) {
+                updateSubtitleButton(tracks)
             }
         })
     }
@@ -291,28 +305,41 @@ class ExoPlayerView(
         ).forEach { id -> playerView.findViewById<View?>(id)?.visibility = View.GONE }
     }
 
-    private fun showAudioTrackDialog() {
+    private fun showTrackDialog(trackType: Int, title: Int) {
         val activePlayer = playerView.player ?: return
-        val groups = activePlayer.currentTracks.groups.filter { it.type == C.TRACK_TYPE_AUDIO }
+        val groups = activePlayer.currentTracks.groups.filter { it.type == trackType }
         if (groups.isEmpty()) return
+        val isText = trackType == C.TRACK_TYPE_TEXT
 
-        val labels = mutableListOf("Auto")
+        val labels = mutableListOf(
+            when {
+                !isText -> "Auto"
+                groups.none { it.isSelected } -> "✓ Off"
+                else -> "Off"
+            }
+        )
         val overrides = mutableListOf<TrackSelectionOverride?>(null)
         for (group in groups) {
             for (i in 0 until group.length) {
                 if (!group.isTrackSupported(i)) continue
                 val prefix = if (group.isTrackSelected(i)) "✓ " else ""
-                labels.add(prefix + audioTrackLabel(group.getTrackFormat(i), overrides.size))
+                labels.add(prefix + trackLabel(group.getTrackFormat(i), overrides.size, isText))
                 overrides.add(TrackSelectionOverride(group.mediaTrackGroup, i))
             }
         }
 
+        playerView.controllerShowTimeoutMs = 0
+        playerView.showController()
         AlertDialog.Builder(playerView.context, android.R.style.Theme_DeviceDefault_Dialog_Alert)
-            .setTitle(R.string.exo_audio)
+            .setTitle(title)
+            .setOnDismissListener {
+                holdControllerWhenIdle()
+                playerView.showController()
+            }
             .setItems(labels.toTypedArray()) { dialog, which ->
                 val params = activePlayer.trackSelectionParameters.buildUpon()
-                    .clearOverridesOfType(C.TRACK_TYPE_AUDIO)
-                    .setTrackTypeDisabled(C.TRACK_TYPE_AUDIO, false)
+                    .clearOverridesOfType(trackType)
+                    .setTrackTypeDisabled(trackType, isText && overrides[which] == null)
                 overrides[which]?.let { params.addOverride(it) }
                 activePlayer.trackSelectionParameters = params.build()
                 dialog.dismiss()
@@ -320,13 +347,14 @@ class ExoPlayerView(
             .show()
     }
 
-    private fun audioTrackLabel(format: Format, fallbackIndex: Int): String {
+    private fun trackLabel(format: Format, fallbackIndex: Int, isText: Boolean): String {
         format.label?.let { return it }
         val lang = format.language
         if (!lang.isNullOrEmpty() && lang != "und") {
             val display = Locale(lang).displayLanguage
             return if (display.isNotEmpty()) display else lang
         }
+        if (isText) return "Subtitles $fallbackIndex"
         return when (format.channelCount) {
             1 -> "Mono"
             2 -> "Stereo"
@@ -335,6 +363,19 @@ class ExoPlayerView(
             Format.NO_VALUE -> "Audio $fallbackIndex"
             else -> "${format.channelCount} channels"
         }
+    }
+
+    private fun updateSubtitleButton(tracks: Tracks) {
+        val button = playerView.findViewById<ImageButton>(R.id.subtitle_button)
+        val textGroups = tracks.groups.filter { it.type == C.TRACK_TYPE_TEXT && it.isSupported }
+        button.visibility = if (textGroups.isEmpty()) View.GONE else View.VISIBLE
+        button.setImageResource(
+            if (textGroups.any { it.isSelected }) {
+                androidx.media3.ui.R.drawable.exo_styled_controls_subtitle_on
+            } else {
+                androidx.media3.ui.R.drawable.exo_styled_controls_subtitle_off
+            }
+        )
     }
 
     private fun toggleZoom() {
